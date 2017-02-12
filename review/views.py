@@ -1,13 +1,17 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, HttpResponseRedirect
+from .forms import UploadFileForm
 
+import logging
+logger = logging.getLogger(__name__)
+logger.debug('A new call to the views.py file')
+
+
+# SECURITY ISSUES
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
 # Brightspace: https://github.com/open-craft/django-lti-tool-provider
-
-
-from django.http import HttpResponseRedirect
-from .forms import UploadFileForm
+from django.views.decorators.csrf import csrf_exempt
+#---------
 
 # Imaginary function to handle an uploaded file.
 def handle_uploaded_file(f):
@@ -23,11 +27,14 @@ def handle_uploaded_file(f):
                             #"without authorization."))
 @csrf_exempt
 def success(request):
+    logger.debug('Success')
     return HttpResponse("You have successfully uploaded")
 
 @csrf_exempt
 def index(request):
+    logger.debug('Starting')
     if request.method == 'POST':
+        logger.debug('POST = ' + str(request.POST))
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             #handle_uploaded_file(request.FILES['file'])
