@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Imaginary function to handle an uploaded file.
 def handle_uploaded_file(f):
-    with open('some/file/name.txt', 'wb+') as destination:
+    with open('/tmp/name.PDF', 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
 
@@ -37,7 +37,7 @@ def index(request):
         logger.debug('POST = ' + str(request.POST))
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            #handle_uploaded_file(request.FILES['file'])
+            handle_uploaded_file(request.FILES['file'])
             return HttpResponseRedirect('/success')
     else:
         form = UploadFileForm()
