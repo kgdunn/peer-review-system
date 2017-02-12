@@ -22,10 +22,16 @@ class Group(models.Model):
 class Course(models.Model):
     """ Which courses are being supported."""
     name = models.CharField(max_length=300, verbose_name="Course name")
-    label = models.CharField(max_length=300, verbose_name="LTI POST label")
+    label = models.CharField(max_length=300, verbose_name="LTI POST label",
+        help_text=("Obtain this from the HTML POST field: "
+                   "is_course_offering_sourcedid"))
     # Brightspace:   u'lis_course_offering_sourcedid':
     #                                  [u'brightspace.tudelft.nl:training-IDE'],
-    slug = models.SlugField(default='')
+    slug = models.SlugField(default='', editable=False)
+
+    def __str__(self):
+        return self.name
+
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -37,7 +43,7 @@ class Rubric(models.Model):
     The PR_process has a link back to here (not the other way around)
     """
     title = models.CharField(max_length=300, verbose_name="Peer review rubric")
-    slug = models.SlugField(default='')
+    slug = models.SlugField(default='', editable=False)
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Rubric, self).save(*args, **kwargs) # Call the "real" save()
@@ -48,6 +54,9 @@ class PR_process(models.Model):
     There is one of these for each peer review activity. If a course has 3
     peer activities, then there will be 3 of these instances.
     """
+    class Meta:
+        verbose_name = 'Peer review process'
+        verbose_name_plural = 'PR processes'
     # This can be used to branch code, if needed, for different LTI systems
     CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
                ('edX-v1', 'edX-v1'))
@@ -55,8 +64,8 @@ class PR_process(models.Model):
     # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
 
     LTI_system = models.CharField(max_length=50, choices=CHOICES,)
-    title = models.CharField(max_length=300, verbose_name="Peer review")
-    slug = models.SlugField(default='')
+    title = models.CharField(max_length=300, verbose_name="Peer review title")
+    slug = models.SlugField(default='', editable=False)
     course = models.ForeignKey(Course)
     rubric = models.ForeignKey(Rubric)
 
@@ -69,7 +78,7 @@ class PR_process(models.Model):
 
     # Date 2: start reviewing their peers
     peer_reviews_start_by = models.DateTimeField(
-        verbose_name='When does the reviewing step open?')
+        verbose_name='When does the reviewing step open for learners to start?')
 
     # Date 3: complete the reviews of their peers
     peer_reviews_completed_by = models.DateTimeField(
@@ -83,7 +92,7 @@ class PR_process(models.Model):
     show_rubric_prior_to_submission = models.BooleanField(default=False,
         help_text=('Can learners see the rubric before they submit?'))
 
-    all_submissions_visible_after_review = models.BooleanField(default=False,
+    make_submissions_visible_after_review = models.BooleanField(default=False,
        help_text=('Can learners see all submissions from peers after the '
                   'reviewing step?'))
 
@@ -113,3 +122,6 @@ class Submission(models.Model):
     learner = models.ForeignKey(Person)
     pr_process = models.ForeignKey(PR_process)
     file_upload = models.FileField(upload_to=peerreview_directory_path)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    datetime_submitted = models.DateTimeField(auto_now_add=True,
+        verbose_name="Date and time the learner/group submitted.")
