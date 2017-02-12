@@ -10,7 +10,7 @@ logger.debug('A new call to the views.py file')
 # SECURITY ISSUES
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
 # Brightspace: https://github.com/open-craft/django-lti-tool-provider
-#from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 #---------
 
 # Imaginary function to handle an uploaded file.
@@ -25,12 +25,12 @@ def handle_uploaded_file(f):
     #else:
         #return HttpResponse(("You have reached the Peer Review LTI component "
                             #"without authorization."))
-#@csrf_exempt
+@csrf_exempt
 def success(request):
     logger.debug('Success')
     return HttpResponse("You have successfully uploaded")
 
-#@csrf_exempt
+@csrf_exempt
 def index(request):
     logger.debug('Starting')
     if request.method == 'POST':
