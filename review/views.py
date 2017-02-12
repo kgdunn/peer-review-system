@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
 # Brightspace: https://github.com/open-craft/django-lti-tool-provider
@@ -20,10 +21,11 @@ def handle_uploaded_file(f):
     #else:
         #return HttpResponse(("You have reached the Peer Review LTI component "
                             #"without authorization."))
-
+@crsf_exempt
 def success(request):
     return HttpResponse("You have successfully uploaded")
 
+@crsf_exempt
 def index(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
