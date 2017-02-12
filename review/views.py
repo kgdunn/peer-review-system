@@ -21,11 +21,11 @@ def handle_uploaded_file(f):
     #else:
         #return HttpResponse(("You have reached the Peer Review LTI component "
                             #"without authorization."))
-@crsf_exempt
+@csrf_exempt
 def success(request):
     return HttpResponse("You have successfully uploaded")
 
-@crsf_exempt
+@csrf_exempt
 def index(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
