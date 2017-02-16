@@ -59,11 +59,11 @@ def get_create_student(request):
     else:
         return None
 
-    learner = Person.objects.get_object_or_404(name=name,
-                                               email=email,
-                                               full_name=full_name,
-                                               user_ID=user_ID,
-                                               role=role)
+    learner = Person.objects.get_or_create(name=name,
+                                            email=email,
+                                            full_name=full_name,
+                                            user_ID=user_ID,
+                                            role=role)
     return learner
 
 @csrf_exempt
