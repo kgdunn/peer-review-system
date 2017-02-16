@@ -63,7 +63,7 @@ def success(request):
     return HttpResponse("You have successfully uploaded")
 
 @csrf_exempt
-#@xframe_options_exempt
+@xframe_options_exempt
 def index(request):
 
     if request.method == 'POST':
