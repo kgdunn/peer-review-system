@@ -22,6 +22,10 @@ class Person(models.Model):
     """
     A learner, with their details provided from the LTI system.
     """
+    ROLES = (('Admin', "Administrator"),
+             ('Learn', "Learner"),
+             ('TA', 'Teaching Assistant')
+            )
     name = models.CharField(max_length=200, verbose_name="First name")
     is_active = models.BooleanField(default=True, help_text=('Placeholder'))
     email = models.EmailField(unique=True, blank=False)
@@ -29,6 +33,7 @@ class Person(models.Model):
                                  blank=True)
     user_ID = models.CharField(max_length=100, verbose_name=('User ID from '
             'Brightspace'), blank=True)
+    role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
         return '{0} [{1}]'.format(self.name, self.email)

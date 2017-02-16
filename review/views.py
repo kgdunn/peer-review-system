@@ -30,6 +30,10 @@ def index(request):
                             "without authorization."))
 
 def starting_point(request):
+    """
+    Bootstrap code to run on every request.
+    Return a Person instance
+    """
     person = get_create_student(request)
     if person:
         return person
@@ -41,19 +45,25 @@ def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
-    logger.debug(str(request.POST))
     if request.POST.contains('ext_d2l_token_digest'):
         name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         full_name = request.POST['lis_person_name_full']
         user_ID = request.POST['user_id']
+        role = request.POST['roles']
+        if 'Instructor' in role:
+            role = 'Admin'
+        elif 'Student' in role:
+            role = 'Learn'
+
     else:
         return None
 
     learner = Person.objects.get_object_or_404(name=name,
                                                email=email,
                                                full_name=full_name,
-                                               user_ID=user_ID)
+                                               user_ID=user_ID,
+                                               role=role)
     return learner
 
 @csrf_exempt
@@ -63,9 +73,12 @@ def success(request):
 
 @csrf_exempt
 def index(request):
-    logger.debug('Starting')
+
     if request.method == 'POST':
+
         logger.debug('POST = ' + str(request.POST))
+        starting_point(request)
+
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(request.FILES['file'])
