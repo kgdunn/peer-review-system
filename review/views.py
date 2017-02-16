@@ -45,7 +45,7 @@ def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
-    if request.POST.contains('ext_d2l_token_digest'):
+    if request.POST.get('ext_d2l_token_digest', None):
         name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         full_name = request.POST['lis_person_name_full']
