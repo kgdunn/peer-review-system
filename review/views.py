@@ -69,6 +69,7 @@ def index(request):
     if request.method == 'POST':
         logger.debug('POST = ' + str(request.POST))
         person_or_error = starting_point(request)
+        logger.debug('returned = ' + str(person_or_error))
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # This is the error path
         else:
