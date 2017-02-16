@@ -2,6 +2,9 @@ First time
 ===========
 * Get the POST details
 * Create the learner account, filling in Person instance: name and email
+* Redirect learner to their unique ID site
+
+
 * Get the course PR item (resource_link_title) and retrieve the PR_process
   based on the ``LTI_title``.
 * Add the learners in an intersection datatable: Course * Person * Group

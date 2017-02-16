@@ -21,18 +21,9 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
 
-@csrf_exempt
-def index(request):
-    if request.POST == 'POST':
-        return starting_point(request)
-    else:
-        return HttpResponse(("You have reached the Peer Review LTI component "
-                            "without authorization."))
-
 def starting_point(request):
     """
-    Bootstrap code to run on every request.
-    Return a Person instance
+    Bootstrap code to run on every request. Returns a Person instance.
     """
     person = get_create_student(request)
     if person:
@@ -55,16 +46,14 @@ def get_create_student(request):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
-
     else:
         return None
 
-    learner = Person.objects.get_or_create(name=name,
-                                            email=email,
-                                            full_name=full_name,
-                                            user_ID=user_ID,
-                                            role=role)
-    return learner
+    return Person.objects.get_or_create(name=name,
+                                        email=email,
+                                        full_name=full_name,
+                                        user_ID=user_ID,
+                                        role=role)
 
 @csrf_exempt
 def success(request):
@@ -75,15 +64,24 @@ def success(request):
 def index(request):
 
     if request.method == 'POST':
-
         logger.debug('POST = ' + str(request.POST))
-        starting_point(request)
+        person_or_error = starting_point(request)
+        if not(isinstance(person, Person)):
+            return person_or_error      # This is the error path
+        else:
+            form = UploadFileForm()
+            return render(request, 'review/upload.html', {'form': form})
 
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            handle_uploaded_file(request.FILES['file'])
-            return HttpResponseRedirect('/success')
+
+        #form = UploadFileForm(request.POST, request.FILES)
+        #if form.is_valid():
+        #    handle_uploaded_file(request.FILES['file'])
+        #    return HttpResponseRedirect('/success')
+
+
     else:
-        form = UploadFileForm()
-    return render(request, 'review/upload.html', {'form': form})
+        return HttpResponse(("You have reached the Peer Review LTI component "
+                                    "without authorization."))
+
+
 
