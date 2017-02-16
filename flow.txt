@@ -1,0 +1,37 @@
+First time
+===========
+* Get the POST details
+* Create the learner account, filling in Person instance: name and email
+* Get the course PR item (resource_link_title) and retrieve the PR_process
+  based on the ``LTI_title``.
+* Add the learners in an intersection datatable: Course * Person * Group
+
+Submission steps:
+* If the submission time is prior to the deadline, allow a new submission
+* Indicate if prior submissions are found (dimmer colour)
+* If past deadline: indicate that a new submisison cannot be allowed
+* Once submitted, send an email with confirmation to group/learner
+  -> should indicate when to return to start with the review process.
+
+
+* Update datastructure on the group addition?
+
+Review process
+==============
+
+New user: create user in this course
+Show the next reviews to complete
+Set up the rubric when the review is actually started
+
+
+
+
+presented with the next available review
+click to expand and start
+shown the document and the rubric side by side
+in a responsive way that the rubric goes below the document
+rubric answers are saved as entered in realtime
+resume /save as draft/submit
+
+Cannot edit/resubmit after submission date
+

@@ -82,6 +82,9 @@ DATABASES = {
     }
 }
 
+# MySQL config: https://docs.djangoproject.com/en/dev/ref/models/querysets/#get-or-create
+# Use "READ COMMITTED" isolation level
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators

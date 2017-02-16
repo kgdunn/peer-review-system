@@ -10,7 +10,7 @@ urlpatterns = [
 """
 Internal URL structure:
 
-/student/__<stage>__/
+/learner/__<stage>__/
 
 
 
