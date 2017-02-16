@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from .models import Person
 
@@ -49,11 +50,12 @@ def get_create_student(request):
     else:
         return None
 
-    return Person.objects.get_or_create(name=name,
-                                        email=email,
-                                        full_name=full_name,
-                                        user_ID=user_ID,
-                                        role=role)
+    learner, newbie = Person.objects.get_or_create(name=name,
+                                                    email=email,
+                                                    full_name=full_name,
+                                                    user_ID=user_ID,
+                                                    role=role)
+    return learner
 
 @csrf_exempt
 def success(request):
@@ -61,6 +63,7 @@ def success(request):
     return HttpResponse("You have successfully uploaded")
 
 @csrf_exempt
+#@xframe_options_exempt
 def index(request):
 
     if request.method == 'POST':
