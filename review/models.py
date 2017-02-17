@@ -305,6 +305,7 @@ class Submission(models.Model):
                    'is replacing this one.'))
     file_upload = models.FileField(upload_to=peerreview_directory_path)
     submitted_file_name = models.CharField(max_length=255, default='')
+    models.ImageField()
 
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime_submitted = models.DateTimeField(auto_now_add=True,

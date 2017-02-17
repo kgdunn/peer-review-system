@@ -30,16 +30,11 @@ def starting_point(request):
 
     """
     person = get_create_student(request)
-    logger.debug('Found the person')
     course_ID = request.POST.get('context_id', None)
-    logger.debug('CourseID = %s' % course_ID)
     course = get_object_or_404(Course, label=course_ID)
-    logger.debug('Course = %s' % str(course))
 
     pr_ID = request.POST.get('resource_link_title', None)
-    logger.debug('pr_ID = %s' % pr_ID)
     pr = get_object_or_404(PR_process, LTI_title=pr_ID)
-    logger.debug('Course = %s' % str(pr))
 
     if person:
         return person, course, pr
@@ -67,10 +62,14 @@ def get_create_student(request):
 
     logger.debug('About to check: name={0}, email = {1}, full_name = {2}, user_ID = {3}, role = {4}'.format(name, email, full_name, user_ID, role))
     learner, newbie = Person.objects.get_or_create(name=name,
-                                                    email=email,
-                                                    full_name=full_name,
-                                                    user_ID=user_ID,
-                                                    role=role)
+                                                   email=email,
+                                                   full_name=full_name,
+                                                   role=role)
+    if learner:
+        # Augments the learner with extra fields that might not be there
+        if learner.user_ID == '':
+            learner.user_ID = user_ID
+            learner.save()
 
     logger.debug('learner = %s' % str(learner))
     return learner
@@ -88,9 +87,8 @@ def success(request):
 def index(request):
 
     if request.method == 'POST':
-        logger.debug('POST = ' + str(request.POST))
-        logger.debug('Enter starting_point')
         person_or_error, course, pr = starting_point(request)
+        logger.debug('POST = ' + str(request.POST))
         logger.debug('person = ' + str(person_or_error))
         logger.debug('course = ' + str(course))
         logger.debug('pre = ' + str(pr))
@@ -118,3 +116,32 @@ def index(request):
 
 
 
+#def manual_create_uploads(request):
+    #"""
+    #"""
+    #name = ''
+    #email = ''
+    #full_name = ''
+    #person = Person(name=name,
+                    #is_active = True,
+                    #email = email,
+                    #full_name = full_name,
+                    #user_ID='',
+                    #role='Student')
+
+    #status = 'S'
+    #pr_process = PR_process.objects.filter(id=1)
+    #is_valid = True
+    #file_upload = ''
+    #submitted_file_name = '/{0}/'.format(pr_process.id)
+    #ip_address = '0.0.0.0'
+
+    ##MEDIA_ROOT/nnn/<filename>
+    ##    return '{0}'.format(instance.pr_process.id) + os.sep
+
+    #self.photo.save(
+        #os.path.basename(self.url),
+        #File(open(result[0]))
+        #)
+
+    #self.save()

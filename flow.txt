@@ -9,6 +9,8 @@ Use foreign characters in the text
 
 Turn DEBUG off
 
+Dump database
+
 
 
 First time
