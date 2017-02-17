@@ -44,6 +44,9 @@ class Group(models.Model):
     """ Used when learners work/submit in groups."""
     name = models.CharField(max_length=300, verbose_name="Group name")
 
+    def __str__(self):
+        return u'{0}' % self.name
+
 @python_2_unicode_compatible
 class Course(models.Model):
     """ Which courses are being supported."""
@@ -147,6 +150,9 @@ class RItemActual(models.Model):
     # accurate reflection of the question
     as_displayed = models.TextField(blank=True)
 
+    def __str__(self):
+        return u'%s' % (self.comment, )
+
     #def __str__(self):
         #if self.qset:
             #return u'%s, for user "%s", in %s of course "%s"' % (
@@ -175,6 +181,7 @@ class ROptionTemplate(models.Model):
         self.score = float(self.score)
         assert(self.score <= self.rubric_item.max_score)
         super(ROptionTemplate, self).save(*args, **kwargs)
+
     def __str__(self):
         out = u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
@@ -196,6 +203,8 @@ class ROptionActual(models.Model):
     # usually not evaluated to this depth
 
     submitted = models.BooleanField(default=False)
+    def __str__(self):
+        return u'%s' % (self.roption_template, )
 
 @python_2_unicode_compatible
 class PR_process(models.Model):
@@ -300,5 +309,8 @@ class Submission(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime_submitted = models.DateTimeField(auto_now_add=True,
         verbose_name="Date and time the learner/group submitted.")
+
+    def __str__(self):
+        return str(self.submitted_file_name)
 
 
