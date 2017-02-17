@@ -39,12 +39,12 @@ class Person(models.Model):
     def __str__(self):
         return u'{0} [{1}]'.format(self.name, self.email)
 
-
+@python_2_unicode_compatible
 class Group(models.Model):
     """ Used when learners work/submit in groups."""
     name = models.CharField(max_length=300, verbose_name="Group name")
 
-
+@python_2_unicode_compatible
 class Course(models.Model):
     """ Which courses are being supported."""
     name = models.CharField(max_length=300, verbose_name="Course name")
@@ -55,7 +55,7 @@ class Course(models.Model):
     slug = models.SlugField(default='', editable=False)
 
     def __str__(self):
-        return (u'%s' % self.name).encode('utf8', 'replace')
+        return u'%s' % self.name
 
 
     def save(self, *args, **kwargs):
@@ -64,6 +64,7 @@ class Course(models.Model):
         super(Course, self).save(*args, **kwargs) # Call the "real" save()
 
 
+@python_2_unicode_compatible
 class RubricTemplate(models.Model):
     """
     Describes the rubric that will be attached to a Peer Review.
@@ -85,9 +86,9 @@ class RubricTemplate(models.Model):
         super(RubricTemplate, self).save(*args, **kwargs) # Call the "real" save()
 
     def __str__(self):
-        return (u'%s' % self.title).encode('utf8', 'replace')
+        return u'%s' % self.title
 
-
+@python_2_unicode_compatible
 class RubricActual(models.Model):
     """
     The actual rubric: one instance per learner.
@@ -99,8 +100,9 @@ class RubricActual(models.Model):
     rubric_template = models.ForeignKey(RubricTemplate)
 
     def __str__(self):
-        return (u'%s' % self.rubric_template.title).encode('utf8', 'replace')
+        return u'%s' % self.rubric_template.title
 
+@python_2_unicode_compatible
 class RItemTemplate(models.Model):
     """
     A (usually a row) in the rubric, containing 1 or more ROptionTemplate
@@ -122,11 +124,10 @@ class RItemTemplate(models.Model):
         self.max_score = float(self.max_score)
         super(RItemTemplate, self).save(*args, **kwargs)
 
-
     def __str__(self):
-        return (u'%d. %s' % (self.order, self.criterion)).encode('utf8',
-                                                                 'replace')
+        return u'%d. %s' % (self.order, self.criterion)
 
+@python_2_unicode_compatible
 class RItemActual(models.Model):
     """
     The actual rubric item for a learner.
@@ -158,7 +159,7 @@ class RItemActual(models.Model):
                 #self.qtemplate.name,
                 #self.user.user.username)
 
-
+@python_2_unicode_compatible
 class ROptionTemplate(models.Model):
     """
     A rubric option template (a single cell in the rubric). Usually with
@@ -175,11 +176,12 @@ class ROptionTemplate(models.Model):
         assert(self.score <= self.rubric_item.max_score)
         super(ROptionTemplate, self).save(*args, **kwargs)
     def __str__(self):
-        out = (u'[%d] %d. %s' % (self.rubric_item.order,
+        out = u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
-                                 self.criterion)).encode('utf8', 'replace')
+                                 self.criterion)
         return out[0:100]
 
+@python_2_unicode_compatible
 class ROptionActual(models.Model):
     """
     The filled in ROptionTemplate by a specific learner.
@@ -193,10 +195,9 @@ class ROptionActual(models.Model):
     #comment = models.CharField(maxdefault='', blank=True)
     # usually not evaluated to this depth
 
-
     submitted = models.BooleanField(default=False)
 
-
+@python_2_unicode_compatible
 class PR_process(models.Model):
     """ Describes the Peer Review process: requirements and deadlines.
 
@@ -269,6 +270,7 @@ def peerreview_directory_path(instance, filename):
     # The file will be uploaded to MEDIA_ROOT/nnn/<filename>
     return '{0}'.format(instance.pr_process.id) + os.sep
 
+@python_2_unicode_compatible
 class Submission(models.Model):
     """
     An instance of a submission for a learner/group of learners.
