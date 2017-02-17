@@ -259,6 +259,9 @@ class PR_process(models.Model):
         unique_slugify(self, self.title, 'slug')
         super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
 
+    def __str__(self):
+        return self.title
+
 
 def peerreview_directory_path(instance, filename):
     # The file will be uploaded to MEDIA_ROOT/nnn/<filename>
