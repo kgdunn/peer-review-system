@@ -47,3 +47,24 @@ resume /save as draft/submit
 
 Cannot edit/resubmit after submission date
 
+"""
+I need a way to allocate reviews to a learner.
+* once allocated, it is remembered (state). So when they come back they see the
+  same N = 3 reviews, in the same order, waiting for them.
+
+  class Review:
+       * source = Submission
+       * reviewer = Person
+       * allocated_datetime
+       * order = 1, 2, 3, 4, ...?
+       *
+
+* The review is allocated out of the pool of all submissions.is_valid and take
+  the next available review that:
+    * is not from the same group as the reviewer
+    * has not already been seen by the reviewer
+    * that has the lowest number of allocations so far
+
+
+
+"""
