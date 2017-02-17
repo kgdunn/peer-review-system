@@ -47,6 +47,7 @@ def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
+    logger.debug('Looking up student')
     if request.POST.get('ext_d2l_token_digest', None):
         name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
@@ -60,11 +61,14 @@ def get_create_student(request):
     else:
         return None
 
+    logger.debug('About to check: name={0}, email = {1}, full_name = {2}, user_ID = {3}, role = {4}'.format(name, email, full_name, user_ID, role))
     learner, newbie = Person.objects.get_or_create(name=name,
                                                     email=email,
                                                     full_name=full_name,
                                                     user_ID=user_ID,
                                                     role=role)
+
+    logger.debug('learner = %s' % str(learner))
     return learner
 
 @csrf_exempt
@@ -81,6 +85,7 @@ def index(request):
 
     if request.method == 'POST':
         logger.debug('POST = ' + str(request.POST))
+        logger.debug('Enter starting_point')
         person_or_error, course, pr = starting_point(request)
         logger.debug('person = ' + str(person_or_error))
         logger.debug('course = ' + str(course))
