@@ -55,7 +55,7 @@ class Course(models.Model):
     slug = models.SlugField(default='', editable=False)
 
     def __str__(self):
-        return u'%s' % self.name
+        return (u'%s' % self.name).encode('utf8', 'replace')
 
 
     def save(self, *args, **kwargs):
@@ -85,7 +85,7 @@ class RubricTemplate(models.Model):
         super(RubricTemplate, self).save(*args, **kwargs) # Call the "real" save()
 
     def __str__(self):
-        return u'%s' % self.title
+        return (u'%s' % self.title).encode('utf8', 'replace')
 
 
 class RubricActual(models.Model):
@@ -99,7 +99,7 @@ class RubricActual(models.Model):
     rubric_template = models.ForeignKey(RubricTemplate)
 
     def __str__(self):
-        return u'%s' % self.rubric_template.title
+        return (u'%s' % self.rubric_template.title).encode('utf8', 'replace')
 
 class RItemTemplate(models.Model):
     """
@@ -124,7 +124,8 @@ class RItemTemplate(models.Model):
 
 
     def __str__(self):
-        return u'%d. %s' % (self.order, self.criterion)
+        return (u'%d. %s' % (self.order, self.criterion)).encode('utf8',
+                                                                 'replace')
 
 class RItemActual(models.Model):
     """
@@ -174,9 +175,9 @@ class ROptionTemplate(models.Model):
         assert(self.score <= self.rubric_item.max_score)
         super(ROptionTemplate, self).save(*args, **kwargs)
     def __str__(self):
-        out = u'[%d] %d. %s' % (self.rubric_item.order,
+        out = (u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
-                                 self.criterion)
+                                 self.criterion)).encode('utf8', 'replace')
         return out[0:100]
 
 class ROptionActual(models.Model):
