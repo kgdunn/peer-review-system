@@ -173,9 +173,10 @@ class ROptionTemplate(models.Model):
         assert(self.score <= self.rubric_item.max_score)
         super(ROptionTemplate, self).save(*args, **kwargs)
     def __str__(self):
-        return (u'[%d] %d. %s' % (self.rubric_item.order,
+        out = (u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
                                  self.criterion)).encode('utf-8').strip()
+        return out[1:50]
 
 class ROptionActual(models.Model):
     """
