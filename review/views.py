@@ -82,6 +82,9 @@ def index(request):
     if request.method == 'POST':
         logger.debug('POST = ' + str(request.POST))
         person_or_error, course, pr = starting_point(request)
+        logger.debug('person = ' + str(person_or_error))
+        logger.debug('course = ' + str(course))
+        logger.debug('pre = ' + str(pr))
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
         else:
