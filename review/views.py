@@ -67,6 +67,7 @@ def get_create_student(request):
                                                    role=role)
     if learner:
         # Augments the learner with extra fields that might not be there
+        debug.info('Augumated user_ID on %s'.format(learner.email))
         if learner.user_ID == '':
             learner.user_ID = user_ID
             learner.save()
