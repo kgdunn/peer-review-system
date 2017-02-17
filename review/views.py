@@ -85,14 +85,13 @@ def index(request):
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
         else:
-            #form = UploadFileForm()
+
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr
                   }
-            #from django.template.loader import get_template
-            #template = get_template('review/welcome.html')
-            #template.render(ctx, request)
+
+            #form = UploadFileForm()
             return render(request, 'review/welcome.html', ctx)#, {'form': form})
 
 
