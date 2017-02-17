@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .models import Person, PR_process
+from .models import Person, PR_process, Course
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ def starting_point(request):
     course_ID = request.POST.get('context_id', None)
     course = get_object_or_404(Course, label=course_ID)
 
-    pr_ID = request.POST.get('LTI_title', None)
+    pr_ID = request.POST.get('resource_link_title', None)
     pr = get_object_or_404(PR_process, LTI_title=pr_ID)
 
     if person:

@@ -38,9 +38,11 @@ class Person(models.Model):
     def __str__(self):
         return '{0} [{1}]'.format(self.name, self.email)
 
+
 class Group(models.Model):
     """ Used when learners work/submit in groups."""
     name = models.CharField(max_length=300, verbose_name="Group name")
+
 
 class Course(models.Model):
     """ Which courses are being supported."""
@@ -59,6 +61,7 @@ class Course(models.Model):
         #self.slug = slugify(self.name)
         unique_slugify(self, self.name, 'slug')
         super(Course, self).save(*args, **kwargs) # Call the "real" save()
+
 
 class RubricTemplate(models.Model):
     """
@@ -374,7 +377,7 @@ class PR_process(models.Model):
 
     def save(self, *args, **kwargs):
         #self.slug = slugify(self.name)
-        unique_slugify(self, self.name, 'slug')
+        unique_slugify(self, self.title, 'slug')
         super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
 
 
