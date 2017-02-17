@@ -1,3 +1,11 @@
+TO DO
+======
+
+Switch to Postgres database
+Figure out template footer/header
+
+
+
 First time
 ===========
 * Get the POST details
