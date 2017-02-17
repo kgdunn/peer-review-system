@@ -5,6 +5,10 @@ Switch to Postgres database
 Figure out template footer/header
 Convert submissions to PDFs
 Create Rubric data structure and display it in the browser
+Use foreign characters in the text
+
+Turn DEBUG off
+
 
 
 First time
@@ -35,6 +39,15 @@ New user: create user in this course
 Show the next reviews to complete
 Set up the rubric when the review is actually started
 
+
+New user:
+* Find the PR
+* Find the submission
+* Get the RubricTemplate
+* Make a RubricActual
+* Save
+* Create 1+ RItemActuals
+* Save each one
 
 
 

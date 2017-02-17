@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 from django.utils.timezone import utc
+from django.utils.encoding import python_2_unicode_compatible
 
 # Django and Python imports
 try:
@@ -17,7 +18,7 @@ from django.core.exceptions import ValidationError
 # Our imports
 from utils import unique_slugify, generate_random_token
 
-
+@python_2_unicode_compatible
 class Person(models.Model):
     """
     A learner, with their details provided from the LTI system.
@@ -36,8 +37,7 @@ class Person(models.Model):
     role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
-        return (u'{0} [{1}]'.format(self.name, self.email)).encode('utf8',
-                                                                   'replace')
+        return u'{0} [{1}]'.format(self.name, self.email)
 
 
 class Group(models.Model):
