@@ -36,7 +36,7 @@ class Person(models.Model):
     role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
-        return ('{0} [{1}]'.format(self.name, self.email)).encode('utf-8').strip()
+        return u'{0} [{1}]'.format(self.name, self.email)
 
 
 class Group(models.Model):
@@ -54,7 +54,7 @@ class Course(models.Model):
     slug = models.SlugField(default='', editable=False)
 
     def __str__(self):
-        return self.name.encode('utf-8').strip()
+        return u'%s' % self.name
 
 
     def save(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class RubricTemplate(models.Model):
         super(RubricTemplate, self).save(*args, **kwargs) # Call the "real" save()
 
     def __str__(self):
-        return (u'%s' % self.title).encode('utf-8').strip()
+        return u'%s' % self.title
 
 
 class RubricActual(models.Model):
@@ -98,7 +98,7 @@ class RubricActual(models.Model):
     rubric_template = models.ForeignKey(RubricTemplate)
 
     def __str__(self):
-        return (u'%s' % self.rubric_template.title).encode('utf-8').strip()
+        return u'%s' % self.rubric_template.title
 
 class RItemTemplate(models.Model):
     """
@@ -123,7 +123,7 @@ class RItemTemplate(models.Model):
 
 
     def __str__(self):
-        return (u'%d. %s' % (self.order, self.criterion)).encode('utf-8').strip()
+        return u'%d. %s' % (self.order, self.criterion)
 
 class RItemActual(models.Model):
     """
@@ -173,9 +173,9 @@ class ROptionTemplate(models.Model):
         assert(self.score <= self.rubric_item.max_score)
         super(ROptionTemplate, self).save(*args, **kwargs)
     def __str__(self):
-        out = (u'[%d] %d. %s' % (self.rubric_item.order,
+        out = u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
-                                 self.criterion)).encode('utf-8').strip()
+                                 self.criterion)
         return out[0:100]
 
 class ROptionActual(models.Model):
