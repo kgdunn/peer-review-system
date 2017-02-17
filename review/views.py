@@ -30,12 +30,16 @@ def starting_point(request):
 
     """
     person = get_create_student(request)
-
+    logger.debug('Found the person')
     course_ID = request.POST.get('context_id', None)
+    logger.debug('CourseID = %s' % course_ID)
     course = get_object_or_404(Course, label=course_ID)
+    logger.debug('Course = %s' % str(course))
 
     pr_ID = request.POST.get('resource_link_title', None)
+    logger.debug('pr_ID = %s' % pr_ID)
     pr = get_object_or_404(PR_process, LTI_title=pr_ID)
+    logger.debug('Course = %s' % str(pr))
 
     if person:
         return person, course, pr
