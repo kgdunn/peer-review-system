@@ -57,7 +57,7 @@ ROOT_URLCONF = 'peer.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['peer/template/peer',],
         'APP_DIRS': True,
         'OPTIONS': {
             'debug': True,

@@ -73,8 +73,6 @@ def success(request):
     return HttpResponse("You have successfully uploaded")
 
 
-
-
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
@@ -90,6 +88,9 @@ def index(request):
                    'course': course,
                    'pr': pr
                   }
+            from django.template.loader import get_template
+            template = get_template('review/welcome.html')
+            template.render(ctx, request)
             return render(request, 'review/welcome.html', ctx)#, {'form': form})
 
 
@@ -97,7 +98,6 @@ def index(request):
         #if form.is_valid():
         #    handle_uploaded_file(request.FILES['file'])
         #    return HttpResponseRedirect('/success')
-
 
     else:
         return HttpResponse(("You have reached the Peer Review LTI component "
