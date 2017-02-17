@@ -46,9 +46,8 @@ class Course(models.Model):
     """ Which courses are being supported."""
     name = models.CharField(max_length=300, verbose_name="Course name")
     label = models.CharField(max_length=300, verbose_name="LTI POST label",
-        help_text=("Obtain this from the HTML POST field: "
-                   "is_course_offering_sourcedid"))
-    # Brightspace:   u'lis_course_offering_sourcedid':
+        help_text=("Obtain this from the HTML POST field: 'context_id' "))
+    # Brightspace:   u'lis_course_offering_sourcedid': <--- is another option
     #                                  [u'brightspace.tudelft.nl:training-IDE'],
     slug = models.SlugField(default='', editable=False)
 

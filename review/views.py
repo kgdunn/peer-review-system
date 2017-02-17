@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .models import Person
+from .models import Person, PR_process
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,11 +24,21 @@ def handle_uploaded_file(f):
 
 def starting_point(request):
     """
-    Bootstrap code to run on every request. Returns a Person instance.
+    Bootstrap code to run on every request.
+
+    Returns a Person instance, the course, and Peer Review (pr) instances.
+
     """
     person = get_create_student(request)
+
+    course_ID = request.POST.get('context_id', None)
+    course = get_object_or_404(Course, label=course_ID)
+
+    pr_ID = request.POST.get('LTI_title', None)
+    pr = get_object_or_404(PR_process, LTI_title=pr_ID)
+
     if person:
-        return person
+        return person, course, pr
     else:
         return HttpResponse(("You are not registered in this course."))
 
@@ -62,19 +72,25 @@ def success(request):
     logger.debug('Success')
     return HttpResponse("You have successfully uploaded")
 
+
+
+
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
 
     if request.method == 'POST':
         logger.debug('POST = ' + str(request.POST))
-        person_or_error = starting_point(request)
-        logger.debug('returned = ' + str(person_or_error))
+        person_or_error, course, pr = starting_point(request)
         if not(isinstance(person_or_error, Person)):
-            return person_or_error      # This is the error path
+            return person_or_error      # Error path if student does not exist
         else:
-            form = UploadFileForm()
-            return render(request, 'review/upload.html', {'form': form})
+            #form = UploadFileForm()
+            ctx = {'person': person_or_error,
+                   'course': course,
+                   'pr': pr
+                  }
+            return render(request, 'review/welcome.html', ctx)#, {'form': form})
 
 
         #form = UploadFileForm(request.POST, request.FILES)
