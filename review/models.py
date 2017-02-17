@@ -176,7 +176,7 @@ class ROptionTemplate(models.Model):
         out = (u'[%d] %d. %s' % (self.rubric_item.order,
                                  self.order,
                                  self.criterion)).encode('utf-8').strip()
-        return out[1:50]
+        return out[0:100]
 
 class ROptionActual(models.Model):
     """
@@ -195,69 +195,69 @@ class ROptionActual(models.Model):
     submitted = models.BooleanField(default=False)
 
 
-class PR_process(models.Model):
-    """ Describes the Peer Review process: requirements and deadlines.
+#class PR_process(models.Model):
+    #""" Describes the Peer Review process: requirements and deadlines.
 
-    There is one of these for each peer review activity. If a course has 3
-    peer activities, then there will be 3 of these instances.
-    """
-    class Meta:
-        verbose_name = 'Peer review process'
-        verbose_name_plural = 'PR processes'
-    # This can be used to branch code, if needed, for different LTI systems
-    CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
-               ('edX-v1', 'edX-v1'))
+    #There is one of these for each peer review activity. If a course has 3
+    #peer activities, then there will be 3 of these instances.
+    #"""
+    #class Meta:
+        #verbose_name = 'Peer review process'
+        #verbose_name_plural = 'PR processes'
+    ## This can be used to branch code, if needed, for different LTI systems
+    #CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
+               #('edX-v1', 'edX-v1'))
 
-    # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
+    ## Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
 
-    LTI_system = models.CharField(max_length=50, choices=CHOICES,)
-    title = models.CharField(max_length=300, verbose_name="Your peer review title")
-    LTI_title = models.CharField(max_length=300, verbose_name="LTI title",
-        help_text=('In Brightspace LTI post: "resource_link_title"'))
-    slug = models.SlugField(default='', editable=False)
-    course = models.ForeignKey(Course)
-    rubric = models.ForeignKey(RubricTemplate)
+    #LTI_system = models.CharField(max_length=50, choices=CHOICES,)
+    #title = models.CharField(max_length=300, verbose_name="Your peer review title")
+    #LTI_title = models.CharField(max_length=300, verbose_name="LTI title",
+        #help_text=('In Brightspace LTI post: "resource_link_title"'))
+    #slug = models.SlugField(default='', editable=False)
+    #course = models.ForeignKey(Course)
+    #rubric = models.ForeignKey(RubricTemplate)
 
-    uses_groups = models.BooleanField(default=False,
-        help_text=('The workflow and responses are slightly modified if groups '
-                   'are used.'))
+    #uses_groups = models.BooleanField(default=False,
+        #help_text=('The workflow and responses are slightly modified if groups '
+                   #'are used.'))
 
-    instructions = models.TextField(help_text='May contain HTML instructions',
-                verbose_name='Overall instructions to learners', )
+    #instructions = models.TextField(help_text='May contain HTML instructions',
+                #verbose_name='Overall instructions to learners', )
 
-    # Date 1: submit their work
-    submission_deadline = models.DateTimeField(
-        verbose_name='When should learners submit their work by', )
+    ## Date 1: submit their work
+    #submission_deadline = models.DateTimeField(
+        #verbose_name='When should learners submit their work by', )
 
-    # Date 2: start reviewing their peers
-    peer_reviews_start_by = models.DateTimeField(
-        verbose_name='When does the reviewing step open for learners to start?')
+    ## Date 2: start reviewing their peers
+    #peer_reviews_start_by = models.DateTimeField(
+        #verbose_name='When does the reviewing step open for learners to start?')
 
-    # Date 3: complete the reviews of their peers
-    peer_reviews_completed_by = models.DateTimeField(
-        verbose_name='When must learners submit their reviews by?')
+    ## Date 3: complete the reviews of their peers
+    #peer_reviews_completed_by = models.DateTimeField(
+        #verbose_name='When must learners submit their reviews by?')
 
-    # Date 4: receive the reviews back
-    peer_reviews_received_back = models.DateTimeField(
-        verbose_name='When will learners receive their reviews back?')
+    ## Date 4: receive the reviews back
+    #peer_reviews_received_back = models.DateTimeField(
+        #verbose_name='When will learners receive their reviews back?')
 
-    # True/False settings:
-    show_rubric_prior_to_submission = models.BooleanField(default=False,
-        help_text=('Can learners see the rubric before they submit?'))
+    ## True/False settings:
+    #show_rubric_prior_to_submission = models.BooleanField(default=False,
+        #help_text=('Can learners see the rubric before they submit?'))
 
-    make_submissions_visible_after_review = models.BooleanField(default=False,
-       help_text=('Can learners see all submissions from peers after the '
-                  'reviewing step?'))
+    #make_submissions_visible_after_review = models.BooleanField(default=False,
+       #help_text=('Can learners see all submissions from peers after the '
+                  #'reviewing step?'))
 
-    # TO DO:
-    max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
-    #limitations of the number of files
+    ## TO DO:
+    #max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
+    ##limitations of the number of files
 
 
-    def save(self, *args, **kwargs):
-        #self.slug = slugify(self.name)
-        unique_slugify(self, self.title, 'slug')
-        super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
+    #def save(self, *args, **kwargs):
+        ##self.slug = slugify(self.name)
+        #unique_slugify(self, self.title, 'slug')
+        #super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
 
 
 def peerreview_directory_path(instance, filename):
@@ -283,7 +283,7 @@ class Submission(models.Model):
 
     submitted_by = models.ForeignKey(Person)
     status = models.CharField(max_length=2, choices=STATUS, default='N')
-    pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
+    #pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
     is_valid = models.BooleanField(default=False,
         help_text=('Invalid if it is too late, or if a newer submission'
                    'is replacing this one.'))

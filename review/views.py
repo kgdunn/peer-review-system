@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .models import Person, PR_process, Course
+from .models import Person, Course #PR_process
 
 import logging
 logger = logging.getLogger(__name__)
