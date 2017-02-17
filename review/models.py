@@ -36,7 +36,8 @@ class Person(models.Model):
     role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
-        return u'{0} [{1}]'.format(self.name, self.email)
+        return (u'{0} [{1}]'.format(self.name, self.email)).encode('utf8',
+                                                                   'replace')
 
 
 class Group(models.Model):
