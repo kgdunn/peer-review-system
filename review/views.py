@@ -88,9 +88,9 @@ def index(request):
                    'course': course,
                    'pr': pr
                   }
-            from django.template.loader import get_template
-            template = get_template('review/welcome.html')
-            template.render(ctx, request)
+            #from django.template.loader import get_template
+            #template = get_template('review/welcome.html')
+            #template.render(ctx, request)
             return render(request, 'review/welcome.html', ctx)#, {'form': form})
 
 

@@ -3,7 +3,8 @@ TO DO
 
 Switch to Postgres database
 Figure out template footer/header
-
+Convert submissions to PDFs
+Create Rubric data structure and display it in the browser
 
 
 First time
