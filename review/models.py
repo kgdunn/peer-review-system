@@ -37,7 +37,7 @@ class Person(models.Model):
     role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
-        return u'{0} [{1}]'.format(self.name, self.email)
+        return u'{0} [{1}]'.format(self.full_name, self.email)
 
 @python_2_unicode_compatible
 class Group(models.Model):
@@ -276,8 +276,13 @@ class PR_process(models.Model):
 
 
 def peerreview_directory_path(instance, filename):
-    # The file will be uploaded to MEDIA_ROOT/nnn/<filename>
-    return '{0}'.format(instance.pr_process.id) + os.sep
+    # The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
+    extension = filename.split('.')[-1]
+    filename = generate_random_token(token_length=16) + '.' + extension
+    return '{0}{1}{2}{1}{3}'.format('uploads',
+                                    os.sep,
+                                    instance.pr_process.id,
+                                    filename)
 
 @python_2_unicode_compatible
 class Submission(models.Model):
@@ -312,6 +317,8 @@ class Submission(models.Model):
         verbose_name="Date and time the learner/group submitted.")
 
     def __str__(self):
-        return str(self.submitted_file_name)
+        return '[{0}]({1}): {2}'.format(self.pr_process,
+                                        self.submitted_by,
+                                        self.submitted_file_name)
 
 

@@ -3,7 +3,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .models import Person, Course, PR_process
+from .models import Person, Course, PR_process, Submission
+from utils import generate_random_token
 
 import logging
 logger = logging.getLogger(__name__)
@@ -46,13 +47,13 @@ def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
-    logger.debug('Looking up student')
     if request.POST.get('ext_d2l_token_digest', None):
         name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         full_name = request.POST['lis_person_name_full']
         user_ID = request.POST['user_id']
         role = request.POST['roles']
+        # You can also use: request.POST['ext_d2l_role']
         if 'Instructor' in role:
             role = 'Admin'
         elif 'Student' in role:
@@ -60,27 +61,31 @@ def get_create_student(request):
     else:
         return None
 
-    logger.debug('About to check: name={0}, email = {1}, full_name = {2}, user_ID = {3}, role = {4}'.format(name, email, full_name, user_ID, role))
+    #logger.debug('About to check: name={0}, email = {1}, full_name = {2},
+    #user_ID = {3}, role = {4}'.format(name, email, full_name, user_ID, role))
     learner, newbie = Person.objects.get_or_create(name=name,
                                                    email=email,
                                                    full_name=full_name,
                                                    role=role)
+
+    if newbie:
+        logger.info('Created new learner: %s' % learner.full_name)
+
+
     if learner:
         # Augments the learner with extra fields that might not be there
-        logger.info('Augumated user_ID on %s'.format(learner.email))
         if learner.user_ID == '':
+            logger.info('Augumented user_ID on %s' % learner.email)
             learner.user_ID = user_ID
             learner.save()
 
-    logger.debug('learner = %s' % str(learner))
+
     return learner
 
 @csrf_exempt
 def success(request):
     logger.debug('Success')
     return HttpResponse("You have successfully uploaded")
-
-
 
 
 @csrf_exempt
@@ -116,33 +121,35 @@ def index(request):
                                     "without authorization."))
 
 
+def manual_create_uploads(request):
+    """
+    Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
+    """
+    name = 'Aine '
+    email = 'A.M.Cronin@student.tudelft.nl'
+    full_name = 'Aine Cronin'
+    learner, newbie = Person.objects.get_or_create(name=name,
+                                                    email = email,
+                                                    full_name = full_name,
+                                                    role='Student')
+    learner.save()
+    logger.debug("Creating submission for %s" % learner)
 
-#def manual_create_uploads(request):
-    #"""
-    #"""
-    #name = ''
-    #email = ''
-    #full_name = ''
-    #person = Person(name=name,
-                    #is_active = True,
-                    #email = email,
-                    #full_name = full_name,
-                    #user_ID='',
-                    #role='Student')
+    status = 'S'
+    pr_process = PR_process.objects.filter(id=1)[0]
+    is_valid = True
+    filename = 'abc.pdf'
+    extension = filename.split('.')[-1]
+    submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+                    generate_random_token(token_length=16) + '.' + extension)
+    ip_address = '0.0.0.0'
 
-    #status = 'S'
-    #pr_process = PR_process.objects.filter(id=1)
-    #is_valid = True
-    #file_upload = ''
-    #submitted_file_name = '/{0}/'.format(pr_process.id)
-    #ip_address = '0.0.0.0'
+    sub = Submission(submitted_by = learner,
+                     status = status,
+                     pr_process = pr_process,
+                     is_valid = True,
+                     file_upload = '',
+                     submitted_file_name = 'Aine_Cronin_TowardsCircularDesign.pdf',
+                     ip_address = ip_address,
+                    )
 
-    ##MEDIA_ROOT/nnn/<filename>
-    ##    return '{0}'.format(instance.pr_process.id) + os.sep
-
-    #self.photo.save(
-        #os.path.basename(self.url),
-        #File(open(result[0]))
-        #)
-
-    #self.save()

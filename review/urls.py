@@ -6,6 +6,8 @@ urlpatterns = [
     #url(r'', views.index, name='index'),
     url(r'^$', views.index, name='index'),
     url(r'^success/$', views.success, name='success'),
+    url(r'^manual_create_uploads/$', views.manual_create_uploads,
+        name='manual_create_uploads'),
 ]
 
 """
