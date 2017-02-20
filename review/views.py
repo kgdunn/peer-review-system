@@ -3,12 +3,19 @@ from django.http import HttpResponse, HttpResponseRedirect
 from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
+# Our imports
 from .models import Person, Course, PR_process, Submission
+from .models import RubricActual, ROptionActual, RItemActual
 from utils import generate_random_token
 
+# Python imports
+import datetime
+
+# Logging
 import logging
 logger = logging.getLogger(__name__)
 logger.debug('A new call to the views.py file')
+
 
 
 # SECURITY ISSUES
@@ -31,6 +38,7 @@ def starting_point(request):
 
     """
     person = get_create_student(request)
+
     course_ID = request.POST.get('context_id', None)
     course = get_object_or_404(Course, label=course_ID)
 
@@ -101,13 +109,44 @@ def index(request):
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
         else:
+            learner = person_or_error
+            now_time = datetime.datetime.now()
 
+            # STEP 1: prior to submission date?
+            # Code here to allow submission
+
+            # STEP 2: between review start and end time?
+            # Code here to display the available reviews
+            # Also display the user's/group's own submission
+
+            if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
+                 and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
+
+                # 1get_next_submission_to_evaluate(pr, learner)
+                # 2get_rubric_template
+                rub_actual, new_rubric = RubricActual.objects.get_or_create(\
+                                            graded_by=learner,
+                                            rubric_template=pr.rubric)
+
+
+                if new_rubric:
+                    pass
+                    # create >=1  RItemActuals here and save
+
+
+
+
+
+
+            # STEP 3: after the time when feedback is available?
+            # Code her to display the results
+
+
+            #form = UploadFileForm()
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr
-                  }
-
-            #form = UploadFileForm()
+                   }
             return render(request, 'review/welcome.html', ctx)#, {'form': form})
 
 
@@ -125,6 +164,29 @@ def manual_create_uploads(request):
     """
     Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
     """
+
+    import csv
+
+    classlist = {}
+    with open('/Users/kevindunn/DELETE/IO3075-classlist.csv', 'rt') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            print(row)
+
+            classlist[row[2] + ' ' + row[1]] = (row[2], row[3])
+
+    folder = '/Users/kevindunn/DELETE/Hand in Aerobics Example Download 18 February, 2017 0707.zip Folder'
+    import os
+    from os.path import join, getsize
+    for root, dirs, files in os.walk(folder):
+        if files[0].lower().endswith('.pdf'):
+            print('PDF')
+        else:
+            print(files[0])
+
+        #if 'CVS' in dirs:
+        #    dirs.remove('CVS')  # don't visit CVS directories
+
     name = 'Aine '
     email = 'A.M.Cronin@student.tudelft.nl'
     full_name = 'Aine Cronin'

@@ -27,7 +27,7 @@ class Person(models.Model):
              ('Learn', "Learner"),
              ('TA', 'Teaching Assistant')
             )
-    name = models.CharField(max_length=200, verbose_name="First name")
+    first_name = models.CharField(max_length=200, verbose_name="First name")
     is_active = models.BooleanField(default=True, help_text=('Placeholder'))
     email = models.EmailField(unique=True, blank=False)
     full_name = models.CharField(max_length=400, verbose_name='Full name',
@@ -238,19 +238,19 @@ class PR_process(models.Model):
                 verbose_name='Overall instructions to learners', )
 
     # Date 1: submit their work
-    submission_deadline = models.DateTimeField(
+    dt_submission_deadline = models.DateTimeField(
         verbose_name='When should learners submit their work by', )
 
     # Date 2: start reviewing their peers
-    peer_reviews_start_by = models.DateTimeField(
+    dt_peer_reviews_start_by = models.DateTimeField(
         verbose_name='When does the reviewing step open for learners to start?')
 
     # Date 3: complete the reviews of their peers
-    peer_reviews_completed_by = models.DateTimeField(
+    dt_peer_reviews_completed_by = models.DateTimeField(
         verbose_name='When must learners submit their reviews by?')
 
     # Date 4: receive the reviews back
-    peer_reviews_received_back = models.DateTimeField(
+    dt_peer_reviews_received_back = models.DateTimeField(
         verbose_name='When will learners receive their reviews back?')
 
     # True/False settings:
