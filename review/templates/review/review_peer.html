@@ -3,6 +3,19 @@
 
 {% block content %}
 
+<style>
+    #left {
+        width: 60%;
+        float: left;
+    }
+    #right {
+        margin-left: 60%;
+    }
+    .clear {
+        clear: both;
+    }
+</style>
+
 <h2>Hello {{person.full_name}}!</h2>
 
 <p>You are reviewing one of your peers. The document to review is shown below.
@@ -10,9 +23,18 @@
 <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>,
 and then continue to review it here.
 <hr>
-<div class="PDF">
-   <object data="/uploads/1/vZhj6nhkadn9KqFR.pdf" type="application/pdf" width="750" height="600"> alt : <a href="/uploads/1/vZhj6nhkadn9KqFR.pdf">Peer review document</a>
+
+<div id="container">
+    <div id="left">
+        <object data="/{{submission.file_upload.url}}" type="application/pdf"
+   width="750" height="600">
+   alt : <a href="/{{submission.file_upload.url}}">Peer review document</a>
    </object>
+    </div>
+    <div id="right">
+        RUBRIC GOES HERE
+    </div>
+    <div class="clear"></div>
 </div>
 
 
