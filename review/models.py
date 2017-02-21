@@ -29,7 +29,7 @@ class Person(models.Model):
             )
     first_name = models.CharField(max_length=200, verbose_name="First name")
     is_active = models.BooleanField(default=True, help_text=('Placeholder'))
-    email = models.EmailField(unique=True, blank=False)
+    email = models.EmailField(blank=False)
     full_name = models.CharField(max_length=400, verbose_name='Full name',
                                  blank=True)
     user_ID = models.CharField(max_length=100, verbose_name=('User ID from '
@@ -130,6 +130,9 @@ class PR_process(models.Model):
     max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
     #limitations of the number of files
 
+    number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
+        help_text='How many reviews must each learner complete?')
+
 
     def save(self, *args, **kwargs):
         #self.slug = slugify(self.name)
@@ -184,15 +187,15 @@ class Submission(models.Model):
     number_reviews_completed = models.PositiveSmallIntegerField(default=0,
         help_text='Number of times this submission has been completed')
 
-
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime_submitted = models.DateTimeField(auto_now_add=True,
         verbose_name="Date and time the learner/group submitted.")
 
     def __str__(self):
-        return '[{0}]({1}): {2}'.format(self.pr_process,
-                                        self.submitted_by,
-                                        self.submitted_file_name)
+        return '[{0}][assign={1}][cmptd={2}]: {3}'.format(self.pr_process,
+                                        self.number_reviews_assigned,
+                                        self.number_reviews_completed,
+                                        self.submitted_by)
 
 
 @python_2_unicode_compatible
@@ -223,17 +226,18 @@ class RubricTemplate(models.Model):
 @python_2_unicode_compatible
 class RubricActual(models.Model):
     """
-    The actual rubric: one instance per learner.
+    The actual rubric: one instance per learner per submission.
     """
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    submitted = models.BooleanField(default=False)
+    submitted = models.BooleanField(default=False,
+        help_text='Has been completed reviewed AND submitted by peer grader.')
     graded_by = models.ForeignKey(Person)
     rubric_template = models.ForeignKey(RubricTemplate)
     submission = models.ForeignKey(Submission, null=True)
 
     def __str__(self):
-        return u'%s' % self.rubric_template.title
+        return u'Peer: {0}; Sub: {1}'.format(self.graded_by, self.submission)
 
 @python_2_unicode_compatible
 class RItemTemplate(models.Model):
@@ -266,7 +270,8 @@ class RItemActual(models.Model):
     The actual rubric item for a learner.
     """
     ritem_template = models.ForeignKey(RItemTemplate)
-    comment = models.TextField() # comment added by the learner
+    r_actual = models.ForeignKey(RubricActual) # assures cascading deletes
+    comment = models.TextField(blank=True) # comment added by the learner
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     #score_awared = models.FloatField(help_text=('Usually corresponds to the '
@@ -281,19 +286,7 @@ class RItemActual(models.Model):
     as_displayed = models.TextField(blank=True)
 
     def __str__(self):
-        return u'%s' % (self.comment, )
-
-    #def __str__(self):
-        #if self.qset:
-            #return u'%s, for user "%s", in %s of course "%s"' % (
-                #self.qtemplate.name,
-                #self.user.user.username,
-                #self.qset.name,
-                #self.qset.course)
-        #else:
-            #return u'%s, for user "%s"' % (
-                #self.qtemplate.name,
-                #self.user.user.username)
+        return u'[Item {0}]'.format(self.ritem_template.order)
 
 @python_2_unicode_compatible
 class ROptionTemplate(models.Model):

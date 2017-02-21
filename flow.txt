@@ -6,6 +6,8 @@ Figure out template footer/header
 Convert submissions to PDFs
 Create Rubric data structure and display it in the browser
 Use foreign characters in the text
+Set nice columns in AdminDB to display details
+
 
 Turn DEBUG off
 

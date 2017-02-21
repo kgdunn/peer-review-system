@@ -6,10 +6,12 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 # Our imports
 from .models import Person, Course, PR_process, Submission
 from .models import RubricActual, ROptionActual, RItemActual
+from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from utils import generate_random_token
 
 # Python imports
 import datetime
+from builtins import range
 
 # Logging
 import logging
@@ -96,13 +98,29 @@ def success(request):
     return HttpResponse("You have successfully uploaded")
 
 
+def create_items(r_actual):
+    """Creates the items (rows) associated with an actual rubric"""
+
+    r_template = r_actual.rubric_template
+    r_items = RItemTemplate.objects.filter(rubric=r_template).order_by('order')
+
+    for r_item in r_items:
+        r_item_actual = RItemActual(ritem_template = r_item,
+                                    r_actual = r_actual,
+                                    comment = '',
+                                    submitted = False,
+                                    as_displayed = '')
+        r_item_actual.save()
+
+
+
 def get_next_submission_to_evaluate(pr, learner):
     """
-    Gets the next peer review submission for the approapriate peer review
-    assignment.
+    Gets the single next peer review submission for the approapriate peer review
+    assignment (``pr``) for this ``learner``.
 
     Principle:
-
+    * see if there is already a submission allocated for this learner: return
     * get the submissions with the least peer reviews ASSIGNED (not completed),
       but exclude:
         ** 1. submissions that are not complete (status='N')
@@ -111,12 +129,11 @@ def get_next_submission_to_evaluate(pr, learner):
         ** 4. a learner cannot evaluate a submission from within their own group
 
     """
-
     r_template = pr.rubrictemplate  # one-to-one relationship used here
 
     r_actual = RubricActual.objects.filter(rubric_template__pr_process=pr)
 
-    valid_subs_0 = Submission.objects.all()
+    valid_subs_0 = Submission.objects.all().order_by('datetime_submitted')
 
     # Exclusion 1 and 2
     valid_subs_1_2 = valid_subs_0.exclude(status='N').exclude(status='F')
@@ -128,18 +145,25 @@ def get_next_submission_to_evaluate(pr, learner):
     # TODO
     valid_subs_4 = valid_subs_3
 
-    valid_subs = valid_subs_4.order_by('-number_reviews_assigned')[0:5]
+    # Sort from lowest to highest
+    valid_subs = valid_subs_4.order_by('number_reviews_assigned')
+
+    # Only execute the database query now, getting the one with the lowest
+    # number of assigned reviews
+    return valid_subs[0]
 
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
 
     if request.method == 'POST':
+
         person_or_error, course, pr = starting_point(request)
         logger.debug('POST = ' + str(request.POST))
         logger.debug('person = ' + str(person_or_error))
         logger.debug('course = ' + str(course))
         logger.debug('pre = ' + str(pr))
+
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
         else:
@@ -156,16 +180,52 @@ def index(request):
             if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
                  and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
 
-                get_next_submission_to_evaluate(pr, learner)
-                # 2get_rubric_template
-                rub_actual, new_rubric = RubricActual.objects.get_or_create(\
-                                            graded_by=learner,
-                                            rubric_template=pr.rubric)
+                # Is this the first time the learner is here: create the
+                # N = pr.number_of_reviews_per_learner rubrics for the learner
+                # and return N ``RubricActual`` instances
+
+                # If this is the second or subequent time here, simply return
+                # the N ``RubricActual`` instances
+
+                r_actuals = [] # this what we want to fill
+
+                if learner.role == 'Learn':
+                    n_reviews = pr.number_of_reviews_per_learner
+                else:
+                    # Administrators/TAs can have unlimited number of reviews
+                    n_reviews = Submission.objects.filter(pr_process=pr,
+                                                        is_valid=True).count()
 
 
-                if new_rubric:
-                    pass
-                    # create >=1  RItemActuals here and save
+                query = RubricActual.objects.filter(graded_by = learner,
+                        rubric_template = pr.rubrictemplate).order_by('created')
+
+                if query.count() == n_reviews:
+                    r_actuals = list(query)
+
+
+                else:
+                    # We need to create and append a few more reviews here
+                    r_actuals = list(query)
+
+                    for k in range(n_reviews - query.count()):
+                        # Hit database to get the next submission to grade:
+                        next_sub = get_next_submission_to_evaluate(pr, learner)
+                        next_sub.number_reviews_assigned += 1
+                        next_sub.save()
+
+                        # Create an ``rubric_actual`` instance:
+                        r_actual, new_rubric = RubricActual.objects.get_or_create(\
+                                        submitted = False,
+                                        graded_by = learner,
+                                        rubric_template = pr.rubrictemplate,
+                                        submission = next_sub)
+
+                        if new_rubric:
+                            create_items(r_actual)
+
+                        r_actuals.append(r_actual)
+
 
 
 
