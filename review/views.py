@@ -11,7 +11,6 @@ from utils import generate_random_token
 
 # Python imports
 import datetime
-from builtins import range
 
 # Logging
 import logging
