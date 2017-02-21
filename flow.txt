@@ -43,16 +43,16 @@ New user: create user in this course
 Show the next reviews to complete
 Set up the rubric when the review is actually started
 
+{{item.submission.file_upload.url}}
 
 New user:
-* Find the PR
-* Find the submission
-* Get the RubricTemplate
-* Make a RubricActual
-* Save
-* Create 1+ RItemActuals
-* Save each one
-
+* done: Find the PR
+* done: Find the submission
+* done: Get the RubricTemplate
+* done: Make a RubricActual
+* done: Save
+* done: Create 1+ RItemActuals
+* done: Save each one
 
 
 presented with the next available review

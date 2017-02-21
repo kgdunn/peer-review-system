@@ -254,7 +254,7 @@ def index(request):
                                     "without authorization."))
 
 
-def review(request, submission_code):
+def review(request, ractual_code):
     """
     From the unique URL
 
@@ -265,6 +265,7 @@ def review(request, submission_code):
     5. Process the storing and saving of the objects
     """
     logger.debug(submission_code)
+    return HttpResponse(("WRONG"))
 
 def manual_create_uploads(request):
     """
