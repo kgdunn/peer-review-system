@@ -274,14 +274,14 @@ def manual_create_uploads(request):
     pr_process = PR_process.objects.filter(id=1)[0]
 
     classlist = {}
-    with open('/Users/kevindunn/DELETE/IO3075-classlist.csv', 'rt') as csvfile:
+    with open('/home/kevindunn/IO3075-classlist.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             print(row)
 
             classlist[row[2] + ' ' + row[1]] = [row[2], row[3]]
 
-    folder = '/home/kevindunn/allsubs/'
+    folder = '/home/kevindunn/allsub/'
 
     for root, dirs, files in os.walk(folder):
         if files[0].lower().endswith('.pdf'):
@@ -309,7 +309,7 @@ def manual_create_uploads(request):
                             generate_random_token(token_length=16) + '.' + extension)
             ip_address = '0.0.0.0'
 
-            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
+            base_dir = '/var/www/peer/documents'
             copyfile(filename, base_dir + os.sep + submitted_file_name)
 
             sub = Submission(submitted_by = learner,
