@@ -232,22 +232,14 @@ def index(request):
 
 
             # STEP 3: after the time when feedback is available?
-            # Code her to display the results
+            # Code here to display the results
 
-
-            #form = UploadFileForm()
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr,
                    'r_actuals': r_actuals,
                    }
-            return render(request, 'review/welcome.html', ctx)#, {'form': form})
-
-
-        #form = UploadFileForm(request.POST, request.FILES)
-        #if form.is_valid():
-        #    handle_uploaded_file(request.FILES['file'])
-        #    return HttpResponseRedirect('/success')
+            return render(request, 'review/welcome.html', ctx)
 
     else:
         return HttpResponse(("You have reached the Peer Review LTI component "
@@ -264,8 +256,20 @@ def review(request, ractual_code):
     4. Capture submit signal
     5. Process the storing and saving of the objects
     """
-    logger.debug(submission_code)
-    return HttpResponse(("WRONG"))
+    logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
+    r_actual = RubricActual.objects.filter(unique_code=ractual_code)
+    if r_actual.count() == 0:
+        return HttpResponse(("You have an incorrect link. Either something "
+                             "is broken in the peer review website, or you "
+                             "removed/changed part of the link."))
+    r_actual = r_actual[0]
+    learner = r_actual.graded_by
+
+    ctx = {'submission': r_actual.submission,
+           'person': r_actual.graded_by,
+           }
+    return render(request, 'review/review_peer.html', ctx)
+
 
 def manual_create_uploads(request):
     """

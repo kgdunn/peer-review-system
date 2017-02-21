@@ -1,0 +1,40 @@
+
+{% extends "review/base.html" %}
+
+{% block content %}
+
+<script src="js/pdf.js"></script>
+<script src="js/pdf.worker.js"></script>
+<script>
+  PDFJS.disableStream = true;
+  PDFJS.getDocument('/files/tizenfordummies.pdf');
+</script>
+
+
+<link rel="stylesheet" href="viewer.css">
+<script src="compatibility.js"></script>
+<!-- This snippet is used in production (included from viewer.html) -->
+<link rel="resource" type="application/l10n" href="locale/locale.properties">
+<script src="l10n.js"></script>
+<script src="../build/pdf.js"></script>
+<script src="viewer.js"></script>
+
+
+<h2>Hello {{person.full_name}}!</h2>
+
+<p>You are reviewing one of your peers. The document to review is shown below.
+However, if the document does not display properly, you may
+<a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>
+and continue to review it here.
+
+
+{% endblock %}
+
+<!--
+<form enctype="multipart/form-data" method="post" action="/">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>
+-->
+
