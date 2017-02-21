@@ -67,13 +67,140 @@ class Course(models.Model):
         super(Course, self).save(*args, **kwargs) # Call the "real" save()
 
 
+
+@python_2_unicode_compatible
+class PR_process(models.Model):
+    """ Describes the Peer Review process: requirements and deadlines.
+
+    There is a one-to-one relationship to the rubric template. So create this
+    PR_process first, then link it up later when you create the template.
+
+    There is one of these for each peer review activity. If a course has 3
+    peer activities, then there will be 3 of these instances.
+    """
+    class Meta:
+        verbose_name = 'Peer review process'
+        verbose_name_plural = 'PR processes'
+    # This can be used to branch code, if needed, for different LTI systems
+    CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
+               ('edX-v1', 'edX-v1'))
+
+    # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
+
+    LTI_system = models.CharField(max_length=50, choices=CHOICES,)
+    title = models.CharField(max_length=300, verbose_name="Your peer review title")
+    LTI_title = models.CharField(max_length=300, verbose_name="LTI title",
+        help_text=('In Brightspace LTI post: "resource_link_title"'))
+    slug = models.SlugField(default='', editable=False)
+    course = models.ForeignKey(Course)
+    # rubrictemplate <--- from the One-To-One relationship
+
+    uses_groups = models.BooleanField(default=False,
+        help_text=('The workflow and responses are slightly modified if groups '
+                   'are used.'))
+
+    instructions = models.TextField(help_text='May contain HTML instructions',
+                verbose_name='Overall instructions to learners', )
+
+    # Date 1: submit their work
+    dt_submission_deadline = models.DateTimeField(
+        verbose_name='When should learners submit their work by', )
+
+    # Date 2: start reviewing their peers
+    dt_peer_reviews_start_by = models.DateTimeField(
+        verbose_name='When does the reviewing step open for learners to start?')
+
+    # Date 3: complete the reviews of their peers
+    dt_peer_reviews_completed_by = models.DateTimeField(
+        verbose_name='When must learners submit their reviews by?')
+
+    # Date 4: receive the reviews back
+    dt_peer_reviews_received_back = models.DateTimeField(
+        verbose_name='When will learners receive their reviews back?')
+
+    # True/False settings:
+    show_rubric_prior_to_submission = models.BooleanField(default=False,
+        help_text=('Can learners see the rubric before they submit?'))
+
+    make_submissions_visible_after_review = models.BooleanField(default=False,
+       help_text=('Can learners see all submissions from peers after the '
+                  'reviewing step?'))
+
+    # TO DO:
+    max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
+    #limitations of the number of files
+
+
+    def save(self, *args, **kwargs):
+        #self.slug = slugify(self.name)
+        unique_slugify(self, self.title, 'slug')
+        super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
+
+    def __str__(self):
+        return self.title
+
+
+def peerreview_directory_path(instance, filename):
+    # The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
+    extension = filename.split('.')[-1]
+    filename = generate_random_token(token_length=16) + '.' + extension
+    return '{0}{1}{2}{1}{3}'.format('uploads',
+                                    os.sep,
+                                    instance.pr_process.id,
+                                    filename)
+
+
+@python_2_unicode_compatible
+class Submission(models.Model):
+    """
+    An instance of a submission for a learner/group of learners.
+
+    TODO: allow multiple files as a submission.
+
+    Old files are kept, but not available for download.
+    Show submissions for people in the same group in top/bottom order
+    Allow multiple uploads till submission deadline is reached.
+    """
+    STATUS = (('S', 'Submitted'),
+              ('T', 'Submitted late'),
+              ('F', 'Finished'),
+              ('G', 'Being peer-reviewed/graded'),
+              ('N', 'Nothing submitted yet'),
+              )
+
+    submitted_by = models.ForeignKey(Person)
+    status = models.CharField(max_length=2, choices=STATUS, default='N')
+    pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
+    is_valid = models.BooleanField(default=False,
+        help_text=('Valid if: it was submitted on time, or if this is the most '
+                   'recent submission (there might be older ones).'))
+    file_upload = models.FileField(upload_to=peerreview_directory_path)
+    submitted_file_name = models.CharField(max_length=255, default='')
+    models.ImageField()
+
+    number_reviews_assigned = models.PositiveSmallIntegerField(default=0,
+        help_text='Number of times this submission has been assigned')
+
+    number_reviews_completed = models.PositiveSmallIntegerField(default=0,
+        help_text='Number of times this submission has been completed')
+
+
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    datetime_submitted = models.DateTimeField(auto_now_add=True,
+        verbose_name="Date and time the learner/group submitted.")
+
+    def __str__(self):
+        return '[{0}]({1}): {2}'.format(self.pr_process,
+                                        self.submitted_by,
+                                        self.submitted_file_name)
+
+
 @python_2_unicode_compatible
 class RubricTemplate(models.Model):
     """
     Describes the rubric that will be attached to a Peer Review.
     One instance per Peer Review (multiple instances for learners are based
     off this template).
-    The PR_process has a link back to here (not the other way around).
 
     A Rubric consists of one or more Items (usually a row).
     Items consist of one or more Options (usually columns).
@@ -83,6 +210,8 @@ class RubricTemplate(models.Model):
     slug = models.SlugField(default='', editable=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    pr_process = models.OneToOneField(PR_process, on_delete=models.CASCADE,
+                                      primary_key=True)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.title, 'slug')
@@ -101,6 +230,7 @@ class RubricActual(models.Model):
     submitted = models.BooleanField(default=False)
     graded_by = models.ForeignKey(Person)
     rubric_template = models.ForeignKey(RubricTemplate)
+    submission = models.ForeignKey(Submission, null=True)
 
     def __str__(self):
         return u'%s' % self.rubric_template.title
@@ -206,119 +336,5 @@ class ROptionActual(models.Model):
     def __str__(self):
         return u'%s' % (self.roption_template, )
 
-@python_2_unicode_compatible
-class PR_process(models.Model):
-    """ Describes the Peer Review process: requirements and deadlines.
-
-    There is one of these for each peer review activity. If a course has 3
-    peer activities, then there will be 3 of these instances.
-    """
-    class Meta:
-        verbose_name = 'Peer review process'
-        verbose_name_plural = 'PR processes'
-    # This can be used to branch code, if needed, for different LTI systems
-    CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
-               ('edX-v1', 'edX-v1'))
-
-    # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
-
-    LTI_system = models.CharField(max_length=50, choices=CHOICES,)
-    title = models.CharField(max_length=300, verbose_name="Your peer review title")
-    LTI_title = models.CharField(max_length=300, verbose_name="LTI title",
-        help_text=('In Brightspace LTI post: "resource_link_title"'))
-    slug = models.SlugField(default='', editable=False)
-    course = models.ForeignKey(Course)
-    rubric = models.ForeignKey(RubricTemplate)
-
-    uses_groups = models.BooleanField(default=False,
-        help_text=('The workflow and responses are slightly modified if groups '
-                   'are used.'))
-
-    instructions = models.TextField(help_text='May contain HTML instructions',
-                verbose_name='Overall instructions to learners', )
-
-    # Date 1: submit their work
-    dt_submission_deadline = models.DateTimeField(
-        verbose_name='When should learners submit their work by', )
-
-    # Date 2: start reviewing their peers
-    dt_peer_reviews_start_by = models.DateTimeField(
-        verbose_name='When does the reviewing step open for learners to start?')
-
-    # Date 3: complete the reviews of their peers
-    dt_peer_reviews_completed_by = models.DateTimeField(
-        verbose_name='When must learners submit their reviews by?')
-
-    # Date 4: receive the reviews back
-    dt_peer_reviews_received_back = models.DateTimeField(
-        verbose_name='When will learners receive their reviews back?')
-
-    # True/False settings:
-    show_rubric_prior_to_submission = models.BooleanField(default=False,
-        help_text=('Can learners see the rubric before they submit?'))
-
-    make_submissions_visible_after_review = models.BooleanField(default=False,
-       help_text=('Can learners see all submissions from peers after the '
-                  'reviewing step?'))
-
-    # TO DO:
-    max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
-    #limitations of the number of files
-
-
-    def save(self, *args, **kwargs):
-        #self.slug = slugify(self.name)
-        unique_slugify(self, self.title, 'slug')
-        super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
-
-    def __str__(self):
-        return self.title
-
-
-def peerreview_directory_path(instance, filename):
-    # The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
-    extension = filename.split('.')[-1]
-    filename = generate_random_token(token_length=16) + '.' + extension
-    return '{0}{1}{2}{1}{3}'.format('uploads',
-                                    os.sep,
-                                    instance.pr_process.id,
-                                    filename)
-
-@python_2_unicode_compatible
-class Submission(models.Model):
-    """
-    An instance of a submission for a learner/group of learners.
-
-    TODO: allow multiple files as a submission.
-
-    Old files are kept, but not available for download.
-    Show submissions for people in the same group in top/bottom order
-    Allow multiple uploads till submission deadline is reached.
-    """
-    STATUS = (('S', 'Submitted'),
-              ('T', 'Subitted late'),
-              ('F', 'Finished'),
-              ('G', 'Being peer-reviewed/graded'),
-              ('N', 'Nothing submitted yet'),
-              )
-
-    submitted_by = models.ForeignKey(Person)
-    status = models.CharField(max_length=2, choices=STATUS, default='N')
-    pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
-    is_valid = models.BooleanField(default=False,
-        help_text=('Invalid if it is too late, or if a newer submission'
-                   'is replacing this one.'))
-    file_upload = models.FileField(upload_to=peerreview_directory_path)
-    submitted_file_name = models.CharField(max_length=255, default='')
-    models.ImageField()
-
-    ip_address = models.GenericIPAddressField(blank=True, null=True)
-    datetime_submitted = models.DateTimeField(auto_now_add=True,
-        verbose_name="Date and time the learner/group submitted.")
-
-    def __str__(self):
-        return '[{0}]({1}): {2}'.format(self.pr_process,
-                                        self.submitted_by,
-                                        self.submitted_file_name)
 
 

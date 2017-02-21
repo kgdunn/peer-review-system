@@ -56,7 +56,7 @@ def get_create_student(request):
     Gets or creates the learner from the POST request.
     """
     if request.POST.get('ext_d2l_token_digest', None):
-        name = request.POST['lis_person_name_given']
+        first_name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         full_name = request.POST['lis_person_name_full']
         user_ID = request.POST['user_id']
@@ -70,8 +70,8 @@ def get_create_student(request):
         return None
 
     #logger.debug('About to check: name={0}, email = {1}, full_name = {2},
-    #user_ID = {3}, role = {4}'.format(name, email, full_name, user_ID, role))
-    learner, newbie = Person.objects.get_or_create(name=name,
+    #user_ID = {3}, role = {4}'.format(first_name, email, full_name, user_ID, role))
+    learner, newbie = Person.objects.get_or_create(first_name=first_name,
                                                    email=email,
                                                    full_name=full_name,
                                                    role=role)
@@ -95,6 +95,40 @@ def success(request):
     logger.debug('Success')
     return HttpResponse("You have successfully uploaded")
 
+
+def get_next_submission_to_evaluate(pr, learner):
+    """
+    Gets the next peer review submission for the approapriate peer review
+    assignment.
+
+    Principle:
+
+    * get the submissions with the least peer reviews ASSIGNED (not completed),
+      but exclude:
+        ** 1. submissions that are not complete (status='N')
+        ** 2. submissions that are peer reviewed already (status='F')
+        ** 3. a learner cannot evaluate their own submission
+        ** 4. a learner cannot evaluate a submission from within their own group
+
+    """
+
+    r_template = pr.rubrictemplate  # one-to-one relationship used here
+
+    r_actual = RubricActual.objects.filter(rubric_template__pr_process=pr)
+
+    valid_subs_0 = Submission.objects.all()
+
+    # Exclusion 1 and 2
+    valid_subs_1_2 = valid_subs_0.exclude(status='N').exclude(status='F')
+
+    # Exclusion 3
+    valid_subs_3 = valid_subs_1_2.exclude(submitted_by=learner)
+
+    # Exclusion 3
+    # TODO
+    valid_subs_4 = valid_subs_3
+
+    valid_subs = valid_subs_4.order_by('-number_reviews_assigned')[0:5]
 
 @csrf_exempt
 @xframe_options_exempt
@@ -122,7 +156,7 @@ def index(request):
             if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
                  and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
 
-                # 1get_next_submission_to_evaluate(pr, learner)
+                get_next_submission_to_evaluate(pr, learner)
                 # 2get_rubric_template
                 rub_actual, new_rubric = RubricActual.objects.get_or_create(\
                                             graded_by=learner,
@@ -163,9 +197,15 @@ def index(request):
 def manual_create_uploads(request):
     """
     Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
+
     """
 
     import csv
+    import os
+    from shutil import copyfile
+    from os.path import join, getsize
+
+    pr_process = PR_process.objects.filter(id=1)[0]
 
     classlist = {}
     with open('/Users/kevindunn/DELETE/IO3075-classlist.csv', 'rt') as csvfile:
@@ -173,45 +213,54 @@ def manual_create_uploads(request):
         for row in reader:
             print(row)
 
-            classlist[row[2] + ' ' + row[1]] = (row[2], row[3])
+            classlist[row[2] + ' ' + row[1]] = [row[2], row[3]]
 
     folder = '/Users/kevindunn/DELETE/Hand in Aerobics Example Download 18 February, 2017 0707.zip Folder'
-    import os
-    from os.path import join, getsize
+
     for root, dirs, files in os.walk(folder):
         if files[0].lower().endswith('.pdf'):
-            print('PDF')
+
+            # Only import PDF files
+
+            student_folder = root.split(os.sep)[5]
+            student_name = student_folder.split('-')[2].strip()
+            student = classlist[student_name]
+
+
+            classlist[student_name].append(root + os.sep + files[0])
+            learner, newbie = Person.objects.get_or_create(first_name=student[0],
+                                                    email = student[1],
+                                                    full_name = student_name,
+                                                    role='Learn')
+
+            learner.save()
+
+            status = 'S'
+            is_valid = True
+            filename = root + os.sep + files[0]
+            extension = filename.split('.')[-1]
+            submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+                            generate_random_token(token_length=16) + '.' + extension)
+            ip_address = '0.0.0.0'
+
+            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
+            copyfile(filename, base_dir + os.sep + submitted_file_name)
+
+            sub = Submission(submitted_by = learner,
+                             status = status,
+                             pr_process = pr_process,
+                             is_valid = True,
+                             file_upload = submitted_file_name,
+                             submitted_file_name = filename,
+                             ip_address = ip_address,
+                            )
+            sub.save()
+
+
         else:
             print(files[0])
 
-        #if 'CVS' in dirs:
-        #    dirs.remove('CVS')  # don't visit CVS directories
 
-    name = 'Aine '
-    email = 'A.M.Cronin@student.tudelft.nl'
-    full_name = 'Aine Cronin'
-    learner, newbie = Person.objects.get_or_create(name=name,
-                                                    email = email,
-                                                    full_name = full_name,
-                                                    role='Student')
-    learner.save()
-    logger.debug("Creating submission for %s" % learner)
 
-    status = 'S'
-    pr_process = PR_process.objects.filter(id=1)[0]
-    is_valid = True
-    filename = 'abc.pdf'
-    extension = filename.split('.')[-1]
-    submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
-                    generate_random_token(token_length=16) + '.' + extension)
-    ip_address = '0.0.0.0'
 
-    sub = Submission(submitted_by = learner,
-                     status = status,
-                     pr_process = pr_process,
-                     is_valid = True,
-                     file_upload = '',
-                     submitted_file_name = 'Aine_Cronin_TowardsCircularDesign.pdf',
-                     ip_address = ip_address,
-                    )
 
