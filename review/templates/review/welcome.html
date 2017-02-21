@@ -19,7 +19,7 @@
     </div>
     <div id="collapse_review{{forloop.counter}}" class="collapse show" role="tabpanel" aria-labelledby="headingOne">
       <div class="card-block">
-        <p>Please <a href="">access this peer review here</a>
+        <p>Please <a href="{{item.submission.file_upload.url}}">access this peer review here</a>
         <p>Start date and time for this review: {{pr.dt_peer_reviews_start_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_start_by|time:"H:i" }}
         <p>You must complete <b>and submit</b> the review before: {{pr.dt_peer_reviews_completed_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_completed_by|time:"H:i" }}
 
