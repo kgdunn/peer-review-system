@@ -3,11 +3,11 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    #url(r'', views.index, name='index'),
     url(r'^$', views.index, name='index'),
-    url(r'^success/$', views.success, name='success'),
-    url(r'^manual_create_uploads/$', views.manual_create_uploads,
-        name='manual_create_uploads'),
+    url(r'^review/(?P<submission_code>[*?]{16})/$', views.review, name='review')
+
+    #url(r'^manual_create_uploads/$', views.manual_create_uploads,
+    #    name='manual_create_uploads'),
 ]
 
 """

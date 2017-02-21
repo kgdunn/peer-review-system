@@ -235,6 +235,11 @@ class RubricActual(models.Model):
     graded_by = models.ForeignKey(Person)
     rubric_template = models.ForeignKey(RubricTemplate)
     submission = models.ForeignKey(Submission, null=True)
+    unique_code = models.CharField(max_length=16, editable=False, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.unique_code = generate_random_token(token_length=16)
+        super(RubricActual, self).save(*args, **kwargs) # Call the "real" save()
 
     def __str__(self):
         return u'Peer: {0}; Sub: {1}'.format(self.graded_by, self.submission)

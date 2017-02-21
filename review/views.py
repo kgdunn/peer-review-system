@@ -91,12 +91,6 @@ def get_create_student(request):
 
     return learner
 
-@csrf_exempt
-def success(request):
-    logger.debug('Success')
-    return HttpResponse("You have successfully uploaded")
-
-
 def create_items(r_actual):
     """Creates the items (rows) associated with an actual rubric"""
 
@@ -259,6 +253,18 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                                     "without authorization."))
 
+
+def review(request, submission_code):
+    """
+    From the unique URL
+
+    1. Get the ``RubricActual`` instance
+    2. Format the text for the user
+    3. Handle interactions and XHR saving
+    4. Capture submit signal
+    5. Process the storing and saving of the objects
+    """
+    logger.debug(submission_code)
 
 def manual_create_uploads(request):
     """
