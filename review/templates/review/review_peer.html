@@ -3,21 +3,20 @@
 
 {% block content %}
 
-<script src="js/pdf.js"></script>
-<script src="js/pdf.worker.js"></script>
+<script src="/uploads/pdf/build/pdf.js"></script>
+<script src="/uploads/pdf/build/pdf.worker.js"></script>
 <script>
   PDFJS.disableStream = true;
-  PDFJS.getDocument('/files/tizenfordummies.pdf');
+  PDFJS.getDocument('/uploads/1/vZhj6nhkadn9KqFR.pdf');
 </script>
 
 
-<link rel="stylesheet" href="viewer.css">
-<script src="compatibility.js"></script>
+<link rel="stylesheet" href="/uploads/pdf/web/viewer.css">
+<script src="/uploads/pdf/web/compatibility.js"></script>
 <!-- This snippet is used in production (included from viewer.html) -->
-<link rel="resource" type="application/l10n" href="locale/locale.properties">
-<script src="l10n.js"></script>
-<script src="../build/pdf.js"></script>
-<script src="viewer.js"></script>
+<link rel="resource" type="application/l10n" href="/pdf/locale/locale.properties">
+<script src="/uploads/pdf/web/l10n.js"></script>
+<script src="/uploads/pdf/web/viewer.js"></script>
 
 
 <h2>Hello {{person.full_name}}!</h2>
@@ -29,12 +28,3 @@ and continue to review it here.
 
 
 {% endblock %}
-
-<!--
-<form enctype="multipart/form-data" method="post" action="/">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" />
-</form>
--->
-
