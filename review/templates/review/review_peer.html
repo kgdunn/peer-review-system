@@ -3,28 +3,17 @@
 
 {% block content %}
 
-<script src="/uploads/pdf/build/pdf.js"></script>
-<script src="/uploads/pdf/build/pdf.worker.js"></script>
-<script>
-  PDFJS.disableStream = true;
-  PDFJS.getDocument('/uploads/1/vZhj6nhkadn9KqFR.pdf');
-</script>
-
-
-<link rel="stylesheet" href="/uploads/pdf/web/viewer.css">
-<script src="/uploads/pdf/web/compatibility.js"></script>
-<!-- This snippet is used in production (included from viewer.html) -->
-<link rel="resource" type="application/l10n" href="/pdf/locale/locale.properties">
-<script src="/uploads/pdf/web/l10n.js"></script>
-<script src="/uploads/pdf/web/viewer.js"></script>
-
-
 <h2>Hello {{person.full_name}}!</h2>
 
 <p>You are reviewing one of your peers. The document to review is shown below.
-However, if the document does not display properly, you may
-<a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>
-and continue to review it here.
+<p>If you do not see any document then you should
+<a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>,
+and then continue to review it here.
+<hr>
+<div class="PDF">
+   <object data="/uploads/1/vZhj6nhkadn9KqFR.pdf" type="application/pdf" width="750" height="600"> alt : <a href="/uploads/1/vZhj6nhkadn9KqFR.pdf">Peer review document</a>
+   </object>
+</div>
 
 
 {% endblock %}
