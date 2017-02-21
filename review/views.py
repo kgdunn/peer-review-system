@@ -284,11 +284,12 @@ def manual_create_uploads(request):
     folder = '/home/kevindunn/allsub/'
 
     for root, dirs, files in os.walk(folder):
+        logger.debug(root)
         if files[0].lower().endswith('.pdf'):
 
             # Only import PDF files
 
-            student_folder = root.split(os.sep)[5]
+            student_folder = root.split(os.sep)[4]
             student_name = student_folder.split('-')[2].strip()
             student = classlist[student_name]
 
