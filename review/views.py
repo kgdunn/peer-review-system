@@ -149,7 +149,10 @@ def get_next_submission_to_evaluate(pr, learner):
 
     # Only execute the database query now, getting the one with the lowest
     # number of assigned reviews
-    return valid_subs[0]
+    if valid_subs.count() == 0:
+        return []
+    else:
+        return valid_subs[0]
 
 @csrf_exempt
 @xframe_options_exempt
@@ -211,22 +214,23 @@ def index(request):
                     for k in range(n_reviews - query.count()):
                         # Hit database to get the next submission to grade:
                         next_sub = get_next_submission_to_evaluate(pr, learner)
-                        next_sub.number_reviews_assigned += 1
-                        next_sub.save()
+                        if next_sub:
+                            next_sub.number_reviews_assigned += 1
+                            next_sub.save()
 
-                        # Create an ``rubric_actual`` instance:
-                        r_actual, new_rubric = RubricActual.objects.get_or_create(\
+                            # Create an ``rubric_actual`` instance:
+                            r_actual, new_rubric = RubricActual.objects.get_or_create(\
                                         submitted = False,
                                         graded_by = learner,
                                         rubric_template = pr.rubrictemplate,
                                         submission = next_sub)
 
-                        if new_rubric:
-                            create_items(r_actual)
+                            if new_rubric:
+                                create_items(r_actual)
 
-                        r_actuals.append(r_actual)
+                            r_actuals.append(r_actual)
 
-                        logger.debug('Created: ' + str(next_sub))
+                            logger.debug('Created: ' + str(next_sub))
 
             # STEP 3: after the time when feedback is available?
             # Code her to display the results
