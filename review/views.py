@@ -202,6 +202,10 @@ def index(request):
                 query = RubricActual.objects.filter(graded_by = learner,
                         rubric_template = pr.rubrictemplate).order_by('created')
 
+                logger.debug('Need to create {0} reviews'.format(n_reviews))
+                logger.debug('Found: {0}'.format(str(query)))
+
+
                 if query.count() == n_reviews:
                     r_actuals = list(query)
                 else:
@@ -277,7 +281,7 @@ def manual_create_uploads(request):
 
             classlist[row[2] + ' ' + row[1]] = [row[2], row[3]]
 
-    folder = '/Users/kevindunn/DELETE/Hand in Aerobics Example Download 18 February, 2017 0707.zip Folder'
+    folder = '/home/kevindunn/allsubs/'
 
     for root, dirs, files in os.walk(folder):
         if files[0].lower().endswith('.pdf'):
