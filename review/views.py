@@ -204,8 +204,6 @@ def index(request):
 
                 if query.count() == n_reviews:
                     r_actuals = list(query)
-
-
                 else:
 
                     # We need to create and append a few more reviews here
@@ -232,6 +230,9 @@ def index(request):
 
                             logger.debug('Created: ' + str(next_sub))
 
+                # Now we have the peer review ojects: ``r_actual``
+
+
             # STEP 3: after the time when feedback is available?
             # Code her to display the results
 
@@ -239,7 +240,8 @@ def index(request):
             #form = UploadFileForm()
             ctx = {'person': person_or_error,
                    'course': course,
-                   'pr': pr
+                   'pr': pr,
+                   'r_actuals': r_actuals,
                    }
             return render(request, 'review/welcome.html', ctx)#, {'form': form})
 

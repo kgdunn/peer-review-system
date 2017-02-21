@@ -1,7 +1,6 @@
 TO DO
 ======
 
-Switch to Postgres database
 Figure out template footer/header
 Convert submissions to PDFs
 Create Rubric data structure and display it in the browser
@@ -11,7 +10,8 @@ Set nice columns in AdminDB to display details
 
 Turn DEBUG off
 
-Dump database
+# Handle the case when a Person suddenly switches role:
+# We don't expect that, and want to prevent POST hijacking.
 
 
 
