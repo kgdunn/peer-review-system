@@ -205,6 +205,7 @@ def index(request):
 
 
                 else:
+
                     # We need to create and append a few more reviews here
                     r_actuals = list(query)
 
@@ -226,11 +227,7 @@ def index(request):
 
                         r_actuals.append(r_actual)
 
-
-
-
-
-
+                        logger.debug('Created: ' + str(next_sub))
 
             # STEP 3: after the time when feedback is available?
             # Code her to display the results
