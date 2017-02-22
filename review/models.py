@@ -230,8 +230,13 @@ class RubricActual(models.Model):
     """
     The actual rubric: one instance per learner per submission.
     """
+    STATUS = (('A', 'Assigned to grader'),
+              ('P', 'Progressing...'),
+              ('C', 'Completed'))
+
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=2, default='A')
     submitted = models.BooleanField(default=False,
         help_text='Has been completed reviewed AND submitted by peer grader.')
     graded_by = models.ForeignKey(Person)

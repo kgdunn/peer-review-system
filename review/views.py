@@ -114,7 +114,11 @@ def get_next_submission_to_evaluate(pr, learner):
 
     Principle:
     * see if there is already a submission allocated for this learner: return
-    * get the submissions with the least peer reviews ASSIGNED (not completed),
+    * get the submissions sorted from lowest to highest number of COMPELTED
+      reviews, and then sort from lowest to highest number of peer reviews
+      ASSIGNED (not completed). So at the top of the list will be submissions
+      with the least completions and assigns:
+
       but exclude:
         ** 1. submissions that are not complete (status='N')
         ** 2. submissions that are peer reviewed already (status='F')
@@ -126,7 +130,8 @@ def get_next_submission_to_evaluate(pr, learner):
 
     r_actual = RubricActual.objects.filter(rubric_template__pr_process=pr)
 
-    valid_subs_0 = Submission.objects.all().order_by('datetime_submitted')
+    valid_subs_0 = Submission.objects.all().order_by('datetime_submitted').\
+        order_by('number_reviews_completed')
 
     # Exclusion 1 and 2
     valid_subs_1_2 = valid_subs_0.exclude(status='N').exclude(status='F')
@@ -327,18 +332,25 @@ def submit_peer_review_feedback(request, ractual_code):
             for option in prior_options_submitted:
                 option.delete()
 
-            # Then set the new value
+            # Then set the "submitted" field on each OPTION
             ROptionActual.objects.get_or_create(roption_template=r_opt_template,
                                             ritem_actual=items[item_number][0],
                                             submitted=True)
 
-            # Set the RItemActual.submitted = True
+            # Set the RItemActual.submitted = True for this ITEM
             items[item_number][0].submitted = True
             items[item_number][0].save()
 
+    # And once we have processed all options and all items, we can also:
+    r_actual.submitted = True
+    r_actual.save()
 
+    # And also mark the submission as having one extra submission:
+    r_actual.submission.number_reviews_completed += 1
+    r_actual.status = 'Completed'
+    r_actual.submission.save()
 
-    return HttpResponse(('Thank you. Your review has successfully been '
+    return HttpResponse(('Thank you. Your review has been successfully '
                          'received. You still have to complete ___ reviews.'))
 
 def manual_create_uploads(request):
