@@ -245,7 +245,8 @@ class RubricActual(models.Model):
     unique_code = models.CharField(max_length=16, editable=False, blank=True)
 
     def save(self, *args, **kwargs):
-        self.unique_code = generate_random_token(token_length=16)
+        if not(self.unique_code):
+            self.unique_code = generate_random_token(token_length=16)
         super(RubricActual, self).save(*args, **kwargs) # Call the "real" save()
 
     def __str__(self):

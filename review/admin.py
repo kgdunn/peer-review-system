@@ -19,8 +19,8 @@ class RItemActualAdmin(admin.ModelAdmin):
                     "created", "modified",)
 
 class RubricActualAdmin(admin.ModelAdmin):
-    list_display = ("created", "modified", "submitted", "graded_by",
-                    "submission", "unique_code",)
+    list_display = ("submitted", "status", "graded_by", "submission",
+                    "unique_code", "created", "modified")
 
 class ROptionActualAdmin(admin.ModelAdmin):
     list_display = ("roption_template", "ritem_actual", "submitted",

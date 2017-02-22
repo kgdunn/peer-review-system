@@ -153,6 +153,21 @@ def get_next_submission_to_evaluate(pr, learner):
     else:
         return valid_subs[0]
 
+
+def get_n_reviews(learner, pr):
+    """
+    How many reviews are required for this ``learner`` for this ``pr``?
+    """
+    if learner.role == 'Learn':
+        n_reviews = pr.number_of_reviews_per_learner
+    else:
+        # Administrators/TAs can have unlimited number of reviews
+        n_reviews = Submission.objects.filter(pr_process=pr,
+                                                  is_valid=True).count()
+
+    return n_reviews
+
+
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
@@ -189,15 +204,7 @@ def index(request):
                 # the N ``RubricActual`` instances
 
                 r_actuals = [] # this what we want to fill
-
-                if learner.role == 'Learn':
-                    n_reviews = pr.number_of_reviews_per_learner
-                else:
-                    # Administrators/TAs can have unlimited number of reviews
-                    n_reviews = Submission.objects.filter(pr_process=pr,
-                                                        is_valid=True).count()
-
-
+                n_reviews = get_n_reviews(learner, pr)
                 query = RubricActual.objects.filter(graded_by = learner,
                         rubric_template = pr.rubrictemplate).order_by('created')
 
@@ -262,7 +269,7 @@ def get_learner_details(ractual_code):
     if r_actual.count() == 0:
         return HttpResponse(("You have an incorrect link. Either something "
                              "is broken in the peer review website, or you "
-                             "removed/changed part of the link."))
+                             "removed/changed part of the link.")), None
     r_actual = r_actual[0]
     learner = r_actual.graded_by
     return r_actual, learner
@@ -281,6 +288,9 @@ def review(request, ractual_code):
     5. Process the storing and saving of the objects
     """
     r_actual, learner = get_learner_details(ractual_code)
+    if learner is None:
+        # This branch only happens with error conditions.
+        return r_actual
     r_item_actuals = r_actual.ritemactual_set.all()
     for item in r_item_actuals:
         item_template = item.ritem_template
@@ -343,15 +353,24 @@ def submit_peer_review_feedback(request, ractual_code):
 
     # And once we have processed all options and all items, we can also:
     r_actual.submitted = True
+    r_actual.status = 'C' # completed
     r_actual.save()
 
     # And also mark the submission as having one extra submission:
     r_actual.submission.number_reviews_completed += 1
-    r_actual.status = 'Completed'
+    r_actual.submission.status = 'G' # in progress
     r_actual.submission.save()
 
+    # Reviews to still complete by this learner:
+    n_graded_already = RubricActual.objects.filter(graded_by=learner,
+                                                   status='C').count()
+    pr = r_actual.rubric_template.pr_process
+    n_to_do = max(0, get_n_reviews(learner, pr) - n_graded_already)
+
     return HttpResponse(('Thank you. Your review has been successfully '
-                         'received. You still have to complete ___ reviews.'))
+                         'received. You still have to complete {0} review(s).'
+                         '<br>You may close this tab/window, and return back.'
+                         '').format(n_to_do,))
 
 def manual_create_uploads(request):
     """
