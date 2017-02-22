@@ -87,11 +87,12 @@
 <div id="header">
     <h2>Hello {{person.full_name}}!</h2>
 
-    <p>You are reviewing one of your peers. The document to review is shown below.
-    <p>If you do not see any document then you should
+    <p>You are reviewing one of your peers. The work you are required to review is shown below.
+    <p>If you do not see any document then you should please 
     <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>,
     and then continue to review it here.
 </div>
+
 <div class="colmask rightmenu">
     <div class="colleft">
         <div class="col1">
@@ -102,13 +103,15 @@
             </object>
             <!-- Column 1 end -->
         </div>
-        <div class="col2" style="overflow:scroll">
+        <div class="col2" style=" padding : 4px; height : 80%; overflow : auto; ">
             <!-- Column 2 start -->
 
 
             {{rubric.general_instructions}}
-
-
+	   	
+	    <br>
+	    Assess the work based on these criterion. Submit your review when complete.
+	    <hr>		
 
             {# alternating colours | radio buttons aligned and indented #}
             {% for item in r_item_actuals %}
