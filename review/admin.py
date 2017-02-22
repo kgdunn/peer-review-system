@@ -22,6 +22,9 @@ class RubricActualAdmin(admin.ModelAdmin):
     list_display = ("created", "modified", "submitted", "graded_by",
                     "submission", "unique_code",)
 
+class ROptionActualAdmin(admin.ModelAdmin):
+    list_display = ("roption_template", "ritem_actual", "submitted",
+                    "comment", "created", "modified")
 
 
 admin.site.register(Person, PersonAdmin)
@@ -32,7 +35,7 @@ admin.site.register(Submission, SubmissionAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)
 admin.site.register(RItemTemplate)
-admin.site.register(ROptionActual)
+admin.site.register(ROptionActual, ROptionActualAdmin)
 admin.site.register(ROptionTemplate)
 admin.site.register(RubricActual, RubricActualAdmin)
 admin.site.register(RubricTemplate)

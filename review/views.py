@@ -303,16 +303,14 @@ def submit_peer_review_feedback(request, ractual_code):
     logger.debug("Submitted: " + str(request.POST))
     r_actual, learner = get_learner_details(ractual_code)
     r_item_actuals = r_actual.ritemactual_set.all()
+    r_item_actuals
     items = {}
-
-    # RItemActual.submitted = True
-
 
     # Dict: items[0] = list of the OPTIONS in the item (for that criterion)
     for item in r_item_actuals:
         item_template = item.ritem_template
-        items[item_template.order] = \
-               item_template.roptiontemplate_set.all().order_by('order')
+        items[item_template.order] = (item,
+               item_template.roptiontemplate_set.all().order_by('order'))
 
     # Stores the users selections as "ROptionActual" instances
     for key, value in request.POST.items():
@@ -321,20 +319,22 @@ def submit_peer_review_feedback(request, ractual_code):
             item_number = int(key.split('item-')[1])
             selected = int(value.split('option-')[1])
 
-            # If necessary, 'unsubmitted' prior submissions for the same
-            # item.
-            r_opt_template = items[item_number][selected-1]  # "-1" is critical
-            prior_options_submitted = ROptionActual.objects.filter(\
-
-                       graded_by=learner)
+            # If necessary, prior submissions for the same option are adjusted
+            # as being .submitted=False (perhaps the user changed their mind)
+            r_opt_template = items[item_number][1][selected-1]  # "-1" is critical
+            prior_options_submitted = ROptionActual.objects.filter(
+                ritem_actual=items[item_number][0])
             for option in prior_options_submitted:
-                option.submitted = False
-                option.save()
+                option.delete()
 
             # Then set the new value
-
             ROptionActual.objects.get_or_create(roption_template=r_opt_template,
-                                                submitted=True)
+                                            ritem_actual=items[item_number][0],
+                                            submitted=True)
+
+            # Set the RItemActual.submitted = True
+            items[item_number][0].submitted = True
+            items[item_number][0].save()
 
 
 

@@ -327,12 +327,10 @@ class ROptionActual(models.Model):
           we will not create an "ROptionActual" for each ROptionTemplate,
           only one ROptionActual is created.
           If the user changes their mind, old ROptionActuals are deleted.
-
     """
     roption_template = models.ForeignKey(ROptionTemplate)
     ritem_actual = models.ForeignKey(RItemActual, null=True)
-    #graded_by = models.ForeignKey(Person, null=True)
-    comment = models.TextField(max_length='', blank=True)
+    comment = models.TextField(blank=True)
     submitted = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
