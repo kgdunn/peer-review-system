@@ -306,10 +306,10 @@ def submit_peer_review_feedback(request, ractual_code):
     # &item-4=option-1'
     #{'item-2': ['option-2'], 'BnWzeExf4VgnF3EJ': ['Submit your review'], 'item-1': ['option-1'], 'csrfmiddlewaretoken': ['1VM9ZM4CdEVQ4gD7AVoZi9V8PQUHyVOTVxHt74qwjUMWchH5o3UL3xk98g7mr9qt'], 'item-3': ['option-3'], 'item-4': ['option-2']}
 
-    for key, value in request.POST.items():
-        if key.startswith('item-'):
-            item_number = int(key.split('item-')[1])
-            selected = int(value.split('option-')[1])
+    #for key, value in request.POST.items():
+        #if key.startswith('item-'):
+            #item_number = int(key.split('item-')[1])
+            #selected = int(value.split('option-')[1])
 
 
 
