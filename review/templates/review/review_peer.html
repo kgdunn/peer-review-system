@@ -32,10 +32,10 @@
 }
 /* column container */
 .colmask {
-    position:relative;	/* This fixes the IE7 overflow hidden bug */
+    position:relative;	    /* This fixes the IE7 overflow hidden bug */
     clear:both;
     float:left;
-    width:100%;			/* width of whole page */
+    width:100%;			    /* width of whole page */
     overflow:hidden;		/* This chops off any overhanging divs */
 }
 /* common column settings */
@@ -59,16 +59,16 @@
     background:#eee;		/* right column background colour */
 }
 .rightmenu .colleft {
-    right:25%;			    /* right column width */
+    right:35%;			    /* right column width */
     background:#fff;		/* left column background colour */
 }
 .rightmenu .col1 {
-    width:71%;			    /* left column content width (left column width minus left and right padding) */
-    left:27%;			    /* (right column width) plus (left column left padding) */
+    width:61%;			    /* 61: left column content width (left column width minus left and right padding) */
+    left:35%;			    /* 35+2(right column width) plus (left column left padding) */
 }
 .rightmenu .col2 {
-    width:21%;			    /* right column content width (right column width minus left and right padding) */
-    left:31%;			    /* (right column width) plus (left column left and right padding) plus (right column left padding) */
+    width:35%;			    /* 35-2-2: right column content width (right column width minus left and right padding) */
+    left:35%;			    /* 35+(2+1)+1: (right column width) plus (left column left and right padding) plus (right column left padding) */
 }
 /* Footer styles */
 #footer {
