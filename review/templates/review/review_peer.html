@@ -119,7 +119,7 @@
 
 				<fieldset id="item-{{item.ritem_template.order}}">
 				{# Criterion is given here #}
-                {{item.ritem_template.order}}. {{item.ritem_template.criterion|safe}} (<b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)
+                {{item.ritem_template.order}}. {{item.ritem_template.criterion|safe}} (maximum score: <b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)
 
                 {% for option in item.options %}
                     <div class="radio">

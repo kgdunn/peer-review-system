@@ -1,7 +1,14 @@
 TO DO
 ======
 
+Replicate the infrastructore on Webfaction
+After cut-off time show calculation of their grades
 Get the HTML formating of the criterion text to look good.
+Verify that the text is the same
+Provide overall feedback box for students to fill in. If you struggle with interpretation
+then ....
+
+"Waste equals Food" or "Waste is Designed out" (3 points)" -> Waste equals Food" or "Waste is Designed out" (max: 3/3 points)
 Alternating colours | radio buttons aligned and indented in rubric
 Process results of evaluations to display back to students
 
@@ -10,21 +17,17 @@ Distinction in instructor vs student view: show names, current allocations
 Convert submissions to PDFs
 
 
-Nice to add
-===========
+Before the run:
+----
+Reduce memory for yint
+Reduce memory for rsmopt
 
-Statistics for duration of review
-
-
-Submission steps:
-* If the submission time is prior to the deadline, allow a new submission
-* Indicate if prior submissions are found (dimmer colour)
-* If past deadline: indicate that a new submisison cannot be allowed
-* Once submitted, send an email with confirmation to group/learner
-  -> should indicate when to return to start with the review process.
+During the run:
+----
+Track linode stats
+Run htop
 
 
-* Update datastructure on the group addition?
 
 Review process
 ==============
