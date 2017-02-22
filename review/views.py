@@ -292,7 +292,7 @@ def review(request, ractual_code):
 
 @csrf_exempt
 @xframe_options_exempt
-def submit_feedback(request, ractual_code):
+def submit_peer_review_feedback(request, ractual_code):
     """
     Learner is submitting the results of their evaluation.
     """
@@ -304,9 +304,10 @@ def submit_feedback(request, ractual_code):
     # &item-2=option-2
     # &item-3=option-1
     # &item-4=option-1'
+    logger.debug("Submitted: " + str(request.POST))
     r_actual, learner = get_learner_details(ractual_code)
 
-    logger.debug("Submitted: " + str(request))
+
     return HttpResponse(('Thank you. Your review has successfully been '
                          'received. You still have to complete ___ reviews.'))
 

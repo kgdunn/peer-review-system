@@ -11,9 +11,9 @@ urlpatterns = [
     url(r'^manual_create_uploads/$', views.manual_create_uploads,
         name='manual_create_uploads'),
 
-    url(r'^submit-feedback/(?P<ractual_code>.+)$',
-        views.submit_feedback,
-        name='submit_feedback')
+    url(r'^submit-peer-review-feedback/(?P<ractual_code>.+)$',
+        views.submit_peer_review_feedback,
+        name='submit_peer_review_feedback')
 ]
 
 """
