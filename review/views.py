@@ -307,7 +307,8 @@ def submit_feedback(request, ractual_code):
     r_actual, learner = get_learner_details(ractual_code)
 
     logger.debug("Submitted: " + str(request))
-    return HttpResponse('Submitted OK')
+    return HttpResponse(('Thank you. Your review has successfully been '
+                         'received. You still have to complete ___ reviews.'))
 
 def manual_create_uploads(request):
     """

@@ -1,12 +1,13 @@
 TO DO
 ======
 
-Convert submissions to PDFs
+Get the HTML formating of the criterion text to look good.
 Alternating colours | radio buttons aligned and indented in rubric
 Process results of evaluations to display back to students
 
-
-
+Show review as being completed in the browser
+Distinction in instructor vs student view: show names, current allocations
+Convert submissions to PDFs
 
 
 Nice to add
