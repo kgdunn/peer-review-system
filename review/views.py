@@ -17,8 +17,6 @@ import logging
 logger = logging.getLogger(__name__)
 logger.debug('A new call to the views.py file')
 
-
-
 # SECURITY ISSUES
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
 # Brightspace: https://github.com/open-craft/django-lti-tool-provider
@@ -50,7 +48,6 @@ def starting_point(request):
         return person, course, pr
     else:
         return HttpResponse(("You are not registered in this course."))
-
 
 def get_create_student(request):
     """
@@ -105,8 +102,6 @@ def create_items(r_actual):
                                     as_displayed = '')
         r_item_actual.save()
 
-
-
 def get_next_submission_to_evaluate(pr, learner):
     """
     Gets the single next peer review submission for the approapriate peer review
@@ -153,7 +148,6 @@ def get_next_submission_to_evaluate(pr, learner):
     else:
         return valid_subs[0]
 
-
 def get_n_reviews(learner, pr):
     """
     How many reviews are required for this ``learner`` for this ``pr``?
@@ -186,8 +180,19 @@ def index(request):
             learner = person_or_error
             now_time = datetime.datetime.now()
 
+            allow_submit = False
+            allow_review = False
+            allow_report = False
+            r_actuals = []       # we want to fill this in the "review" step
+            peers = {}           # we want to fill this in the "report" step
+
             # STEP 1: prior to submission date?
             # Code here to allow submission
+
+            if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
+                and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
+                allow_submit = True
+
 
             # STEP 2: between review start and end time?
             # Code here to display the available reviews
@@ -195,6 +200,7 @@ def index(request):
 
             if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
                  and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
+                allow_review = True
 
                 # Is this the first time the learner is here: create the
                 # N = pr.number_of_reviews_per_learner rubrics for the learner
@@ -203,7 +209,7 @@ def index(request):
                 # If this is the second or subequent time here, simply return
                 # the N ``RubricActual`` instances
 
-                r_actuals = [] # this what we want to fill
+
                 n_reviews = get_n_reviews(learner, pr)
                 query = RubricActual.objects.filter(graded_by = learner,
                         rubric_template = pr.rubrictemplate).order_by('created')
@@ -245,11 +251,19 @@ def index(request):
 
             # STEP 3: after the time when feedback is available?
             # Code here to display the results
+            if (pr.dt_peer_reviews_received_back.replace(tzinfo=None) <= now_time):
+                allow_report = True
+
+                peers = get_peer_report_data(pr, learner)
 
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr,
                    'r_actuals': r_actuals,
+                   'peers': peers,
+                   'allow_submit': allow_submit,
+                   'allow_review': allow_review,
+                   'allow_report': allow_report,
                    }
             return render(request, 'review/welcome.html', ctx)
 
@@ -257,6 +271,33 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                                     "without authorization."))
 
+
+def get_peer_report_data(pr, learner):
+    """
+    Returns a ``dict`` of the peers comments for each rubric criterion. If
+    ``learner`` did not submit, then ``peers = {'n_peers': 0}``.
+
+    peers = {
+        'item-01': [3, 4, 1, 5, 7, 1],
+        'item-02': [2, 1, 4, 5, 2, 6],
+        'item-03': [2, 1, 4, 5, 2, 6],
+        'n_peers': 6,
+        'overall': 5.1,
+        'class_average': 3.4,
+    }
+    """
+    peers = {'n_peers': 0}
+    submission = Submission.objects.filter(submitted_by=learner,
+                                           pr_process=pr,
+                                           is_valid=True,
+                                           ).order_by('-datetime_submitted')[0]
+    completed_reviews = RubricActual.objects.filter(submission=submission,
+                                                    status='C')
+
+    # Get the scores from each of the completed_reviews
+
+    #peer_data = get_peer_data(learner, pr)
+    return peers
 
 def get_learner_details(ractual_code):
     """

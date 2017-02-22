@@ -103,8 +103,11 @@ class PR_process(models.Model):
                 verbose_name='Overall instructions to learners', )
 
     # Date 1: submit their work
+    dt_submissions_open_up = models.DateTimeField(
+        verbose_name='When can learners start to submit their work by', )
+
     dt_submission_deadline = models.DateTimeField(
-        verbose_name='When should learners submit their work by', )
+        verbose_name='When should learners submit their work before', )
 
     # Date 2: start reviewing their peers
     dt_peer_reviews_start_by = models.DateTimeField(
@@ -114,9 +117,10 @@ class PR_process(models.Model):
     dt_peer_reviews_completed_by = models.DateTimeField(
         verbose_name='When must learners submit their reviews by?')
 
-    # Date 4: receive the reviews back
+    # Date 4: receive the results back
     dt_peer_reviews_received_back = models.DateTimeField(
-        verbose_name='When will learners receive their reviews back?')
+        verbose_name='When will learners receive their results back?')
+
 
     # True/False settings:
     show_rubric_prior_to_submission = models.BooleanField(default=False,
@@ -179,7 +183,6 @@ class Submission(models.Model):
                    'recent submission (there might be older ones).'))
     file_upload = models.FileField(upload_to=peerreview_directory_path)
     submitted_file_name = models.CharField(max_length=255, default='')
-    models.ImageField()
 
     number_reviews_assigned = models.PositiveSmallIntegerField(default=0,
         help_text='Number of times this submission has been assigned')

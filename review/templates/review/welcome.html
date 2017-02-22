@@ -4,14 +4,15 @@
 {% block content %}
 
 <h2>Submission phase</h2>
-<p>Submission of your work is/was due on: {{pr.dt_submission_deadline|date:"l, d F Y"}} at {{pr.dt_submission_deadline|time:"H:i" }}
+<p>Submission of your work {% if allow_submit %}is{%else%}was{% endif %} due on: {{pr.dt_submission_deadline|date:"l, d F Y"}} at {{pr.dt_submission_deadline|time:"H:i" }}
 
 
 <hr>
-<h2>Review phase</h2>
+<h2>Review phase: {{pr.number_of_reviews_per_learner}} peer reviews required</h2>
 <p>Start date and time for this review: {{pr.dt_peer_reviews_start_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_start_by|time:"H:i" }}
 <p>You must complete <b>and submit</b> the review before: {{pr.dt_peer_reviews_completed_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_completed_by|time:"H:i" }}
 
+{% if allow_review %}
 <div id="accordion" role="tablist" aria-multiselectable="true">
   <div class="card">
 {% for item in r_actuals %}
@@ -33,13 +34,20 @@
 {% endfor %}
   </div>
 </div>
-
+{% else %}
+<p>The review stage has passed. No further reviews can be completed.
+{% endif %}
 
 <hr>
 <h2>Feedback phase</h2>
-Feedback from your peers will be available: {{pr.dt_peer_reviews_received_back|date:"l, d F Y"}} at {{pr.dt_peer_reviews_received_back|time:"H:i" }}
+Feedback from your peers is available after: {{pr.dt_peer_reviews_received_back|date:"l, d F Y"}} at {{pr.dt_peer_reviews_received_back|time:"H:i" }}
 
-You were evaluated by ___ peers. Their comments and feedback are available in anonymized, randomized order.
+{% if allow_report %}
+{% if peers.n_peers == 0 %}
+<p>There is no feedback, as you did submit work for the peer review.
+{% else %}
+
+You were evaluated by __{{peers|length}}__ peers. Their comments and feedback are available in anonymized, randomized order.
 <br>
 Score for criterion 1: _________ (max: 3 points)
 <br>
@@ -53,6 +61,8 @@ Overall score: _________ (max: 12 points)
 <br>
 Comments from your peers: _________
 <br>
+{% endif %} {# peers.n_peers == 0 #}
+{% endif %} {# allow_report #}
 
 {% endblock %}
 
