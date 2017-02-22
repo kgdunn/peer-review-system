@@ -95,7 +95,7 @@ def create_items(r_actual):
     """Creates the items (rows) associated with an actual rubric"""
 
     r_template = r_actual.rubric_template
-    r_items = RItemTemplate.objects.filter(rubric=r_template).order_by('order')
+    r_items = RItemTemplate.objects.filter(r_template=r_template).order_by('order')
 
     for r_item in r_items:
         r_item_actual = RItemActual(ritem_template = r_item,
@@ -245,7 +245,8 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                                     "without authorization."))
 
-
+@csrf_exempt
+@xframe_options_exempt
 def review(request, ractual_code):
     """
     From the unique URL
@@ -265,8 +266,21 @@ def review(request, ractual_code):
     r_actual = r_actual[0]
     learner = r_actual.graded_by
 
+    #RItemActual.objects.filter
+
+    #rubric = models.ForeignKey(RubricTemplate)
+    #comment_required = models.BooleanField(default=False)
+    #order = models.IntegerField()
+    #criterion = models.TextField(help_text=('The prompt/criterion for the row '
+                                            #'in the rubric'))
+    #max_score = models.FloatField(help_text='Highest score achievable here')
+
+
+
+
     ctx = {'submission': r_actual.submission,
            'person': r_actual.graded_by,
+           'r_actual': r_actual,
            }
     return render(request, 'review/review_peer.html', ctx)
 
@@ -285,7 +299,9 @@ def manual_create_uploads(request):
     pr_process = PR_process.objects.filter(id=1)[0]
 
     classlist = {}
-    with open('/home/kevindunn/IO3075-classlist.csv', 'rt') as csvfile:
+    classlist_CSV = '/home/kevindunn/IO3075-classlist.csv'
+    classlist_CSV = '/Users/kevindunn/DELETE/IO3075-classlist.csv'
+    with open(classlist_CSV, 'rt') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             print(row)
@@ -293,6 +309,9 @@ def manual_create_uploads(request):
             classlist[row[2] + ' ' + row[1]] = [row[2], row[3]]
 
     folder = '/home/kevindunn/allsub/'
+    level_deep = 4
+    folder = '/Users/kevindunn/DELETE/allsub/'
+    level_deep = 5
 
     for root, dirs, files in os.walk(folder):
         logger.debug(root)
@@ -300,7 +319,7 @@ def manual_create_uploads(request):
 
             # Only import PDF files
 
-            student_folder = root.split(os.sep)[4]
+            student_folder = root.split(os.sep)[level_deep]
             student_name = student_folder.split('-')[2].strip()
             student = classlist[student_name]
 
@@ -322,6 +341,7 @@ def manual_create_uploads(request):
             ip_address = '0.0.0.0'
 
             base_dir = '/var/www/peer/documents'
+            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
             copyfile(filename, base_dir + os.sep + submitted_file_name)
 
             sub = Submission(submitted_by = learner,

@@ -7,11 +7,11 @@
 body {
     margin:0;
     padding:0;
-    border:0;			/* This removes the border around the viewport in old versions of IE */
+    border:0;			    /* This removes the border around the viewport in old versions of IE */
     width:100%;
     background:#fff;
     min-width:600px;    	/* Minimum width of layout - remove line if not required */
-                    /* The min-width property does not work in old versions of Internet Explorer */
+                            /* The min-width property does not work in old versions of Internet Explorer */
     font-size:90%;
 }
 a {
@@ -135,12 +135,12 @@ img {
     background:#fff;		/* left column background colour */
 }
 .rightmenu .col1 {
-    width:71%;			/* left column content width (left column width minus left and right padding) */
-    left:27%;			/* (right column width) plus (left column left padding) */
+    width:71%;			    /* left column content width (left column width minus left and right padding) */
+    left:27%;			    /* (right column width) plus (left column left padding) */
 }
 .rightmenu .col2 {
-    width:21%;			/* right column content width (right column width minus left and right padding) */
-    left:31%;			/* (right column width) plus (left column left and right padding) plus (right column left padding) */
+    width:21%;			    /* right column content width (right column width minus left and right padding) */
+    left:31%;			    /* (right column width) plus (left column left and right padding) plus (right column left padding) */
 }
 /* Footer styles */
 #footer {
@@ -177,13 +177,25 @@ img {
         <div class="col2" style="overflow:scroll">
             <!-- Column 2 start -->
 
-            RUBRIC GOES HERE
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui.
+            {#rubric.general_instructions
 
-Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia.
+            {% for item in r_item_actuals %}
+            item.number
+            item.criterion
+            item.max_score
 
-Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi.
+            item.actual.as_displayed
+            <hr>
+            {% endfor %} #}
 
+            1. 'Waste equals Food' or 'Waste is Designed out' (max: <b>3 points</b>)<br>
+
+            <input type="radio" name="gender" value="male" checked> There is no explanation given of why (or why not) the product fits this principle. (<b>1 point</b>)<br>
+
+            <input type="radio" name="gender" value="female"> There is an explanation, but the principle has been misunderstood or the explanation misses important points.
+For example, the prevention of waste is mentioned as a way for the product to remain ‘food’. (<b>2 points</b>)<br>
+
+            <input type="radio" name="gender" value="other"> The example illustrates that attempts have been made to drastically reduce waste. Or, the product is an example of (the potential for) reuse in the same or in a different cycle. If the principle isn’t fully applicable, valid reasons are given. (<b>3 points</b>)
 
             <!-- Column 2 end -->
         </div>

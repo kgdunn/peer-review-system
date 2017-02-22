@@ -15,7 +15,8 @@ class SubmissionAdmin(admin.ModelAdmin):
                     "number_reviews_completed", "datetime_submitted")
 
 class RItemActualAdmin(admin.ModelAdmin):
-    list_display = ("submitted", "comment", "created", "modified",)
+    list_display = ("ritem_template", "submitted", "comment",
+                    "created", "modified",)
 
 class RubricActualAdmin(admin.ModelAdmin):
     list_display = ("created", "modified", "submitted", "graded_by",

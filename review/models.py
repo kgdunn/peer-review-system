@@ -216,6 +216,8 @@ class RubricTemplate(models.Model):
     pr_process = models.OneToOneField(PR_process, on_delete=models.CASCADE,
                                       primary_key=True)
 
+    general_instructions = models.TextField(default='')
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.title, 'slug')
         super(RubricTemplate, self).save(*args, **kwargs) # Call the "real" save()
@@ -252,7 +254,7 @@ class RItemTemplate(models.Model):
     An item corresponds to a criterion, and the peers will select an option,
     and also (probably) comment on the criterion.
     """
-    rubric = models.ForeignKey(RubricTemplate)
+    r_template = models.ForeignKey(RubricTemplate)
     comment_required = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
