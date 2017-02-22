@@ -1,6 +1,7 @@
 TO DO
 ======
 
+After cut-off time show calculation of their grades
 Get the HTML formating of the criterion text to look good.
 Alternating colours | radio buttons aligned and indented in rubric
 Process results of evaluations to display back to students
