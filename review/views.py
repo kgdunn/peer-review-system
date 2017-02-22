@@ -278,7 +278,8 @@ def review(request, ractual_code):
 
 
 
-    ctx = {'submission': r_actual.submission,
+    ctx = {'ractual_code': ractual_code,
+           'submission': r_actual.submission,
            'person': r_actual.graded_by,
            'r_actual': r_actual,
            }
