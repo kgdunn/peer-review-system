@@ -1,30 +1,19 @@
 TO DO
 ======
 
-Figure out template footer/header
 Convert submissions to PDFs
-Create Rubric data structure and display it in the browser
-Use foreign characters in the text
-Set nice columns in AdminDB to display details
-
-
-Turn DEBUG off
-
-# Handle the case when a Person suddenly switches role:
-# We don't expect that, and want to prevent POST hijacking.
+Alternating colours | radio buttons aligned and indented in rubric
+Process results of evaluations to display back to students
 
 
 
-First time
+
+
+Nice to add
 ===========
-* Get the POST details
-* Create the learner account, filling in Person instance: name and email
-* Redirect learner to their unique ID site
 
+Statistics for duration of review
 
-* Get the course PR item (resource_link_title) and retrieve the PR_process
-  based on the ``LTI_title``.
-* Add the learners in an intersection datatable: Course * Person * Group
 
 Submission steps:
 * If the submission time is prior to the deadline, allow a new submission
@@ -42,8 +31,6 @@ Review process
 New user: create user in this course
 Show the next reviews to complete
 Set up the rubric when the review is actually started
-
-{{item.submission.file_upload.url}}
 
 New user:
 * done: Find the PR
@@ -87,6 +74,7 @@ I need a way to allocate reviews to a learner.
     * has not already been seen by the reviewer
     * that has the lowest number of allocations so far
 
+* Handle self-review still
 
 
 """

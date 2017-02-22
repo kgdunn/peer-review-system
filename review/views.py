@@ -245,6 +245,24 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                                     "without authorization."))
 
+
+def get_learner_details(ractual_code):
+    """
+    Verifies the learner is genuine.
+    Returns: r_actual (an instance of ``RubricActual``)
+             learner  (an instance of ``Person``)
+    """
+    logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
+    r_actual = RubricActual.objects.filter(unique_code=ractual_code)
+    if r_actual.count() == 0:
+        return HttpResponse(("You have an incorrect link. Either something "
+                             "is broken in the peer review website, or you "
+                             "removed/changed part of the link."))
+    r_actual = r_actual[0]
+    learner = r_actual.graded_by
+    return r_actual, learner
+
+
 @csrf_exempt
 @xframe_options_exempt
 def review(request, ractual_code):
@@ -257,37 +275,11 @@ def review(request, ractual_code):
     4. Capture submit signal
     5. Process the storing and saving of the objects
     """
-    logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
-    r_actual = RubricActual.objects.filter(unique_code=ractual_code)
-    if r_actual.count() == 0:
-        return HttpResponse(("You have an incorrect link. Either something "
-                             "is broken in the peer review website, or you "
-                             "removed/changed part of the link."))
-    r_actual = r_actual[0]
-    learner = r_actual.graded_by
-
+    r_actual, learner = get_learner_details(ractual_code)
     r_item_actuals = r_actual.ritemactual_set.all()
     for item in r_item_actuals:
         item_template = item.ritem_template
         item.options = ROptionTemplate.objects.filter(rubric_item=item_template)
-
-
-
-
-
-    #rubric = models.ForeignKey(RubricTemplate)
-    #comment_required = models.BooleanField(default=False)
-    #order = models.IntegerField()
-    #criterion = models.TextField(help_text=('The prompt/criterion for the row '
-                                            #'in the rubric'))
-    #max_score = models.FloatField(help_text='Highest score achievable here')
-
-#r_item_actuals <-- QuerySet
-#r_item_actuals.number
-#r_item_actuals.criterion
-#r_item_actuals.max_score
-#r_item_actuals.options <-- dict
-
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
@@ -298,11 +290,24 @@ def review(request, ractual_code):
            }
     return render(request, 'review/review_peer.html', ctx)
 
-def submit_feedback(request):
+@csrf_exempt
+@xframe_options_exempt
+def submit_feedback(request, ractual_code):
     """
+    Learner is submitting the results of their evaluation.
     """
+    # 1. Check that this is POST
+    # 2. Create OptionActuals
+    # 3. Calculate score for evaluations?
+
+    # &item-1=option-2
+    # &item-2=option-2
+    # &item-3=option-1
+    # &item-4=option-1'
+    r_actual, learner = get_learner_details(ractual_code)
+
     logger.debug("Submitted: " + str(request))
-    return HttpResponse('Submitted')
+    return HttpResponse('Submitted OK')
 
 def manual_create_uploads(request):
     """
