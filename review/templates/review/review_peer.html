@@ -114,7 +114,7 @@
 	    <br>
 	    Assess the work based on these criterion. Submit your review when complete.
 	    <hr>
-			<form action="{% url 'submit-feedback' course_code_slug=course question_set_slug=qset %}" method="GET" enctype="multipart/form-data">{% csrf_token %}
+			<form action="{% url 'submit_feedback' %}" method="GET" enctype="multipart/form-data">{% csrf_token %}
 				<input type="submit" name="{{ractual_code}}" value="Submit your review">
 
 

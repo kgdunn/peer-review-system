@@ -298,6 +298,11 @@ def review(request, ractual_code):
            }
     return render(request, 'review/review_peer.html', ctx)
 
+def submit_feedback(request):
+    """
+    """
+    logger.debug("Submitted: " + str(request))
+    return HttpResponse('Submitted')
 
 def manual_create_uploads(request):
     """

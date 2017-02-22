@@ -8,6 +8,8 @@ urlpatterns = [
 
     url(r'^manual_create_uploads/$', views.manual_create_uploads,
         name='manual_create_uploads'),
+
+    url(r'^submit-feedback$', views.submit_feedback, name='submit_feedback')
 ]
 
 """
