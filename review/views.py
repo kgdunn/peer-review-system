@@ -300,12 +300,40 @@ def submit_peer_review_feedback(request, ractual_code):
     # 2. Create OptionActuals
     # 3. Calculate score for evaluations?
 
-    # &item-1=option-2
-    # &item-2=option-2
-    # &item-3=option-1
-    # &item-4=option-1'
     logger.debug("Submitted: " + str(request.POST))
     r_actual, learner = get_learner_details(ractual_code)
+    r_item_actuals = r_actual.ritemactual_set.all()
+    items = {}
+
+    # RItemActual.submitted = True
+
+
+    # Dict: items[0] = list of the OPTIONS in the item (for that criterion)
+    for item in r_item_actuals:
+        item_template = item.ritem_template
+        items[item_template.order] = \
+               item_template.roptiontemplate_set.all().order_by('order')
+
+    # Stores the users selections as "ROptionActual" instances
+    for key, value in request.POST.items():
+        if key.startswith('item-'):
+            item_number = int(key.split('item-')[1])
+            selected = int(value.split('option-')[1])
+
+            # If necessary, 'unsubmitted' prior submissions for the same
+            # item.
+            r_opt_template = items[item_number][selected-1]  # "-1" is critical
+            prior_options_submitted = ROptionActual.objects.filter(\
+                       roption_template=r_opt_template, submitted=True)
+            for option in prior_options_submitted:
+                option.submitted = False
+                option.save()
+
+            # Then set the new value
+
+            ROptionActual.objects.get_or_create(roption_template=r_opt_template,
+                                                submitted=True)
+
 
 
     return HttpResponse(('Thank you. Your review has successfully been '

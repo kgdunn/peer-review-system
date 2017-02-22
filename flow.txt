@@ -1,10 +1,19 @@
 TO DO
 ======
 
-Replicate the infrastructore on Webfaction
+Add remaining DOC -> PDFs
+Add textfield for feedback
+Colour coded background from criterion and the options
+Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
+Clear workflow for the next step after the review is submitted.
+Allow resubmissions.
+Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
+
+
+Replicate the infrastructore on Webfaction
 Get the HTML formating of the criterion text to look good.
-Verify that the text is the same
+Verify that the text is the same as tge rubric
 Provide overall feedback box for students to fill in. If you struggle with interpretation
 then ....
 
@@ -14,7 +23,12 @@ Process results of evaluations to display back to students
 
 Show review as being completed in the browser
 Distinction in instructor vs student view: show names, current allocations
-Convert submissions to PDFs
+
+
+Track review text and selections immediately in the database
+Allow multiple attempts for the review, until the cut-off point is reached.
+
+
 
 
 Before the run:

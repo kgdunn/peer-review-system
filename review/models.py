@@ -330,10 +330,12 @@ class ROptionActual(models.Model):
 
     """
     roption_template = models.ForeignKey(ROptionTemplate)
-    #comment = models.CharField(maxdefault='', blank=True)
-    # usually not evaluated to this depth
-
+    graded_by = models.ForeignKey(Person, null=True)
+    comment = models.TextField(max_length='', blank=True)
     submitted = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return u'%s' % (self.roption_template, )
 
