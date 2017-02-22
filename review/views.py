@@ -316,6 +316,7 @@ def submit_peer_review_feedback(request, ractual_code):
 
     # Stores the users selections as "ROptionActual" instances
     for key, value in request.POST.items():
+        # Process each item in the rubric, one at a time
         if key.startswith('item-'):
             item_number = int(key.split('item-')[1])
             selected = int(value.split('option-')[1])
@@ -324,7 +325,8 @@ def submit_peer_review_feedback(request, ractual_code):
             # item.
             r_opt_template = items[item_number][selected-1]  # "-1" is critical
             prior_options_submitted = ROptionActual.objects.filter(\
-                       roption_template=r_opt_template, submitted=True)
+
+                       graded_by=learner)
             for option in prior_options_submitted:
                 option.submitted = False
                 option.save()
