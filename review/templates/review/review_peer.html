@@ -104,37 +104,25 @@
         </div>
         <div class="col2" style="overflow:scroll">
             <!-- Column 2 start -->
-            Does the product fit the 4 Circular Economy principles, and why (or why not)? Assess it based on these 4 principles:
 
-            {#rubric.general_instructions #}
 
-            {# for item in r_item_actuals #}
-            {#
-            alternating colours | radio buttons aligned and indented
-            item.number
-            item.criterion
-            item.max_score
+            {{rubric.general_instructions}}
 
-            item.actual.as_displayed
-            #}
+
+
+            {# alternating colours | radio buttons aligned and indented #}
+            {% for item in r_item_actuals %}
+
+                {{item.ritem_template.order}}. {{item.ritem_template.criterion}} (<b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)
+
+                {% for option in item.options %}
+                    <div class="radio">
+                        <label><input type="radio" name="item-{{item.ritem_template.number}}" value="option-{{option.order}}">{{option.criterion}} (<b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>)</label>
+                    </div>
+                {% endfor %}
             <hr>
-            {# endfor #}
+            {% endfor %}
 
-            1. 'Waste equals Food' or 'Waste is Designed out' (max: <b>3 points</b>)<br>
-
-
-            <div class="radio">
-            <label><input type="radio" name="gender" value="male" checked> There is no explanation given of why (or why not) the product fits this principle. (<b>1 point</b>)</label>
-            </div>
-
-            <div class="radio">
-            <input type="radio" name="gender" value="female"> There is an explanation, but the principle has been misunderstood or the explanation misses important points.
-For example, the prevention of waste is mentioned as a way for the product to remain ‘food’. (<b>2 points</b>)</label><br>
-            </div>
-
-            <div class="radio">
-            <input type="radio" name="gender" value="other"> The example illustrates that attempts have been made to drastically reduce waste. Or, the product is an example of (the potential for) reuse in the same or in a different cycle. If the principle isn’t fully applicable, valid reasons are given. (<b>3 points</b>)</label>
-            </div>
             <!-- Column 2 end -->
         </div>
     </div>

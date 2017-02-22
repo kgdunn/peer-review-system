@@ -266,7 +266,14 @@ def review(request, ractual_code):
     r_actual = r_actual[0]
     learner = r_actual.graded_by
 
-    #RItemActual.objects.filter
+    r_item_actuals = r_actual.ritemactual_set.all()
+    for item in r_item_actuals:
+        item_template = item.ritem_template
+        item.options = ROptionTemplate.objects.filter(rubric_item=item_template)
+
+
+
+
 
     #rubric = models.ForeignKey(RubricTemplate)
     #comment_required = models.BooleanField(default=False)
@@ -275,13 +282,19 @@ def review(request, ractual_code):
                                             #'in the rubric'))
     #max_score = models.FloatField(help_text='Highest score achievable here')
 
-
+#r_item_actuals <-- QuerySet
+#r_item_actuals.number
+#r_item_actuals.criterion
+#r_item_actuals.max_score
+#r_item_actuals.options <-- dict
 
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
            'person': r_actual.graded_by,
            'r_actual': r_actual,
+           'r_item_actuals' : r_item_actuals,
+           'rubric' : r_actual.rubric_template
            }
     return render(request, 'review/review_peer.html', ctx)
 

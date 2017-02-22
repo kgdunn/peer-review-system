@@ -263,6 +263,7 @@ class RItemTemplate(models.Model):
                                             'in the rubric'))
     max_score = models.FloatField(help_text='Highest score achievable here')
 
+
     def save(self, *args, **kwargs):
         """ Override the model's saving function to do some checks """
         self.max_score = float(self.max_score)

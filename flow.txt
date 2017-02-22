@@ -64,6 +64,11 @@ resume /save as draft/submit
 
 Cannot edit/resubmit after submission date
 
+
+If the page is reloaded, it shows the options from last time
+
+
+
 """
 I need a way to allocate reviews to a learner.
 * once allocated, it is remembered (state). So when they come back they see the
