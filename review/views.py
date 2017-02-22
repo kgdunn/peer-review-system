@@ -311,13 +311,8 @@ def submit_peer_review_feedback(request, ractual_code):
             #item_number = int(key.split('item-')[1])
             #selected = int(value.split('option-')[1])
 
-
-
-
-
-    logger.debug("Submitted: " + str(request.POST))
+    #logger.debug("Submitted: " + str(request.POST))
     r_actual, learner = get_learner_details(ractual_code)
-
 
     return HttpResponse(('Thank you. Your review has successfully been '
                          'received. You still have to complete ___ reviews.'))
