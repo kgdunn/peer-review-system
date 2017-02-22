@@ -69,6 +69,8 @@
 .rightmenu .col2 {
     width:35%;			    /* 35-2-2: right column content width (right column width minus left and right padding) */
     left:35%;			    /* 35+(2+1)+1: (right column width) plus (left column left and right padding) plus (right column left padding) */
+	height:80%;
+	overflow : auto;
 }
 /* Footer styles */
 #footer {
@@ -88,7 +90,7 @@
     <h2>Hello {{person.full_name}}!</h2>
 
     <p>You are reviewing one of your peers. The work you are required to review is shown below.
-    <p>If you do not see any document then you should please 
+    <p>If you do not see any document then you should please
     <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>,
     and then continue to review it here.
 </div>
@@ -103,19 +105,21 @@
             </object>
             <!-- Column 1 end -->
         </div>
-        <div class="col2" style=" padding : 4px; height : 80%; overflow : auto; ">
+        <div class="col2">
             <!-- Column 2 start -->
 
 
             {{rubric.general_instructions}}
-	   	
+
 	    <br>
 	    Assess the work based on these criterion. Submit your review when complete.
-	    <hr>		
-
+	    <hr>
+			<form>
             {# alternating colours | radio buttons aligned and indented #}
             {% for item in r_item_actuals %}
 
+				<fieldset id="item-{{item.ritem_template.number}}">
+				{# Criterion is given here #}
                 {{item.ritem_template.order}}. {{item.ritem_template.criterion}} (<b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)
 
                 {% for option in item.options %}
@@ -123,8 +127,10 @@
                         <label><input type="radio" name="item-{{item.ritem_template.number}}" value="option-{{option.order}}">{{option.criterion}} (<b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>)</label>
                     </div>
                 {% endfor %}
+				</fieldset>
             <hr>
             {% endfor %}
+			<form>
 
             <!-- Column 2 end -->
         </div>
