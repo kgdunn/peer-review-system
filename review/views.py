@@ -283,21 +283,56 @@ def get_peer_report_data(pr, learner):
         'item-03': [2, 1, 4, 5, 2, 6],
         'n_peers': 6,
         'overall': 5.1,
-        'class_average': 3.4,
     }
     """
     peers = {'n_peers': 0}
+
+
+    # Get the scores from each of the completed_reviews
+    peer_data = get_peer_grading_data(learner, pr)
+
+    return peers
+
+
+def get_peer_grading_data(learner, pr):
+    """
+    Gets the grading data and associated feedback for this ``learner`` for the
+    given ``pr`` (peer review).
+    """
+    # Only valid submissions are accepted
     submission = Submission.objects.filter(submitted_by=learner,
                                            pr_process=pr,
                                            is_valid=True,
-                                           ).order_by('-datetime_submitted')[0]
+                                          ).order_by('-datetime_submitted')[0]
+    # and only completed reviews
     completed_reviews = RubricActual.objects.filter(submission=submission,
                                                     status='C')
 
-    # Get the scores from each of the completed_reviews
+    #ActualItems and ActualOptions from the ActualRubric
 
-    #peer_data = get_peer_data(learner, pr)
-    return peers
+    peer_data = {}
+    for rubric_actual in completed_reviews:
+        # Process all completed reviews
+        r_template = rubric_actual.rubric_template
+        item_templates = r_template.ritemtemplate_set.all()
+
+
+        for item in item_templates:
+            # Go through each item (usually a row in the rubric matrix)
+            item_scores = []
+            max_score = item.max_score
+
+            for actual_item in item.ritemactual_set.filter(submitted=True):
+
+                for actual_option in actual_item.roptionactual_set.all():
+                    score = actual_option.roption_template.score
+                    item_scores.append(score)
+
+            # OK, done with this row, for this learner, and all evalutions
+            peer_data[item.order] = (max_score, item_scores)
+
+    peer_data['n_peers'] = len(completed_reviews)
+    return peer_data
 
 def get_learner_details(ractual_code):
     """

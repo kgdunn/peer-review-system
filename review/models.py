@@ -250,7 +250,7 @@ class RubricActual(models.Model):
     def save(self, *args, **kwargs):
         if not(self.unique_code):
             self.unique_code = generate_random_token(token_length=16)
-        super(RubricActual, self).save(*args, **kwargs) # Call the "real" save()
+        super(RubricActual, self).save(*args, **kwargs)
 
     def __str__(self):
         return u'Peer: {0}; Sub: {1}'.format(self.graded_by, self.submission)
