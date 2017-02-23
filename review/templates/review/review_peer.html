@@ -127,7 +127,7 @@
 	    Assess the work based on these criteria. Submit your review when complete.
 		<form action="{% url 'submit_peer_review_feedback' ractual_code=ractual_code %}"
 		      method="POST" enctype="multipart/form-data">{% csrf_token %}
-		<input style="float:right" type="submit" name="{{ractual_code}}" value="Submit your review">
+		<span class="submit_button" style="float:right"><input  type="submit" name="{{ractual_code}}" value="Submit your review"></span>
 	    <hr>
 
             {% for item in r_item_actuals %}
@@ -145,7 +145,7 @@
 
             <hr>
             {% endfor %}
-		<input type="submit" name="below-{{ractual_code}}" value="Submit your review">
+		<span class="submit_button" style="float:right"><input type="submit" name="below-{{ractual_code}}" value="Submit your review"></span>
 		</form>
 
             <!-- Column 2 end -->
