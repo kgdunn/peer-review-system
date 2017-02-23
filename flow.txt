@@ -1,26 +1,23 @@
 TO DO
 ======
 
+Check calculations are correct and Process results of evaluations to display back to students
 Add textfield for feedback
+Provide overall feedback box for students to fill in. If you struggle with interpretation then ....
+
+
+
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
 Allow resubmissions: ideally reload the prior submitted values
 Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
 
 Shows in the HTML if it has been successfully submitted.
-
 Replicate the infrastructore on Webfaction
-Verify that the text is the same as the rubric
-Provide overall feedback box for students to fill in. If you struggle with interpretation
-then ....
 
-"Waste equals Food" or "Waste is Designed out" (3 points)" -> Waste equals Food" or "Waste is Designed out" (max: 3/3 points)
-Alternating colours | radio buttons aligned and indented in rubric
-Process results of evaluations to display back to students
+Verify that the text is the same as the rubric
 
 Show review as being completed in the browser
-Distinction in instructor vs student view: show names, current allocations
-
 
 Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
