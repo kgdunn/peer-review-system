@@ -10,7 +10,9 @@ from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from utils import generate_random_token
 
 # Python imports
+import re
 import datetime
+import hashlib
 
 # Logging
 import logging
@@ -372,10 +374,32 @@ def review(request, ractual_code):
     if learner is None:
         # This branch only happens with error conditions.
         return r_actual
-    r_item_actuals = r_actual.ritemactual_set.all()
+    r_item_actuals = r_actual.ritemactual_set.all().order_by('-modified')
+
+    # Ensure the ``r_item_actuals`` are in the right order. These 3 lines
+    # sort the ``r_item_actuals`` by using the ``order`` field on the associated
+    # ``ritem_template`` instance.
+    # I noticed that in some peer reviews the order was e.g. [4, 1, 3, 2]
+    r_item_template_order = (i.ritem_template.order for i in r_item_actuals)
+    zipped = list(zip(r_item_actuals, r_item_template_order))
+    r_item_actuals, _ = list(zip(*(sorted(zipped, key=lambda x: x[1]))))
+
     for item in r_item_actuals:
         item_template = item.ritem_template
-        item.options = ROptionTemplate.objects.filter(rubric_item=item_template)
+
+        hash_name = hashlib.md5(learner.full_name.encode())
+        digit = re.search("\d", hash_name.hexdigest())
+        if digit:
+            value = int(hash_name.hexdigest()[digit.start()])
+        else:
+            value = 0
+
+        # Small experiment: do rubrics from low to high (+order),  or
+        # from high to low (-order), score better or worse?
+        if value % 2 == 0: # even
+            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('-order')
+        else:
+            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
