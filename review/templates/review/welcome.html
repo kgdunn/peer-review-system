@@ -10,7 +10,7 @@
 <hr>
 <h2>Review phase: {{pr.number_of_reviews_per_learner}} peer reviews required</h2>
 <p>Start date and time for this review: {{pr.dt_peer_reviews_start_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_start_by|time:"H:i" }}
-<p>You must complete <b>and submit</b> the review before: {{pr.dt_peer_reviews_completed_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_completed_by|time:"H:i" }}
+<p>You must complete <b>and submit</b> the reviews before: {{pr.dt_peer_reviews_completed_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_completed_by|time:"H:i" }}
 
 {% if allow_review %}
 <div id="accordion" role="tablist" aria-multiselectable="true">
@@ -33,7 +33,7 @@
 {% endfor %}
   </div>
 </div>
-{% else %}
+{% else %} {# if allow_review #}
 <p>The review stage has passed. No further reviews can be completed.
 {% endif %}
 

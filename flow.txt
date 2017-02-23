@@ -9,6 +9,8 @@ Allow resubmissions: ideally reload the prior submitted values
 Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
 
+Shows in the HTML if it has been successfully submitted.
+
 Replicate the infrastructore on Webfaction
 Get the HTML formating of the criterion text to look good.
 Verify that the text is the same as the rubric
