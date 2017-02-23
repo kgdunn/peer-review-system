@@ -382,7 +382,8 @@ def review(request, ractual_code):
            'person': r_actual.graded_by,
            'r_actual': r_actual,
            'r_item_actuals' : r_item_actuals,
-           'rubric' : r_actual.rubric_template
+           'rubric' : r_actual.rubric_template,
+           'person': learner,
            }
     return render(request, 'review/review_peer.html', ctx)
 
