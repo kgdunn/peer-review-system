@@ -468,7 +468,7 @@ def manual_create_uploads(request):
 
     classlist = {}
     classlist_CSV = '/home/kevindunn/IO3075-classlist.csv'
-    classlist_CSV = '/Users/kevindunn/DELETE/IO3075-classlist.csv'
+#    classlist_CSV = '/Users/kevindunn/DELETE/IO3075-classlist.csv'
     with open(classlist_CSV, 'rt') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
@@ -478,12 +478,12 @@ def manual_create_uploads(request):
 
     folder = '/home/kevindunn/allsub/'
     level_deep = 4
-    folder = '/Users/kevindunn/DELETE/allsub/'
-    level_deep = 5
+#    folder = '/Users/kevindunn/DELETE/allsub/'
+#    level_deep = 5
 
     for root, dirs, files in os.walk(folder):
         logger.debug(root)
-        if files[0].lower().endswith('.pdf'):
+        if files and files[0].lower().endswith('.pdf'):
 
             # Only import PDF files
 
@@ -509,7 +509,7 @@ def manual_create_uploads(request):
             ip_address = '0.0.0.0'
 
             base_dir = '/var/www/peer/documents'
-            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
+#            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
             copyfile(filename, base_dir + os.sep + submitted_file_name)
 
             sub = Submission(submitted_by = learner,
@@ -524,9 +524,5 @@ def manual_create_uploads(request):
 
 
         else:
-            print(files[0])
-
-
-
-
+            print(files)
 
