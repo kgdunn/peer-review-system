@@ -90,7 +90,14 @@
 .odd{
 	background:#ddd;
 }
-
+.submit_button{
+  display: table;
+  margin: auto;
+}
+p{
+margin: 0;
+}
+.clear {clear: both;}
 .radio_text {
   display: block;
   margin-top: -20px;
@@ -127,7 +134,8 @@
 	    Assess the work based on these criteria. Submit your review when complete.
 		<form action="{% url 'submit_peer_review_feedback' ractual_code=ractual_code %}"
 		      method="POST" enctype="multipart/form-data">{% csrf_token %}
-		<span class="submit_button" style="float:right"><input  type="submit" name="{{ractual_code}}" value="Submit your review"></span>
+		<div class="submit_button" ><input  type="submit" name="{{ractual_code}}" value="Submit your review"></div>
+		<div class="clear"></div>
 	    <hr>
 
             {% for item in r_item_actuals %}
@@ -145,7 +153,7 @@
 
             <hr>
             {% endfor %}
-		<span class="submit_button" style="float:right"><input type="submit" name="below-{{ractual_code}}" value="Submit your review"></span>
+		<span class="submit_button" ><input type="submit" name="below-{{ractual_code}}" value="Submit your review"></span>
 		</form>
 
             <!-- Column 2 end -->
