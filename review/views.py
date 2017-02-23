@@ -187,6 +187,14 @@ def index(request):
             r_actuals = []       # we want to fill this in the "review" step
             peers = {}           # we want to fill this in the "report" step
 
+            # This is a bit hackish, but required to work towards a deadline.
+            report_sort = []
+            report__comments = []
+            report__n_reviews = 0
+            report__did_submit = False
+            report__overall_max_score = 0
+            report__learner_avg = 0
+
             # STEP 1: prior to submission date?
             # Code here to allow submission
 
