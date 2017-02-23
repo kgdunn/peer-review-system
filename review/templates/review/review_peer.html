@@ -106,6 +106,16 @@ margin: 0;
 .radio_button{
   margin-left: 5px;
 }
+textarea
+{
+  width:100%;
+}
+.textwrapper
+{
+  border:1px solid #999999;
+  margin:5px 0;
+  padding:3px;
+}
 </style>
 
 <div id="header">
@@ -145,9 +155,28 @@ margin: 0;
                 {{item.ritem_template.order}}. {{item.ritem_template.criterion|safe}} <span style="float:right; margin-bottom:10px">(maximum score: <b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)</span>
 
                 {% for option in item.options %}
+
+					{% if option.option_type == 'Radio' %}
                     <div class="radio">
                         <label><span class="radio_button"><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"></span><span class="radio_text">{{option.criterion|safe}} (<b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>)</span></label>
                     </div>
+					{% endif %}
+					{% if option.option_type == 'LText' %}
+
+
+
+
+<div  class="LText" style="display: block;" id="item-{{item.ritem_template.order}}">
+  <label for="item-{{item.ritem_template.order}}" id="item-{{item.ritem_template.order}}"></label>
+  <div class="textwrapper">
+      <textarea cols="2" rows="10" id="item-{{item.ritem_template.order}}" placeholder="{{option.criterion}}"></textarea>
+	</div>
+</div>
+
+
+
+
+					{% endif %}
                 {% endfor %}
 				</fieldset>
 

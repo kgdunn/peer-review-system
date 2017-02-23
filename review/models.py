@@ -311,10 +311,18 @@ class ROptionTemplate(models.Model):
     A rubric option template (a single cell in the rubric). Usually with
     other options to the left and right of it.
     """
+    TYPE = (('Radio', 'Radio buttons (default)'),
+            ('LText', 'Long text [HTML Text area]'),
+            ('SText', 'Short text [HTML input=text]'),)
+
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
+    option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
     criterion = models.TextField(help_text='A prompt/criterion to the peers')
     order = models.IntegerField()
+    # NOTE: the ``order`` is ignored for type ``LText``, as there will/should
+    #       only be 1 of those per Item.
+
 
     def save(self, *args, **kwargs):
         """ Override the model's saving function to do some checks """

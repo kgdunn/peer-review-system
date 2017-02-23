@@ -1,10 +1,20 @@
 TO DO
 ======
 
-Check calculations are correct and Process results of evaluations to display back to students
+
+Please provide overall feedback for your peers.
+<p>If you struggled with the interpretation of the above 4 criteria and how they applied to this review, then please also indicate that in your feedback.
+
+
 Add textfield for feedback
 Provide overall feedback box for students to fill in. If you struggle with interpretation then ....
 
+Check calculations are correct and Process results of evaluations to display back to students
+Relocate to actual course
+Test the actual process: from beginning to end.
+
+
+Show the score they awarded in the peer review.
 
 
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
@@ -14,16 +24,12 @@ After cut-off time show calculation of their grades
 
 Shows in the HTML if it has been successfully submitted.
 Replicate the infrastructore on Webfaction
-
-Verify that the text is the same as the rubric
-
 Show review as being completed in the browser
 
 Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
-
-
 Strip out and PDF information.
+
 
 Before the run:
 ----
@@ -39,54 +45,11 @@ Run htop
 
 Review process
 ==============
-
-New user: create user in this course
-Show the next reviews to complete
-Set up the rubric when the review is actually started
-
-New user:
-* done: Find the PR
-* done: Find the submission
-* done: Get the RubricTemplate
-* done: Make a RubricActual
-* done: Save
-* done: Create 1+ RItemActuals
-* done: Save each one
-
-
-presented with the next available review
-click to expand and start
-shown the document and the rubric side by side
 in a responsive way that the rubric goes below the document
 rubric answers are saved as entered in realtime
 resume /save as draft/submit
-
 Cannot edit/resubmit after submission date
-
-
 If the page is reloaded, it shows the options from last time
 
-
-
-"""
-I need a way to allocate reviews to a learner.
-* once allocated, it is remembered (state). So when they come back they see the
-  same N = 3 reviews, in the same order, waiting for them.
-
-  class Review:
-       * source = Submission
-       * reviewer = Person
-       * allocated_datetime
-       * order = 1, 2, 3, 4, ...?
-       *
-
-* The review is allocated out of the pool of all submissions.is_valid and take
-  the next available review that:
-    * is not from the same group as the reviewer
-    * has not already been seen by the reviewer
-    * that has the lowest number of allocations so far
-
 * Handle self-review still
-
-
 """
