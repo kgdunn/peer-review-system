@@ -291,7 +291,7 @@ def get_peer_report_data(pr, learner):
     # Get the scores from each of the completed_reviews
     peer_data = get_peer_grading_data(learner, pr)
 
-    return peers
+    return peer_data
 
 
 def get_peer_grading_data(learner, pr):
@@ -303,14 +303,19 @@ def get_peer_grading_data(learner, pr):
     submission = Submission.objects.filter(submitted_by=learner,
                                            pr_process=pr,
                                            is_valid=True,
-                                          ).order_by('-datetime_submitted')[0]
+                                          ).order_by('-datetime_submitted')
+
+    if submission.count() == 0:
+        return {'n_peers': 0,
+                'did_submit': False}
+
     # and only completed reviews
-    completed_reviews = RubricActual.objects.filter(submission=submission,
+    completed_reviews = RubricActual.objects.filter(submission=submission[0],
                                                     status='C')
 
     #ActualItems and ActualOptions from the ActualRubric
 
-    peer_data = {}
+    peer_data = {'did_submit': True}
     for rubric_actual in completed_reviews:
         # Process all completed reviews
         r_template = rubric_actual.rubric_template

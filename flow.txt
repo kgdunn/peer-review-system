@@ -27,7 +27,7 @@ Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
 
 
-
+Strip out and PDF information.
 
 Before the run:
 ----

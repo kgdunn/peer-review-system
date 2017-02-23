@@ -84,6 +84,21 @@
     margin:0;
 }
 
+.even{
+	background:#ccc;
+}
+.odd{
+	background:#ddd;
+}
+
+.radio_text {
+  display: block;
+  margin-top: -20px;
+  margin-left: 28px;
+}
+.radio_button{
+  margin-left: 5px;
+}
 </style>
 
 <div id="header">
@@ -117,16 +132,17 @@
 
             {% for item in r_item_actuals %}
 
-				<fieldset id="item-{{item.ritem_template.order}}">
+				<fieldset id="item-{{item.ritem_template.order}}" class="{% cycle 'odd' 'even' %}">
 				{# Criterion is given here #}
-                {{item.ritem_template.order}}. {{item.ritem_template.criterion|safe}} (maximum score: <b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)
+                {{item.ritem_template.order}}. {{item.ritem_template.criterion|safe}} <span style="float:right; margin-bottom:10px">(maximum score: <b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)</span>
 
                 {% for option in item.options %}
                     <div class="radio">
-                        <label><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}">{{option.criterion}} (<b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>)</label>
+                        <label><span class="radio_button"><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"></span><span class="radio_text">{{option.criterion|safe}} (<b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>)</span></label>
                     </div>
                 {% endfor %}
 				</fieldset>
+
             <hr>
             {% endfor %}
 		<input type="submit" name="below-{{ractual_code}}" value="Submit your review">
