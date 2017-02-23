@@ -42,25 +42,30 @@
 Feedback from your peers is available after: {{pr.dt_peer_reviews_received_back|date:"l, d F Y"}} at {{pr.dt_peer_reviews_received_back|time:"H:i" }}
 
 {% if allow_report %}
-{% if peers.n_peers == 0 %}
+{% if report__n_reviews == 0 %}
 <p>There is no feedback, as you did submit work for the peer review.
 {% else %}
 
-You were evaluated by __{{peers|length}}__ peers. Their comments and feedback are available in anonymized, randomized order.
+<p>You were evaluated by {{report__n_reviews}} peers.
+
+<ul>
+
+{% for key, value in report.items|dictsort:0 %}
+<li>Score for criterion {{key}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
+{% endfor %}
+</ul>
+
+Overall score: {{report__learner_avg}} out of a maximum of {{report__overall_max_score}} points
 <br>
-Score for criterion 1: _________ (max: 3 points)
-<br>
-Score for criterion 2: _________ (max: 3 points)
-<br>
-Score for criterion 3: _________ (max: 3 points)
-<br>
-Score for criterion 4: _________ (max: 3 points)
-<br>
-Overall score: _________ (max: 12 points)
-<br>
-Comments from your peers: _________
-<br>
-{% endif %} {# peers.n_peers == 0 #}
+Comments and feedback from your peers are in anonymized, randomized order:
+<ul>
+{% for commentitem in report__comments %}
+<li>{{commentitem}}
+{% endfor %}
+</ul>
+
+
+{% endif %} {# report__n_reviews == 0 #}
 {% endif %} {# allow_report #}
 
 {% endblock %}

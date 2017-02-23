@@ -13,6 +13,8 @@ from utils import generate_random_token
 import re
 import datetime
 import hashlib
+import numpy as np
+from random import shuffle
 
 # Logging
 import logging
@@ -251,13 +253,26 @@ def index(request):
             if (pr.dt_peer_reviews_received_back.replace(tzinfo=None) <= now_time):
                 allow_report = True
 
-                peers = get_peer_report_data(pr, learner)
+                report = get_peer_grading_data(learner, pr)
+                report__comments = report.pop('comments')
+                report__n_reviews = report.pop('n_reviews')
+                report__did_submit = report.pop('did_submit')
+                report__overall_max_score = report.pop('overall_max_score')
+                report__learner_avg = report.pop('learner_avg')
+
+
+                shuffle(report__comments)
 
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr,
                    'r_actuals': r_actuals,
-                   'peers': peers,
+                   'report': report,
+                   'report__comments': report__comments,
+                   'report__n_reviews': report__n_reviews,
+                   'report__did_submit': report__did_submit,
+                   'report__overall_max_score': report__overall_max_score,
+                   'report__learner_avg': report__learner_avg,
                    'allow_submit': allow_submit,
                    'allow_review': allow_review,
                    'allow_report': allow_report,
@@ -268,33 +283,23 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                                     "without authorization."))
 
-
-def get_peer_report_data(pr, learner):
+def get_peer_grading_data(learner, pr):
     """
+    Gets the grading data and associated feedback for this ``learner`` for the
+    given ``pr`` (peer review).
+    """
+    """
+    IGNORE: but come back to later, to see if this is an improvement
     Returns a ``dict`` of the peers comments for each rubric criterion. If
-    ``learner`` did not submit, then ``peers = {'n_peers': 0}``.
+    ``learner`` did not submit, then ``peers = {'n_reviews': 0}``.
 
     peers = {
         'item-01': [3, 4, 1, 5, 7, 1],
         'item-02': [2, 1, 4, 5, 2, 6],
         'item-03': [2, 1, 4, 5, 2, 6],
-        'n_peers': 6,
+        'n_reviews': 6,
         'overall': 5.1,
     }
-    """
-    peers = {'n_peers': 0}
-
-
-    # Get the scores from each of the completed_reviews
-    peer_data = get_peer_grading_data(learner, pr)
-
-    return peer_data
-
-
-def get_peer_grading_data(learner, pr):
-    """
-    Gets the grading data and associated feedback for this ``learner`` for the
-    given ``pr`` (peer review).
     """
     # Only valid submissions are accepted
     submission = Submission.objects.filter(submitted_by=learner,
@@ -303,37 +308,58 @@ def get_peer_grading_data(learner, pr):
                                           ).order_by('-datetime_submitted')
 
     if submission.count() == 0:
-        return {'n_peers': 0,
+        return {'n_reviews': 0,
                 'did_submit': False}
 
     # and only completed reviews
     completed_reviews = RubricActual.objects.filter(submission=submission[0],
                                                     status='C')
 
-    #ActualItems and ActualOptions from the ActualRubric
+    if completed_reviews.count() == 0:
+        return {'n_reviews': 0,
+                'did_submit': True}
 
     peer_data = {'did_submit': True}
-    for rubric_actual in completed_reviews:
-        # Process all completed reviews
+    n_reviews = completed_reviews.count()
+    n_items = completed_reviews[0].rubric_template.ritemtemplate_set.count()
+
+    # Store the scores: one column per peer review, one row per item in rubric
+    scores = np.zeros((n_items, n_reviews))
+    comments = []
+    for idx, rubric_actual in enumerate(completed_reviews):
+        overall_max_score = 0.0
         r_template = rubric_actual.rubric_template
-        item_templates = r_template.ritemtemplate_set.all()
+        #item_templates = r_template.ritemtemplate_set.all().order_by('order')
 
+        item_scores = []
+        #comments = []  # <--- come back and change processing order. This only
+                        # <--- works now because there is 1 text feedback field.
+        ritems_submitted = rubric_actual.ritemactual_set.filter(submitted=True)
+        for actual_item in ritems_submitted:
+            for actual_option in actual_item.roptionactual_set.all():
+                score = actual_option.roption_template.score
+                item_scores.append(score)
+                if actual_option.roption_template.option_type == 'LText':
+                    comments.append(actual_option.comment)
 
-        for item in item_templates:
-            # Go through each item (usually a row in the rubric matrix)
-            item_scores = []
-            max_score = item.max_score
-
-            for actual_item in item.ritemactual_set.filter(submitted=True):
-
-                for actual_option in actual_item.roptionactual_set.all():
-                    score = actual_option.roption_template.score
-                    item_scores.append(score)
 
             # OK, done with this row, for this learner, and all evalutions
-            peer_data[item.order] = (max_score, item_scores)
+            peer_data[actual_item.ritem_template.order] = {
+                        'max_score': actual_item.ritem_template.max_score}
+            overall_max_score += actual_item.ritem_template.max_score
 
-    peer_data['n_peers'] = len(completed_reviews)
+        # Update the scores: one column per completed review
+        scores[:, idx] = item_scores
+
+    # Process scores here:
+    for idx, actual_item in enumerate(ritems_submitted):
+        peer_data[actual_item.ritem_template.order]['raw'] = str(scores[idx,:])
+        peer_data[actual_item.ritem_template.order]['avg_score'] = np.mean(scores[idx,:])
+
+    peer_data['comments'] = comments
+    peer_data['n_reviews'] = n_reviews
+    peer_data['overall_max_score'] = overall_max_score
+    peer_data['learner_avg'] = scores.sum() / n_reviews
     return peer_data
 
 def get_learner_details(ractual_code):

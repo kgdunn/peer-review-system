@@ -1,9 +1,12 @@
 TO DO
 ======
 
-
+Clean slate for allocations and completions
 Check calculations are correct and
 Process results of (numeric + text)evaluations to display back to students
+
+
+Is there a miscount here? ``for k in range(n_reviews - query.count()):``
 
 Relocate to actual course
 Test the actual process: from beginning to end.
@@ -36,6 +39,8 @@ During the run:
 Watch the reviews coming in at: https://peer.connectmv.com/admin/review/roptionactual/
 Track linode stats
 Run htop
+Dump the data to text file:
+  ./manage.py dumpdata review  --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
 
 
 
