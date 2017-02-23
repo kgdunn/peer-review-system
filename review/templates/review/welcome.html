@@ -51,10 +51,10 @@ Feedback from your peers is available after: {{pr.dt_peer_reviews_received_back|
 <ul>
 
 {% for item, value in report %}
-<li>Score for criterion {{item.key}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
+<li>Average score for criterion {{item}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
 {% endfor %}
 </ul>
-
+<hr>
 Overall score: {{report__learner_avg}} out of a maximum of {{report__overall_max_score}} points
 <br>
 Comments and feedback from your peers are in anonymized, randomized order:
