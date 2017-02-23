@@ -254,20 +254,24 @@ def index(request):
                 allow_report = True
 
                 report = get_peer_grading_data(learner, pr)
-                report__comments = report.pop('comments')
+                report__comments = report.pop('comments', ['',])
+                shuffle(report__comments)
                 report__n_reviews = report.pop('n_reviews')
                 report__did_submit = report.pop('did_submit')
-                report__overall_max_score = report.pop('overall_max_score')
-                report__learner_avg = report.pop('learner_avg')
+                report__overall_max_score = report.pop('overall_max_score', 0)
+                report__learner_avg = report.pop('learner_avg',0)
 
+                report_sort = []
+                for key, value in report.items():
+                    report_sort.append((key, value))
+                report_sort = sorted(report_sort)
 
-                shuffle(report__comments)
 
             ctx = {'person': person_or_error,
                    'course': course,
                    'pr': pr,
                    'r_actuals': r_actuals,
-                   'report': report,
+                   'report': report_sort,
                    'report__comments': report__comments,
                    'report__n_reviews': report__n_reviews,
                    'report__did_submit': report__did_submit,

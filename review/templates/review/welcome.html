@@ -50,8 +50,8 @@ Feedback from your peers is available after: {{pr.dt_peer_reviews_received_back|
 
 <ul>
 
-{% for key, value in report.items|dictsort:0 %}
-<li>Score for criterion {{key}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
+{% for item, value in report %}
+<li>Score for criterion {{item.key}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
 {% endfor %}
 </ul>
 
