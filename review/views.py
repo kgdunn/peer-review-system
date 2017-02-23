@@ -17,7 +17,7 @@ import hashlib
 # Logging
 import logging
 logger = logging.getLogger(__name__)
-logger.debug('A new call to the views.py file')
+
 
 # SECURITY ISSUES
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
@@ -172,9 +172,6 @@ def index(request):
 
         person_or_error, course, pr = starting_point(request)
         logger.debug('POST = ' + str(request.POST))
-        logger.debug('person = ' + str(person_or_error))
-        logger.debug('course = ' + str(course))
-        logger.debug('pre = ' + str(pr))
 
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
@@ -217,8 +214,6 @@ def index(request):
                         rubric_template = pr.rubrictemplate).order_by('created')
 
                 logger.debug('Need to create {0} reviews'.format(n_reviews))
-                logger.debug('Found: {0}'.format(str(query)))
-
 
                 if query.count() == n_reviews:
                     r_actuals = list(query)
@@ -421,7 +416,6 @@ def submit_peer_review_feedback(request, ractual_code):
     # 2. Create OptionActuals
     # 3. Calculate score for evaluations?
 
-    logger.debug("Submitted: " + str(request.POST))
     r_actual, learner = get_learner_details(ractual_code)
     r_item_actuals = r_actual.ritemactual_set.all()
     r_item_actuals
