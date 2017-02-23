@@ -427,7 +427,7 @@ def submit_peer_review_feedback(request, ractual_code):
     r_item_actuals
     items = {}
 
-    # Dict: items[0] = list of the OPTIONS in the item (for that criterion)
+    # ``dict``, for example: items[3] = list of the OPTIONS in item 3
     for item in r_item_actuals:
         item_template = item.ritem_template
         items[item_template.order] = (item,
@@ -438,20 +438,31 @@ def submit_peer_review_feedback(request, ractual_code):
         # Process each item in the rubric, one at a time
         if key.startswith('item-'):
             item_number = int(key.split('item-')[1])
-            selected = int(value.split('option-')[1])
+
+            comment = ''
+            if items[item_number][1][0].option_type == 'LText':
+                r_opt_template = items[item_number][1][0]
+                comment = value
+
+            if items[item_number][1][0].option_type == 'Radio':
+                selected = int(value.split('option-')[1])
+
+                # in "selected-1": the '-1' part is critical
+                r_opt_template = items[item_number][1][selected-1]
 
             # If necessary, prior submissions for the same option are adjusted
             # as being .submitted=False (perhaps the user changed their mind)
-            r_opt_template = items[item_number][1][selected-1]  # "-1" is critical
             prior_options_submitted = ROptionActual.objects.filter(
-                ritem_actual=items[item_number][0])
+                                             ritem_actual=items[item_number][0])
+
             for option in prior_options_submitted:
                 option.delete()
 
             # Then set the "submitted" field on each OPTION
             ROptionActual.objects.get_or_create(roption_template=r_opt_template,
                                             ritem_actual=items[item_number][0],
-                                            submitted=True)
+                                            submitted=True,
+                                            comment=comment)
 
             # Set the RItemActual.submitted = True for this ITEM
             items[item_number][0].submitted = True

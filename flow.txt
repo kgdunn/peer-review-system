@@ -2,14 +2,9 @@ TO DO
 ======
 
 
-Please provide overall feedback for your peers.
-<p>If you struggled with the interpretation of the above 4 criteria and how they applied to this review, then please also indicate that in your feedback.
+Check calculations are correct and
+Process results of (numeric + text)evaluations to display back to students
 
-
-Add textfield for feedback
-Provide overall feedback box for students to fill in. If you struggle with interpretation then ....
-
-Check calculations are correct and Process results of evaluations to display back to students
 Relocate to actual course
 Test the actual process: from beginning to end.
 
@@ -38,6 +33,7 @@ Reduce memory for rsmopt
 
 During the run:
 ----
+Watch the reviews coming in at: https://peer.connectmv.com/admin/review/roptionactual/
 Track linode stats
 Run htop
 
