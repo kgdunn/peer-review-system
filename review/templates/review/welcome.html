@@ -52,7 +52,7 @@
 <ul>
 
 {% for item, value in report %}
-<li>Average score for criterion {{item}}: {{value.avg_score}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
+<li>Average score for criterion {{item}}: {{value.avg_score|floatformat}} out of {{value.max_score|floatformat}} points. (raw data from your peers: {{value.raw}})
 {% endfor %}
 </ul>
 Comments and feedback from your peers are in anonymized, randomized order:
