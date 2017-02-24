@@ -13,7 +13,9 @@ urlpatterns = [
 
     url(r'^submit-peer-review-feedback/(?P<ractual_code>.+)$',
         views.submit_peer_review_feedback,
-        name='submit_peer_review_feedback')
+        name='submit_peer_review_feedback'),
+
+    url(r'^reset-counts/$', views.reset_counts, name='reset_counts'),
 ]
 
 """

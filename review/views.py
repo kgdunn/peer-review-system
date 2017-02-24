@@ -521,6 +521,8 @@ def submit_peer_review_feedback(request, ractual_code):
                          '<br>You may close this tab/window, and return back.'
                          '').format(n_to_do,))
 
+
+# TODO: secure this still
 def manual_create_uploads(request):
     """
     Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
@@ -594,3 +596,18 @@ def manual_create_uploads(request):
         else:
             print(files)
 
+# TODO: secure this still
+def reset_counts(request):
+    """
+    Resets the counts for each submission
+    """
+    pr_process = PR_process.objects.filter(id=1)[0]
+
+    all_subs = Submission.objects.filter(pr_process=pr_process)
+    for idx, sub in enumerate(all_subs):
+        sub.number_reviews_completed = 0
+        sub.number_reviews_assigned = 0
+        sub.save()
+        logger.debug('Counts reset for: {0}'.format(sub))
+
+    return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
