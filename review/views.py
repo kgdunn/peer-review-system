@@ -361,6 +361,7 @@ def get_peer_grading_data(learner, pr):
             overall_max_score += actual_item.ritem_template.max_score
 
         # Update the scores: one column per completed review
+        logger.debug(item_scores)
         scores[:, idx] = item_scores
 
     # Process scores here:

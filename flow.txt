@@ -1,19 +1,10 @@
 TO DO
 ======
 
-Clean slate for allocations and completions
-Check calculations are correct and
-Process results of (numeric + text)evaluations to display back to students
-
+Timezones don't display properly: off by 1 hour. How to get local time to display?
 
 Is there a miscount here? ``for k in range(n_reviews - query.count()):``
-
-Relocate to actual course
-Test the actual process: from beginning to end.
-
-
 Show the score they awarded in the peer review.
-
 
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
 Allow resubmissions: ideally reload the prior submitted values
@@ -26,13 +17,19 @@ Show review as being completed in the browser
 
 Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
-Strip out and PDF information.
+Strip out the PDF information.
+
+Make it clear that these reviews are all for 1 session (not N=3 sessions)
+
+Link to return back more apparent.
 
 
 Before the run:
 ----
 Reduce memory for yint
 Reduce memory for rsmopt
+Increase memory for peer
+
 
 During the run:
 ----
