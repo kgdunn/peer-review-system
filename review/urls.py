@@ -17,20 +17,3 @@ urlpatterns = [
 
     url(r'^reset-counts/$', views.reset_counts, name='reset_counts'),
 ]
-
-"""
-Internal URL structure:
-
-/learner/__<stage>__/
-
-
-
-
-<form action="upload.php" method="post" enctype="multipart/form-data">
-    Select image to upload:
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Upload Image" name="submit">
-</form>
-
-
-"""

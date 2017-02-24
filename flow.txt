@@ -1,9 +1,14 @@
 TO DO
 ======
 
-Timezones don't display properly: off by 1 hour. How to get local time to display?
 
-Is there a miscount here? ``for k in range(n_reviews - query.count()):``
+Suggestions for a grading scheme for Conny.
+Comments and grades to Conny.
+Get a list of grades: grade report
+
+Make it clear that these reviews are all for 1 session (not N=3 sessions)
+
+Timezones don't display properly: off by 1 hour. How to get local time to display?
 Show the score they awarded in the peer review.
 
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
@@ -19,7 +24,6 @@ Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
 Strip out the PDF information.
 
-Make it clear that these reviews are all for 1 session (not N=3 sessions)
 
 Link to return back more apparent.
 
@@ -29,6 +33,7 @@ Error in the vector of scores not being the right length
 
 Make it mandatory to fill in all fields.
 Be able to come back and edit your reviews.
+
 
 
 
