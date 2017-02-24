@@ -23,6 +23,14 @@ Make it clear that these reviews are all for 1 session (not N=3 sessions)
 
 Link to return back more apparent.
 
+Be able to impersonate a student and see their feedback.
+A mix up for some students about item 4 and 5
+Error in the vector of scores not being the right length
+
+Make it mandatory to fill in all fields.
+Be able to come back and edit your reviews.
+
+
 
 Before the run:
 ----
@@ -50,4 +58,6 @@ Cannot edit/resubmit after submission date
 If the page is reloaded, it shows the options from last time
 
 * Handle self-review still
+* Handle group upload, with email
+*
 """
