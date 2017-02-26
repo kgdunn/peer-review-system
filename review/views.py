@@ -340,14 +340,15 @@ def get_peer_grading_data(learner, pr):
         r_template = rubric_actual.rubric_template
         #item_templates = r_template.ritemtemplate_set.all().order_by('order')
 
-        item_scores = []
+        item_scores = np.zeros(n_items) * np.NaN
         #comments = []  # <--- come back and change processing order. This only
                         # <--- works now because there is 1 text feedback field.
         ritems_submitted = rubric_actual.ritemactual_set.filter(submitted=True)
         for actual_item in ritems_submitted:
             for actual_option in actual_item.roptionactual_set.all():
                 score = actual_option.roption_template.score
-                item_scores.append(score)
+                item_scores[actual_item.ritem_template.order-1] = score
+
                 if actual_option.roption_template.option_type == 'LText':
                     comments.append(actual_option.comment)
 
@@ -364,12 +365,12 @@ def get_peer_grading_data(learner, pr):
     # Process scores here:
     for idx, actual_item in enumerate(ritems_submitted):
         peer_data[actual_item.ritem_template.order]['raw'] = str(scores[idx,:])
-        peer_data[actual_item.ritem_template.order]['avg_score'] = np.mean(scores[idx,:])
+        peer_data[actual_item.ritem_template.order]['avg_score'] = np.nanmean(scores[idx,:])
 
     peer_data['comments'] = comments
     peer_data['n_reviews'] = n_reviews
     peer_data['overall_max_score'] = overall_max_score
-    peer_data['learner_avg'] = scores.sum() / n_reviews
+    peer_data['learner_avg'] = np.mean(np.nansum(scores, axis=0))  # ignore NaNsu
     return peer_data
 
 def get_learner_details(ractual_code):
