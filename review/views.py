@@ -13,6 +13,7 @@ import re
 import datetime
 import hashlib
 import numpy as np
+import json
 from random import shuffle
 
 # Logging
@@ -173,7 +174,7 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                              "without authorization."))
 
-    logger.debug('POST = ' + str(request.POST))
+    #logger.debug('POST = ' + str(request.POST))
     person_or_error, course, pr = starting_point(request)
 
     if not(isinstance(person_or_error, Person)):
@@ -358,7 +359,6 @@ def get_peer_grading_data(learner, pr):
             overall_max_score += actual_item.ritem_template.max_score
 
         # Update the scores: one column per completed review
-        logger.debug(item_scores)
         scores[:, idx] = item_scores
 
     # Process scores here:
@@ -626,7 +626,7 @@ def reset_counts(request):
 
     return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
 
-
+@csrf_exempt
 def get_stats_comments(request):
     """
     Gets all the student grades and comments
@@ -635,16 +635,27 @@ def get_stats_comments(request):
     if not(isinstance(person_or_error, Person)):
         return person_or_error      # Error path if learner does not exist
 
-    learner = person_or_error
+    person = person_or_error
     if person.role == 'Learn':
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
     all_subs = Submission.objects.filter(pr_process=pr_process)
-    for idx, sub in enumerate(all_subs):
-        sub.person
 
+    with open('results.tsv', 'wt') as statsfile:
+        statsfile.write('FullName\tEmail\tQuestion1Score\tQuestion2Score\tQuestion3Score\t Question4Score\tAverageOutOf12\tComments\n')
+        for idx, sub in enumerate(all_subs):
 
-        peer = get_peer_grading_data(learner, pr_process)
+            peer = get_peer_grading_data(sub.submitted_by, pr_process)
+            statsfile.write('{}\t{}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{}\n'.format(
+                sub.submitted_by.full_name,
+                sub.submitted_by.email,
+                peer[1]['avg_score'],
+                peer[2]['avg_score'],
+                peer[3]['avg_score'],
+                peer[4]['avg_score'],
+                peer['learner_avg'],
+                str(peer['comments']).encode('utf-8')))
+
 
     return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))

@@ -1,9 +1,7 @@
 TO DO
 ======
 
-
-All student comments and grades to Conny.
-
+Add Google analytics
 Add group functionality
 Allow multiple uploads
 Release as BSD license and open up
