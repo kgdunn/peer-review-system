@@ -45,7 +45,7 @@ def starting_point(request):
     course = get_object_or_404(Course, label=course_ID)
 
     pr_ID = request.POST.get('resource_link_id', None)
-    pr = get_object_or_404(PR_process, LTI_title=pr_ID)
+    pr = get_object_or_404(PR_process, LTI_id=pr_ID)
 
     if person:
         return person, course, pr

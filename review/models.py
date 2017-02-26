@@ -92,7 +92,7 @@ class PR_process(models.Model):
     LTI_id = models.CharField(max_length=50, verbose_name="LTI ID",
         help_text=('In Brightspace LTI post: "resource_link_id"'))
     LTI_title = models.CharField(max_length=300, verbose_name="LTI Title",
-        help_text=('A title to identify this PR in the database"'))
+        help_text=('A title to identify this PR in the database'))
 
 
         # Old code:
