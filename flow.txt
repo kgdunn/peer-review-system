@@ -1,7 +1,9 @@
 TO DO
 ======
 
-
+Add group functionality
+Allow multiple uploads
+Release as BSD license and open up
 Suggestions for a grading scheme for Conny.
 Comments and grades to Conny.
 Get a list of grades: grade report
@@ -65,4 +67,38 @@ If the page is reloaded, it shows the options from last time
 * Handle self-review still
 * Handle group upload, with email
 *
-"""
+
+
+https://github.com/Brightspace/sample-LTI-WHMIS-quiz
+
+
+Send grades back:
+
+https://community.brightspace.com/devcop/blog/so_you_want_to_extend_your_lms__part_1_lti_primer
+
+To send back grades once a student has completed an assessment in a learning tool, the tool sends an HTTP POST back to the LMS via the URL specified in the [lis_outcome_service_url] field, the payload being a block of XML that contains the grade details.
+
+<?xml version = "1.0" encoding = "UTF-8"?>
+<imsx_POXEnvelopeRequest xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
+  <imsx_POXHeader>
+    <imsx_POXRequestHeaderInfo>
+      <imsx_version>V1.0</imsx_version>
+      <imsx_messageIdentifier>51b8cdfc2a7bb</imsx_messageIdentifier>
+    </imsx_POXRequestHeaderInfo>
+  </imsx_POXHeader>
+  <imsx_POXBody>
+    <replaceResultRequest>
+      <resultRecord>
+        <sourcedGUID>
+          <sourcedId>8d053b33-6f1f-410c-888b-1944226e44d3</sourcedId>
+        </sourcedGUID>
+        <result>
+          <resultScore>
+            <language>en-us</language>
+            <textString>0.33</textString>
+          </resultScore>
+        </result>
+      </resultRecord>
+    </replaceResultRequest>
+  </imsx_POXBody>
+</imsx_POXEnvelopeRequest>

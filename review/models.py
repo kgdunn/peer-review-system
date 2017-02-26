@@ -89,8 +89,22 @@ class PR_process(models.Model):
 
     LTI_system = models.CharField(max_length=50, choices=CHOICES,)
     title = models.CharField(max_length=300, verbose_name="Your peer review title")
-    LTI_title = models.CharField(max_length=300, verbose_name="LTI title",
-        help_text=('In Brightspace LTI post: "resource_link_title"'))
+    #LTI_id = models.Charfield(max_length=50, verbose_name="LTI ID",
+    #    help_text=('In Brightspace LTI post: "resource_link_id"'))
+    LTI_title = models.CharField(max_length=300, verbose_name="LTI Title",
+        help_text=('A title to identiy this PR in the database"'))
+
+
+        # Old code:
+        #-----------
+        # help_text=('In Brightspace LTI post: "resource_link_title"'))
+        #
+        # That is ideally the case, but Brightspace munges this and only returns
+        # the title as it was created in the External Tools section, and not
+        # the title of the item created in the Content area.
+        #
+        # More reliable is "resource_link_id"
+
     slug = models.SlugField(default='', editable=False)
     course = models.ForeignKey(Course)
     # rubrictemplate <--- from the One-To-One relationship

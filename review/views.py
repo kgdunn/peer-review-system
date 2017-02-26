@@ -45,7 +45,7 @@ def starting_point(request):
     course_ID = request.POST.get('context_id', None)
     course = get_object_or_404(Course, label=course_ID)
 
-    pr_ID = request.POST.get('resource_link_title', None)
+    pr_ID = request.POST.get('resource_link_id', None)
     pr = get_object_or_404(PR_process, LTI_title=pr_ID)
 
     if person:
@@ -171,9 +171,9 @@ def get_n_reviews(learner, pr):
 def index(request):
 
     if request.method == 'POST':
-
-        person_or_error, course, pr = starting_point(request)
         logger.debug('POST = ' + str(request.POST))
+        person_or_error, course, pr = starting_point(request)
+
 
         if not(isinstance(person_or_error, Person)):
             return person_or_error      # Error path if student does not exist
