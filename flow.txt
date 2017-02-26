@@ -69,6 +69,9 @@ If the page is reloaded, it shows the options from last time
 *
 
 
+Use the LTI checker: http://ltiapps.net/test/tc.php
+
+
 https://github.com/Brightspace/sample-LTI-WHMIS-quiz
 
 
@@ -102,3 +105,7 @@ To send back grades once a student has completed an assessment in a learning too
     </replaceResultRequest>
   </imsx_POXBody>
 </imsx_POXEnvelopeRequest>
+
+
+Look at extending it with a remote plugin:
+http://docs.valence.desire2learn.com/ui-ext/rplugins.html
