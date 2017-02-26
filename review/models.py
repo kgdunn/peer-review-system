@@ -28,7 +28,7 @@ class Person(models.Model):
              ('TA', 'Teaching Assistant')
             )
     first_name = models.CharField(max_length=200, verbose_name="First name")
-    is_active = models.BooleanField(default=True, help_text=('Placeholder'))
+    is_active = models.BooleanField(default=True, help_text=('NOT USED'))
     email = models.EmailField(blank=False)
     student_number = models.CharField(max_length=15, blank=True, default='')
     full_name = models.CharField(max_length=400, verbose_name='Full name',
@@ -56,15 +56,16 @@ class Course(models.Model):
         help_text=("Obtain this from the HTML POST field: 'context_id' "))
     # Brightspace:   u'lis_course_offering_sourcedid': <--- is another option
     #                                  [u'brightspace.tudelft.nl:training-IDE'],
-    slug = models.SlugField(default='', editable=False)
+
+    offering = models.PositiveIntegerField(default='0000', blank=True,
+        help_text="Which year/quarter is it being offered?")
 
     def __str__(self):
         return u'%s' % self.name
 
 
     def save(self, *args, **kwargs):
-        #self.slug = slugify(self.name)
-        unique_slugify(self, self.name, 'slug')
+
         super(Course, self).save(*args, **kwargs) # Call the "real" save()
 
 

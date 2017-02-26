@@ -77,7 +77,9 @@ class Enrolled(models.Model):
     """
     Which group is a learner enrolled in"""
     person = models.ForeignKey(Person)
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group, null=True,
+        help_text=('If blank/null: used internally to enrol the rest of the '
+                                          'class list.'))
     is_enrolled = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

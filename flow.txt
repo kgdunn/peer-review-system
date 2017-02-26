@@ -1,16 +1,14 @@
 TO DO
 ======
 
-Add Google analytics
+Check that Google analytics works
+
 Add group functionality
 Allow multiple uploads
 Release as BSD license and open up
 Suggestions for a grading scheme for Conny.
 
-Get a list of grades: grade report
-
 Make it clear that these reviews are all for 1 session (not N=3 sessions)
-
 Show the score they awarded in the peer review.
 
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
@@ -26,16 +24,11 @@ Track review text and selections immediately in the database
 Allow multiple attempts for the review, until the cut-off point is reached.
 Strip out the PDF information.
 
-
 Link to return back more apparent.
 
 Be able to impersonate a student and see their feedback.
-A mix up for some students about item 4 and 5
-Error in the vector of scores not being the right length
-
 Make it mandatory to fill in all fields.
 Be able to come back and edit your reviews.
-
 
 
 During the run:
@@ -58,17 +51,10 @@ If the page is reloaded, it shows the options from last time
 
 * Handle self-review still
 * Handle group upload, with email
-*
-
 
 Use the LTI checker: http://ltiapps.net/test/tc.php
-
-
 https://github.com/Brightspace/sample-LTI-WHMIS-quiz
-
-
 Send grades back:
-
 https://community.brightspace.com/devcop/blog/so_you_want_to_extend_your_lms__part_1_lti_primer
 
 To send back grades once a student has completed an assessment in a learning tool, the tool sends an HTTP POST back to the LMS via the URL specified in the [lis_outcome_service_url] field, the payload being a block of XML that contains the grade details.

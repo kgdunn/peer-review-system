@@ -7,6 +7,7 @@ from utils import generate_random_token
 from review.views import get_create_student
 from review.models import Person, Course
 from .models import Group_Formation_Process, Group, Enrolled
+from .forms import UploadFileForm
 
 # Python imports
 import re
@@ -52,34 +53,16 @@ def randomly_enroll_function(gID):
     Runs the process of randomly enrolling the remaining users.
     """
 
-def import_classlist(request):
-    """
-    Allows the instructor to import a class list
-    """
-
-    if request.method != 'POST':
-        return HttpResponse(("You have reached the Group LTI component "
-                             "without authorization."))
-
-    logger.debug('POST = ' + str(request.POST))
-    person_or_error, course, gID = starting_point(request)
-    if not(isinstance(person_or_error, Person)):
-        return person_or_error      # Error path if learner does not exist
-
-    person = person_or_error
-    if person.role == 'Learn':
-        return HttpResponse(("You have reached the Group LTI component "
-                             "without authorization."))
-
-    # Classlist should be exported from Brightspace:
-    # Row 1 is ignored
-    # OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
-
+def handle_uploaded_file(classlist):
     output = []
-    for idx, row in enumerate(rows):
+    classlist_all = classlist.readlines()
+
+    for idx, row in enumerate(classlist_all):
+
         if idx == 0:
             continue
 
+        row = row.decode().split(',')
         student_number = row[0].strip('#')
         last_name = row[1].strip()
         first_name = row[2].strip()
@@ -87,15 +70,64 @@ def import_classlist(request):
 
         # Only create student accounts if there is a valid email address:
         if email:
-            learner, newbie = Person.objects.get_or_create(is_active = True,
-                                    first_name = first_name,
-                                    email = email,
-                                    student_number = student_number,
-                                    full_name = first_name + ' ' + last_name,
-                                    role = 'Learn',
-                                    )
+            learner, newbie = Person.objects.get_or_create(
+                        email = email,
+                        role = 'Learn')
+            learner.student_number = student_number
+            learner.save()
 
-            output.append('Added to the database: %s' % learner)
+            if newbie:
+                output.append('Added new learner: %s' % learner)
+
+
+            enrolled = Enrolled(person = learner,
+                                group = None,        # this isn't known yet
+                                is_enrolled = False) # enrolled when student
+                                                     # selects to
+            enrolled.save()
+
+            output.append('Enrolled learner: %s' % learner)
+
+    return '\n'.join(output)
+
+#@csrf_exempt
+#@xframe_options_exempt
+def import_classlist(request):
+    """
+    Allows the instructor to import a class list. This is used (only) so that
+    unallocated students can be assigned, if needed.
+
+    Therefore, importing is only needed if that specific function is required.
+    """
+    if request.method != 'POST':
+        form = UploadFileForm()
+        return render(request, 'groups/import_classlist.html', {'form': form})
+
+        #return HttpResponse(("You have reached the Group LTI component "
+        #                     "without authorization."))
+
+    #logger.debug('POST = ' + str(request.POST))
+    #person_or_error = get_create_student(request)
+    #if not(isinstance(person_or_error, Person)):
+        #return person_or_error      # Error path if learner does not exist
+
+    #person = person_or_error
+    #if person.role == 'Learn':
+        #return HttpResponse(("You have reached the Group LTI component "
+                             #"without authorization."))
+
+    # Classlist should be exported from Brightspace:
+    # Row 1 is ignored
+    # OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
+
+
+
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            output = handle_uploaded_file(request.FILES['classlist'])
+            return HttpResponse(str(output))
+
 
 @csrf_exempt
 @xframe_options_exempt
