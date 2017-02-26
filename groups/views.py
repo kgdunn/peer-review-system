@@ -71,8 +71,31 @@ def import_classlist(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
+    # Classlist should be exported from Brightspace:
+    # Row 1 is ignored
+    # OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
 
+    output = []
+    for idx, row in enumerate(rows):
+        if idx == 0:
+            continue
 
+        student_number = row[0].strip('#')
+        last_name = row[1].strip()
+        first_name = row[2].strip()
+        email = row[3].strip()
+
+        # Only create student accounts if there is a valid email address:
+        if email:
+            learner, newbie = Person.objects.get_or_create(is_active = True,
+                                    first_name = first_name,
+                                    email = email,
+                                    student_number = student_number,
+                                    full_name = first_name + ' ' + last_name,
+                                    role = 'Learn',
+                                    )
+
+            output.append('Added to the database: %s' % learner)
 
 @csrf_exempt
 @xframe_options_exempt

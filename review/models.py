@@ -30,6 +30,7 @@ class Person(models.Model):
     first_name = models.CharField(max_length=200, verbose_name="First name")
     is_active = models.BooleanField(default=True, help_text=('Placeholder'))
     email = models.EmailField(blank=False)
+    student_number = models.CharField(max_length=15, blank=True, default='')
     full_name = models.CharField(max_length=400, verbose_name='Full name',
                                  blank=True)
     user_ID = models.CharField(max_length=100, verbose_name=('User ID from '
