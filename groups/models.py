@@ -1,19 +1,6 @@
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
-from review.models import Course
-
-@python_2_unicode_compatible
-class Group(models.Model):
-    """ Used when learners work/submit in groups."""
-    name = models.CharField(max_length=300, verbose_name="Group name")
-    description = models.TextField(blank=True,
-                                   verbose_name="Detailed group description")
-    capacity = models.PositiveIntegerField(default=0,
-        help_text=('How many people in this particular group instance   '))
-
-    def __str__(self):
-        return u'{0}'.format(self.name)
-
+from review.models import Course, Person
 
 @python_2_unicode_compatible
 class Group_Formation_Process(models.Model):
@@ -39,6 +26,7 @@ class Group_Formation_Process(models.Model):
     instructions = models.TextField(help_text='May contain HTML instructions',
                 verbose_name='Overall instructions to learners', )
 
+    # Dates and times
     dt_groups_open_up = models.DateTimeField(
         verbose_name='When can learners start to register', )
 
@@ -70,3 +58,26 @@ class Group_Formation_Process(models.Model):
     def __str__(self):
         return self.title
 
+
+@python_2_unicode_compatible
+class Group(models.Model):
+    """ Used when learners work/submit in groups."""
+    gp = models.ForeignKey(Group_Formation_Process)
+    name = models.CharField(max_length=300, verbose_name="Group name")
+    description = models.TextField(blank=True,
+                                   verbose_name="Detailed group description")
+    capacity = models.PositiveIntegerField(default=0,
+        help_text=('How many people in this particular group instance   '))
+
+    def __str__(self):
+        return u'{0}'.format(self.name)
+
+
+class Enrolled(models.Model):
+    """
+    Which group is a learner enrolled in"""
+    person = models.ForeignKey(Person)
+    group = models.ForeignKey(Group)
+    is_enrolled = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)

@@ -169,130 +169,128 @@ def get_n_reviews(learner, pr):
 @xframe_options_exempt
 def index(request):
 
-    if request.method == 'POST':
-        logger.debug('POST = ' + str(request.POST))
-        person_or_error, course, pr = starting_point(request)
-
-
-        if not(isinstance(person_or_error, Person)):
-            return person_or_error      # Error path if student does not exist
-        else:
-            learner = person_or_error
-            now_time = datetime.datetime.now()
-
-            allow_submit = False
-            allow_review = False
-            allow_report = False
-            r_actuals = []       # we want to fill this in the "review" step
-            peers = {}           # we want to fill this in the "report" step
-
-            # This is a bit hackish, but required to work towards a deadline.
-            report_sort = []
-            report__comments = []
-            report__n_reviews = 0
-            report__did_submit = False
-            report__overall_max_score = 0
-            report__learner_avg = 0
-
-            # STEP 1: prior to submission date?
-            # Code here to allow submission
-
-            if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
-                and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
-                allow_submit = True
-
-
-            # STEP 2: between review start and end time?
-            # Code here to display the available reviews
-            # Also display the user's/group's own submission
-
-            if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
-                 and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
-                allow_review = True
-
-                # Is this the first time the learner is here: create the
-                # N = pr.number_of_reviews_per_learner rubrics for the learner
-                # and return N ``RubricActual`` instances
-
-                # If this is the second or subequent time here, simply return
-                # the N ``RubricActual`` instances
-
-
-                n_reviews = get_n_reviews(learner, pr)
-                query = RubricActual.objects.filter(graded_by = learner,
-                        rubric_template = pr.rubrictemplate).order_by('created')
-
-                logger.debug('Need to create {0} reviews'.format(n_reviews))
-
-                if query.count() == n_reviews:
-                    r_actuals = list(query)
-                else:
-
-                    # We need to create and append a few more reviews here
-                    r_actuals = list(query)
-
-                    for k in range(n_reviews - query.count()):
-                        # Hit database to get the next submission to grade:
-                        next_sub = get_next_submission_to_evaluate(pr, learner)
-                        if next_sub:
-                            next_sub.number_reviews_assigned += 1
-                            next_sub.save()
-
-                            # Create an ``rubric_actual`` instance:
-                            r_actual, new_rubric = RubricActual.objects.get_or_create(\
-                                        submitted = False,
-                                        graded_by = learner,
-                                        rubric_template = pr.rubrictemplate,
-                                        submission = next_sub)
-
-                            if new_rubric:
-                                create_items(r_actual)
-
-                            r_actuals.append(r_actual)
-
-                            logger.debug('Created: ' + str(next_sub))
-
-                # Now we have the peer review ojects: ``r_actual``
-
-
-            # STEP 3: after the time when feedback is available?
-            # Code here to display the results
-            if (pr.dt_peer_reviews_received_back.replace(tzinfo=None) <= now_time):
-                allow_report = True
-
-                report = get_peer_grading_data(learner, pr)
-                report__comments = report.pop('comments', ['',])
-                shuffle(report__comments)
-                report__n_reviews = report.pop('n_reviews')
-                report__did_submit = report.pop('did_submit')
-                report__overall_max_score = report.pop('overall_max_score', 0)
-                report__learner_avg = report.pop('learner_avg',0)
-
-                report_sort = []
-                for key, value in report.items():
-                    report_sort.append((key, value))
-                report_sort = sorted(report_sort)
-
-
-            ctx = {'person': learner,
-                   'course': course,
-                   'pr': pr,
-                   'r_actuals': r_actuals,
-                   'report': report_sort,
-                   'report__comments': report__comments,
-                   'report__n_reviews': report__n_reviews,
-                   'report__did_submit': report__did_submit,
-                   'report__overall_max_score': report__overall_max_score,
-                   'report__learner_avg': report__learner_avg,
-                   'allow_submit': allow_submit,
-                   'allow_review': allow_review,
-                   'allow_report': allow_report,
-                   }
-            return render(request, 'review/welcome.html', ctx)
-
-    else:
+    if request.method != 'POST':
         return HttpResponse(("You have reached the Peer Review LTI component "
-                                    "without authorization."))
+                             "without authorization."))
+
+    logger.debug('POST = ' + str(request.POST))
+    person_or_error, course, pr = starting_point(request)
+
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if student does not exist
+
+    learner = person_or_error
+    now_time = datetime.datetime.now()
+
+    allow_submit = False
+    allow_review = False
+    allow_report = False
+    r_actuals = []       # we want to fill this in the "review" step
+    peers = {}           # we want to fill this in the "report" step
+
+    # This is a bit hackish, but required to work towards a deadline.
+    report_sort = []
+    report__comments = []
+    report__n_reviews = 0
+    report__did_submit = False
+    report__overall_max_score = 0
+    report__learner_avg = 0
+
+    # STEP 1: prior to submission date?
+    # Code here to allow submission
+
+    if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
+        and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
+        allow_submit = True
+
+
+    # STEP 2: between review start and end time?
+    # Code here to display the available reviews
+    # Also display the user's/group's own submission
+
+    if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
+         and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
+        allow_review = True
+
+        # Is this the first time the learner is here: create the
+        # N = pr.number_of_reviews_per_learner rubrics for the learner
+        # and return N ``RubricActual`` instances
+
+        # If this is the second or subequent time here, simply return
+        # the N ``RubricActual`` instances
+
+
+        n_reviews = get_n_reviews(learner, pr)
+        query = RubricActual.objects.filter(graded_by = learner,
+                rubric_template = pr.rubrictemplate).order_by('created')
+
+        logger.debug('Need to create {0} reviews'.format(n_reviews))
+
+        if query.count() == n_reviews:
+            r_actuals = list(query)
+        else:
+
+            # We need to create and append a few more reviews here
+            r_actuals = list(query)
+
+            for k in range(n_reviews - query.count()):
+                # Hit database to get the next submission to grade:
+                next_sub = get_next_submission_to_evaluate(pr, learner)
+                if next_sub:
+                    next_sub.number_reviews_assigned += 1
+                    next_sub.save()
+
+                    # Create an ``rubric_actual`` instance:
+                    r_actual, new_rubric = RubricActual.objects.get_or_create(\
+                                submitted = False,
+                                graded_by = learner,
+                                rubric_template = pr.rubrictemplate,
+                                submission = next_sub)
+
+                    if new_rubric:
+                        create_items(r_actual)
+
+                    r_actuals.append(r_actual)
+
+                    logger.debug('Created: ' + str(next_sub))
+
+        # Now we have the peer review ojects: ``r_actual``
+
+
+    # STEP 3: after the time when feedback is available?
+    # Code here to display the results
+    if (pr.dt_peer_reviews_received_back.replace(tzinfo=None) <= now_time):
+        allow_report = True
+
+        report = get_peer_grading_data(learner, pr)
+        report__comments = report.pop('comments', ['',])
+        shuffle(report__comments)
+        report__n_reviews = report.pop('n_reviews')
+        report__did_submit = report.pop('did_submit')
+        report__overall_max_score = report.pop('overall_max_score', 0)
+        report__learner_avg = report.pop('learner_avg',0)
+
+        report_sort = []
+        for key, value in report.items():
+            report_sort.append((key, value))
+        report_sort = sorted(report_sort)
+
+    ctx = {'person': learner,
+           'course': course,
+           'pr': pr,
+           'r_actuals': r_actuals,
+           'report': report_sort,
+           'report__comments': report__comments,
+           'report__n_reviews': report__n_reviews,
+           'report__did_submit': report__did_submit,
+           'report__overall_max_score': report__overall_max_score,
+           'report__learner_avg': report__learner_avg,
+           'allow_submit': allow_submit,
+           'allow_review': allow_review,
+           'allow_report': allow_report,
+           }
+    return render(request, 'review/welcome.html', ctx)
+
 
 def get_peer_grading_data(learner, pr):
     """
@@ -522,19 +520,26 @@ def submit_peer_review_feedback(request, ractual_code):
                          '').format(n_to_do,))
 
 
-# TODO: secure this still
 def manual_create_uploads(request):
     """
     Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
 
     """
-
     import csv
     import os
     from shutil import copyfile
     from os.path import join, getsize
 
-    pr_process = PR_process.objects.filter(id=1)[0]
+    person_or_error, course, pr_process = starting_point(request)
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if learner does not exist
+
+    person = person_or_error
+    if person.role == 'Learn':
+        return HttpResponse(("You have reached the Group LTI component "
+                             "without authorization."))
+
+    #pr_process = PR_process.objects.filter(id=1)[0]
 
     classlist = {}
     classlist_CSV = '/home/kevindunn/IO3075-classlist.csv'
@@ -596,12 +601,21 @@ def manual_create_uploads(request):
         else:
             print(files)
 
-# TODO: secure this still
 def reset_counts(request):
     """
     Resets the counts for each submission
     """
-    pr_process = PR_process.objects.filter(id=1)[0]
+
+    person_or_error, course, pr_process = starting_point(request)
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if learner does not exist
+
+    person = person_or_error
+    if person.role == 'Learn':
+        return HttpResponse(("You have reached the Group LTI component "
+                             "without authorization."))
+
+    #pr_process = PR_process.objects.filter(id=1)[0]
 
     all_subs = Submission.objects.filter(pr_process=pr_process)
     for idx, sub in enumerate(all_subs):

@@ -6,7 +6,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from utils import generate_random_token
 from review.views import get_create_student
 from review.models import Person, Course
-from .models import Group_Formation_Process
+from .models import Group_Formation_Process, Group, Enrolled
 
 # Python imports
 import re
@@ -47,40 +47,76 @@ def starting_point(request):
         return HttpResponse(("You are not registered in this course."))
 
 
+def randomly_enroll_function(gID):
+    """
+    Runs the process of randomly enrolling the remaining users.
+    """
+
+def import_classlist(request):
+    """
+    Allows the instructor to import a class list
+    """
+
+    if request.method != 'POST':
+        return HttpResponse(("You have reached the Group LTI component "
+                             "without authorization."))
+
+    logger.debug('POST = ' + str(request.POST))
+    person_or_error, course, gID = starting_point(request)
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if learner does not exist
+
+    person = person_or_error
+    if person.role == 'Learn':
+        return HttpResponse(("You have reached the Group LTI component "
+                             "without authorization."))
+
+
+
+
 @csrf_exempt
 @xframe_options_exempt
 def start_groups(request):
     """
     The group functionality is rendered to the end-learner here.
     """
-    if request.method == 'POST':
-        logger.debug('POST = ' + str(request.POST))
-        person_or_error, course, gID = starting_point(request)
-
-
-        if not(isinstance(person_or_error, Person)):
-            return person_or_error      # Error path if student does not exist
-        else:
-            learner = person_or_error
-            now_time = datetime.datetime.now()
-
-            # Set bools
-            # Set variables depeding on the timing information
-            # Render template
-
-            #if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
-            #    and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
-            #    allow_submit = True
-
-            # if after cutoff:
-            # run "randomly_enroll_function(), if required"
-
-
-            ctx = {'person': learner,
-                   'course': course,
-                  }
-            return render(request, 'groups/index.html', ctx)
-
-    else:
+    if request.method != 'POST':
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
+
+    # Continue with the main function
+    logger.debug('POST = ' + str(request.POST))
+    person_or_error, course, gID = starting_point(request)
+
+
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if student does not exist
+
+    learner = person_or_error
+    now_time = datetime.datetime.now()
+
+    allow_activity = False
+    allow_selfenrol = False
+    enrolled_into = []
+    group_for_course = []
+
+    if (gID.dt_groups_open_up.replace(tzinfo=None) <= now_time):
+        allow_activity = True
+        enrolled_into = Enrolled.objects.filter(person=learner)
+        #group_for_course = gID
+
+    if (gID.dt_selfenroll_starts.replace(tzinfo=None) <= now_time) and \
+        (gID.allow_unenroll):
+        allow_selfenrol = True
+
+    if (gID.dt_group_selection_stops.replace(tzinfo=None) <= now_time):
+        allow_activity = False
+        randomly_enroll_function(gID)
+
+    ctx = {'person': learner,
+           'course': course,
+           'gID': gID,
+
+          }
+    return render(request, 'groups/index.html', ctx)
+
