@@ -9,6 +9,9 @@ from .models import RubricActual, RubricTemplate
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("full_name", "email", "is_active", "user_ID", "role")
 
+class PR_processAdmin(admin.ModelAdmin):
+    list_display = ("title", "course", "uses_groups", "LTI_system", "LTI_id")
+
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
                     "submitted_file_name", "number_reviews_assigned",
@@ -27,10 +30,12 @@ class ROptionActualAdmin(admin.ModelAdmin):
                     "comment", "created", "modified")
 
 
+
+
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Group)
 admin.site.register(Course)
-admin.site.register(PR_process)
+admin.site.register(PR_process, PR_processAdmin)
 admin.site.register(Submission, SubmissionAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)
