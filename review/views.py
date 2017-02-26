@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
-from .forms import UploadFileForm
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
