@@ -1,11 +1,14 @@
 TO DO
 ======
 
+
+All student comments and grades to Conny.
+
 Add group functionality
 Allow multiple uploads
 Release as BSD license and open up
 Suggestions for a grading scheme for Conny.
-Comments and grades to Conny.
+
 Get a list of grades: grade report
 
 Make it clear that these reviews are all for 1 session (not N=3 sessions)

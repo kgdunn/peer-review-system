@@ -338,7 +338,6 @@ def get_peer_grading_data(learner, pr):
     for idx, rubric_actual in enumerate(completed_reviews):
         overall_max_score = 0.0
         r_template = rubric_actual.rubric_template
-        #item_templates = r_template.ritemtemplate_set.all().order_by('order')
 
         item_scores = np.zeros(n_items) * np.NaN
         #comments = []  # <--- come back and change processing order. This only
@@ -370,7 +369,7 @@ def get_peer_grading_data(learner, pr):
     peer_data['comments'] = comments
     peer_data['n_reviews'] = n_reviews
     peer_data['overall_max_score'] = overall_max_score
-    peer_data['learner_avg'] = np.mean(np.nansum(scores, axis=0))  # ignore NaNsu
+    peer_data['learner_avg'] = np.sum(np.nanmean(scores, axis=1)) # ignore NaNs
     return peer_data
 
 def get_learner_details(ractual_code):
@@ -624,5 +623,28 @@ def reset_counts(request):
         sub.number_reviews_assigned = 0
         sub.save()
         logger.debug('Counts reset for: {0}'.format(sub))
+
+    return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
+
+
+def get_stats_comments(request):
+    """
+    Gets all the student grades and comments
+    """
+    person_or_error, course, pr_process = starting_point(request)
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if learner does not exist
+
+    learner = person_or_error
+    if person.role == 'Learn':
+        return HttpResponse(("You have reached the Group LTI component "
+                             "without authorization."))
+
+    all_subs = Submission.objects.filter(pr_process=pr_process)
+    for idx, sub in enumerate(all_subs):
+        sub.person
+
+
+        peer = get_peer_grading_data(learner, pr_process)
 
     return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))

@@ -16,4 +16,8 @@ urlpatterns = [
         name='submit_peer_review_feedback'),
 
     url(r'^reset-counts/$', views.reset_counts, name='reset_counts'),
+
+    url(r'^get_stats_comments$',
+        views.get_stats_comments,
+        name='get_stats_comments')
 ]
