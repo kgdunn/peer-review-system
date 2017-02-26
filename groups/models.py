@@ -12,7 +12,7 @@ class Group(models.Model):
         help_text=('How many people in this particular group instance   '))
 
     def __str__(self):
-        return u'{0}' % self.name
+        return u'{0}'.format(self.name)
 
 
 @python_2_unicode_compatible
@@ -43,7 +43,8 @@ class Group_Formation_Process(models.Model):
         verbose_name='When can learners start to register', )
 
     dt_selfenroll_starts = models.DateTimeField(
-        verbose_name='Usually the same as above date/time, but can be later', )
+        verbose_name="When does self-enrolment start?",
+        help_text='Usually the same as above date/time, but can be later', )
 
     dt_group_selection_stops = models.DateTimeField(
         verbose_name=('When does group selection stop'))
@@ -61,6 +62,7 @@ class Group_Formation_Process(models.Model):
         help_text=('Should we show the group descriptions also?'))
 
     random_add_unenrolled_after_cutoff = models.BooleanField(default=False,
+        verbose_name=('Randomly add unenrolled learners after the cutoff date/time'),
         help_text=('Should we randomly allocate unenrolled users after '
                    'the cut-off date/time ("dt_group_selection_stops")?'))
 

@@ -274,7 +274,7 @@ def index(request):
                 report_sort = sorted(report_sort)
 
 
-            ctx = {'person': person_or_error,
+            ctx = {'person': learner,
                    'course': course,
                    'pr': pr,
                    'r_actuals': r_actuals,
