@@ -1,0 +1,11 @@
+
+{% extends "review/base.html" %}
+
+{% block content %}
+
+You are currently enrolled in the following groups for this activity:
+
+
+{{group.name}}  {{group.description}}  {{group.join_link}} {{group.leave_link}}       {{group.capacity}}   {{group.member_details}}
+
+{% endblock %}

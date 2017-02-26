@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Person, Group, Course, Submission, PR_process
+from .models import Person, Course, Submission, PR_process
 
 from .models import RItemActual, RItemTemplate
 from .models import ROptionActual, ROptionTemplate
@@ -29,11 +29,7 @@ class ROptionActualAdmin(admin.ModelAdmin):
     list_display = ("roption_template", "ritem_actual", "submitted",
                     "comment", "created", "modified")
 
-
-
-
 admin.site.register(Person, PersonAdmin)
-admin.site.register(Group)
 admin.site.register(Course)
 admin.site.register(PR_process, PR_processAdmin)
 admin.site.register(Submission, SubmissionAdmin)

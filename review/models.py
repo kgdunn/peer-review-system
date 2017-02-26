@@ -39,13 +39,13 @@ class Person(models.Model):
     def __str__(self):
         return u'{0} [{1}]'.format(self.full_name, self.email)
 
-@python_2_unicode_compatible
-class Group(models.Model):
-    """ Used when learners work/submit in groups."""
-    name = models.CharField(max_length=300, verbose_name="Group name")
+#@python_2_unicode_compatible
+#class Group(models.Model):
+    #""" Used when learners work/submit in groups."""
+    #name = models.CharField(max_length=300, verbose_name="Group name")
 
-    def __str__(self):
-        return u'{0}' % self.name
+    #def __str__(self):
+        #return u'{0}' % self.name
 
 @python_2_unicode_compatible
 class Course(models.Model):
