@@ -23,7 +23,7 @@ file submisison. Only the following file types are accepted: {{pr.accepted_file_
     <input type="submit" value="Submit your{% if pr.uses_groups %} group's{% endif %} report" /> (maximum size: {{pr.max_file_upload_size_MB}} MB).
 </form>
 
-{% endif %}
+{% else %}{# if allow_submit #}
 
 <hr>
 <h2>Review phase{% if person.role == 'Learn'%}: {{pr.number_of_reviews_per_learner}} peer reviews required{%endif%}</h2>
@@ -84,12 +84,14 @@ Overall score: {{report__learner_avg|floatformat}} out of a maximum of {{report_
 <hr>
 
 
-
 {% endif %} {# report__n_reviews == 0 #}
 
 {% else %}
 <p>No feedback is available at this time.
 {% endif %} {# allow_report #}
+
+{% endif %}{# if allow_submit #}
+
 
 {% endblock %}
 
