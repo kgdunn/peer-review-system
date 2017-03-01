@@ -1,6 +1,30 @@
 TO DO
 ======
 
+Groups
+--------
+
+Open time
+Closing time
+Allow more than N enrollments
+Groups of different sizes
+Can be prefilled
+Allow self-removal and re-enrollment
+Longer term: waitlist
+Export to CSV
+IMport names from CSV
+Show description of groups
+Log for administrator
+
+
+Upload
+=-------
+
+Size limit
+Check for PDF
+>>> import magic
+>>> magic.from_file("testdata/test.pdf")
+
 Check that Google analytics works
 
 Add group functionality
