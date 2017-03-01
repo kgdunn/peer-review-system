@@ -466,9 +466,8 @@ def upload_submission(request, learner, pr_process):
                      )
     sub.save()
 
-    if pr_process.uses_groups:
-        group_info = get_group_information(learner, pr_process.gf_process)
-        group_name = group_info['group_name']
+    group_info = get_group_information(learner, pr_process.gf_process)
+    if group_info['group_name']:
         address = group_info['member_email_list']
         first_line = 'You, or someone in your group,'
         extra_line = ('That is why all members in your group will receive '
@@ -476,7 +475,6 @@ def upload_submission(request, learner, pr_process):
     else:
         address = [learner.email, ]
         first_line = 'You'
-        group_name = ''
         extra_line = ''
 
     message = ('{0} have successfully submitted a document for: {1}.\n'
