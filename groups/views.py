@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
@@ -20,12 +21,7 @@ from random import shuffle
 import logging
 logger = logging.getLogger(__name__)
 
-# SECURITY ISSUES
-# Look at https://github.com/Harvard-University-iCommons/django-auth-lti
-# Brightspace: https://github.com/open-craft/django-lti-tool-provider
-from django.views.decorators.csrf import csrf_exempt
 #---------
-
 
 def starting_point(request):
     """
@@ -48,12 +44,17 @@ def starting_point(request):
         return HttpResponse(("You are not registered in this course."))
 
 
+
 def randomly_enroll_function(gID):
     """
     Runs the process of randomly enrolling the remaining users.
     """
+    pass
 
-def handle_uploaded_file(classlist):
+def handle_uploaded_file(classlist, gID, auto_create_and_enroll_groups=True):
+    """
+    Enrols students into (preliminary) groups based on the uploaded CSV file.
+    """
     output = []
     classlist_all = classlist.readlines()
 
@@ -64,9 +65,20 @@ def handle_uploaded_file(classlist):
 
         row = row.decode().split(',')
         student_number = row[0].strip('#')
-        last_name = row[1].strip()
-        first_name = row[2].strip()
-        email = row[3].strip()
+        last_name = row[2].strip()
+        first_name = row[3].strip()
+        email = row[4].strip()
+        if len(row) > 5:
+            group = row[5].strip()
+        else:
+            group = None
+            is_enrolled = False
+
+        if group and auto_create_and_enroll_groups:
+            group, newgroup = Group.objects.get_or_create(name=group, gp=gID)
+            is_enrolled = True
+            if newgroup:
+                output.append('Created new group: %s' % group)
 
         # Only create student accounts if there is a valid email address:
         if email:
@@ -79,11 +91,9 @@ def handle_uploaded_file(classlist):
             if newbie:
                 output.append('Added new learner: %s' % learner)
 
-
-            enrolled = Enrolled(person = learner,
-                                group = None,        # this isn't known yet
-                                is_enrolled = False) # enrolled when student
-                                                     # selects to
+            enrolled = Enrolled(person=learner,
+                                group=group,
+                                is_enrolled=is_enrolled)
             enrolled.save()
 
             output.append('Enrolled learner: %s' % learner)
@@ -116,16 +126,15 @@ def import_classlist(request):
         #return HttpResponse(("You have reached the Group LTI component "
                              #"without authorization."))
 
-    # Classlist should be exported from Brightspace:
-    # Row 1 is ignored
-    # OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
-
-
-
     if request.method == 'POST':
+
+        #person_or_error, course, gID = starting_point(request)
+        course = Course.objects.get(pk=1)
+        gID = Group_Formation_Process.objects.get(pk=1)
+
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            output = handle_uploaded_file(request.FILES['classlist'])
+            output = handle_uploaded_file(request.FILES['classlist'], gID)
             return HttpResponse(str(output))
 
 

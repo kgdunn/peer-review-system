@@ -6,7 +6,7 @@
 <p>Please upload the classlist in CSV format, based on the export from Brightspace:
 
 <p>Row 1 is ignored
-<p>OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
+<p>STudent number,   OrgDefinedId,	Last Name,	First Name,	Email, ignore rest of columns
 
 <form action="{% url 'import_classlist' %}" method="post"  enctype="multipart/form-data">
     {% csrf_token %}

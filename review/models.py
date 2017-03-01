@@ -5,6 +5,7 @@ import os
 from django.utils.timezone import utc
 from django.utils.encoding import python_2_unicode_compatible
 
+
 # Django and Python imports
 try:
     import simplejson as json
@@ -106,6 +107,10 @@ class PR_process(models.Model):
     uses_groups = models.BooleanField(default=False,
         help_text=('The workflow and responses are slightly modified if groups '
                    'are used.'))
+    gf_process = models.ForeignKey('groups.Group_Formation_Process', blank=True,
+                                   default=None, null=True,
+        help_text=('Must be specified if groups are being used.'))
+
 
     instructions = models.TextField(help_text='May contain HTML instructions',
                 verbose_name='Overall instructions to learners', )

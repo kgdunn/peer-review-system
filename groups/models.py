@@ -17,7 +17,7 @@ class Group_Formation_Process(models.Model):
     # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
 
     LTI_system = models.CharField(max_length=50, choices=CHOICES,)
-    title = models.CharField(max_length=300, verbose_name="Group formation")
+    title = models.CharField(max_length=300, verbose_name="Group formation name")
     LTI_id = models.CharField(max_length=50, verbose_name="LTI ID",
         help_text=('In Brightspace LTI post: "resource_link_id"'))
 

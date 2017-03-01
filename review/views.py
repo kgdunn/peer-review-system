@@ -442,7 +442,8 @@ def upload_submission(request, learner, pr_process):
     sub.save()
 
     if pr_process.uses_groups:
-        address = '' #get_group_mailing_address(learner)
+
+        address = '' #get_group_mailing_address(learner, course)
     else:
         address = learner.email
 
