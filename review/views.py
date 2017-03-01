@@ -210,8 +210,8 @@ def index(request):
     if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
         and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
         allow_submit = True
-        from .forms import UploadFileForm
-        file_upload_form = UploadFileForm()
+        from . forms import UploadFF
+        file_upload_form = UploadFF()
 
 
     # STEP 2: between review start and end time?
@@ -397,6 +397,49 @@ def get_learner_details(ractual_code):
     learner = r_actual.graded_by
     return r_actual, learner
 
+@csrf_exempt
+def upload_submission(request):
+    """
+    Handles the upload of the user's submission.
+    """
+    # if within the date and time, and
+         #if the filesize is OK and
+             #if the file is of the correct type
+
+                #receive the upload, store it.
+
+
+    # if a group submission, send email to the group
+    # let them know the cut-off for further submissions.
+    logger.debug(request.POST)
+    logger.debug(request.FILES)
+
+
+    #status = 'S'
+    #is_valid = True
+    #filename = root + os.sep + files[0]
+    #extension = filename.split('.')[-1]
+    #submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+                                                   #generate_random_token(token_length=16) + '.' + extension)
+    #ip_address = '0.0.0.0'
+
+    #base_dir = '/var/www/peer/documents'
+##            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
+    #copyfile(filename, base_dir + os.sep + submitted_file_name)
+
+    #sub = Submission(submitted_by = learner,
+                     #status = status,
+                     #pr_process = pr_process,
+                     #is_valid = True,
+                     #file_upload = submitted_file_name,
+                     #submitted_file_name = filename,
+                     #ip_address = ip_address,
+                     #)
+    #sub.save()
+
+
+
+    return HttpResponse('Received')
 
 @csrf_exempt
 @xframe_options_exempt

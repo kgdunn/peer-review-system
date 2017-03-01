@@ -173,7 +173,8 @@ class Submission(models.Model):
 
     TODO: allow multiple files as a submission.
 
-    Old files are kept, but not available for download.
+    Old files are kept, but not available for download.<-- remove old submissions
+
     Show submissions for people in the same group in top/bottom order
     Allow multiple uploads till submission deadline is reached.
     """
