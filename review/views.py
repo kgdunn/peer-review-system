@@ -7,7 +7,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from .models import Person, Course, PR_process, Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
-from utils import generate_random_token, send_email
+from utils import generate_random_token, send_email, get_IP_address
 from groups.views import get_group_information
 
 # Python imports
