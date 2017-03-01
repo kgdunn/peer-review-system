@@ -20,12 +20,16 @@ Log for administrator
 Upload
 =-------
 
+
 Size limit
 Check for PDF
 >>> import magic
 >>> magic.from_file("testdata/test.pdf")
 
 Check that Google analytics works
+
+File upload: the upload process should also create the directory, if not existing
+
 
 Add group functionality
 Allow multiple uploads
