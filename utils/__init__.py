@@ -196,6 +196,7 @@ def send_email(to_addresses, subject, messages):
     else:
         use_mass_email = False
         if settings.DEBUG or settings.TESTING:
+            logger.debug('Overwriting the email: sending to @example.com.')
             # Overwrite sender address in debug mode
             to_addresses = ['test@example.com',]
             to_list.append('test@example.com')
