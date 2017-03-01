@@ -28,12 +28,6 @@ logger = logging.getLogger(__name__)
 from django.views.decorators.csrf import csrf_exempt
 #---------
 
-# Imaginary function to handle an uploaded file.
-def handle_uploaded_file(f):
-    with open('/tmp/name.PDF', 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
 def starting_point(request):
     """
     Bootstrap code to run on every request.
@@ -77,6 +71,7 @@ def get_create_student(request):
                                                        role=role)
 
     elif request.POST.get('learner_ID', ''):
+        logger.debug('Getting user from POST field')
         newbie = False
         learner_ID = request.POST.get('learner_ID', '')
         learner = Person.objects.filter(user_ID=learner_ID)
@@ -222,8 +217,8 @@ def index(request, message=''):
         from . forms import UploadFF
         file_upload_form = UploadFF()
 
-        logger.debug(request.POST)
-        logger.debug(request.FILES)
+        if request.FILES:
+            upload_submission(request, learner, pr)
 
 
     # STEP 2: between review start and end time?
@@ -410,49 +405,50 @@ def get_learner_details(ractual_code):
     learner = r_actual.graded_by
     return r_actual, learner
 
-@csrf_exempt
-def upload_submission(request):
+
+def upload_submission(request, learner, pr_process):
     """
     Handles the upload of the user's submission.
     """
-    # if within the date and time, and
-         #if the filesize is OK and
-             #if the file is of the correct type
 
-                #receive the upload, store it.
+    # if within the date and time <-- that doesn't need to be checked.
+    #                                 already done in the calling function
 
+    #if the filesize is OK and    <-- not checked yet
+
+    #if the file is of the correct type <-- we will come back to that later
+
+
+    filename = request.FILES['file_upload'].name
+    extension = filename.split('.')[-1]
+    submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+                     generate_random_token(token_length=16) + '.' + extension)
+    #copyfile(source_file, base_dir + os.sep + submitted_file_name)
+    with open(submitted_file_name, 'wb+') as destination:
+        for chunk in request.FILES['file_upload'].chunks():
+            destination.write(chunk)
+
+    sub = Submission(submitted_by=learner,
+                     status = 'S',
+                     pr_process = pr_process,
+                     is_valid = True,
+                     file_upload = submitted_file_name,
+                     submitted_file_name = filename,
+                     ip_address = '0.0.0.0',
+                     )
+    sub.save()
+
+    if pr_process.uses_groups:
+        address = get_group_mailing_address(learner)
+    else:
+        address = learner.email
 
     # if a group submission, send email to the group
     # let them know the cut-off for further submissions.
-    logger.debug(request.POST)
-    logger.debug(request.FILES)
-    message = ('Thank you. Your upload has been successfully '
-               'received.')
-    return HttpResponseRedirect('/')
+    message = ('')
+    #send_mail(address)
 
-    #status = 'S'
-    #is_valid = True
-    #filename = root + os.sep + files[0]
-    #extension = filename.split('.')[-1]
-    #submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
-                                                   #generate_random_token(token_length=16) + '.' + extension)
-    #ip_address = '0.0.0.0'
-
-    #base_dir = '/var/www/peer/documents'
-##            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
-    #copyfile(filename, base_dir + os.sep + submitted_file_name)
-
-    #sub = Submission(submitted_by = learner,
-                     #status = status,
-                     #pr_process = pr_process,
-                     #is_valid = True,
-                     #file_upload = submitted_file_name,
-                     #submitted_file_name = filename,
-                     #ip_address = ip_address,
-                     #)
-    #sub.save()
-
-
+    return None
 
 @csrf_exempt
 @xframe_options_exempt
