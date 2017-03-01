@@ -7,7 +7,8 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from .models import Person, Course, PR_process, Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
-from utils import generate_random_token
+from utils import generate_random_token, send_email
+from groups.views import get_group_information
 
 # Python imports
 import re
@@ -442,15 +443,35 @@ def upload_submission(request, learner, pr_process):
     sub.save()
 
     if pr_process.uses_groups:
-
-        address = '' #get_group_mailing_address(learner, course)
+        group_info = get_group_information(learner, pr_process.gf_process)
+        group_name = group_info['group_name']
+        address = group_info['member_email_list']
+        first_line = 'You, or someone in your group,'
+        extra_line = ('That is why all members in your group will receive '
+                      'this message.')
     else:
-        address = learner.email
+        address = [learner.email, ]
+        first_line = 'You'
+        group_name = ''
+        extra_line = ''
 
-    # if a group submission, send email to the group
-    # let them know the cut-off for further submissions.
-    message = ('')
-    #send_mail(address)
+    message = ('{0} have successfully submitted a document for: {1}.\n'
+               'This is for the course: {2}\n'
+               '\n'
+               'The closing time for submissions is: {3}\n'
+               'You may submit multiple times, up to the deadline. Only the '
+               'most recent submission is kept. {4}\n'
+               ''
+               'This is an automated message from the Peer Review system. '
+               'Please do not reply to this email address.\n')
+    message = message.format(first_line, pr_process.LTI_title,
+                             pr_process.course.name,
+                             pr_process.dt_submission_deadline,
+                             extra_line)
+
+    logger.debug('Sending email: {0}'.format(address))
+    subject = 'Peer review file: successfully submitted'
+    send_email(address, subject, message)
 
     return None
 

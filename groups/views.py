@@ -5,7 +5,6 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
 from utils import generate_random_token
-from review.views import get_create_student
 from review.models import Person, Course
 from .models import Group_Formation_Process, Group, Enrolled
 from .forms import UploadFileForm
@@ -50,6 +49,31 @@ def randomly_enroll_function(gID):
     Runs the process of randomly enrolling the remaining users.
     """
     pass
+
+def get_group_information(learner, gID):
+    """
+    Get the group information for the current ``learner`` in the current group
+    formation process instance (gID).
+
+    Returns a dictionary:
+    {'group_name': Name of the group,
+     'member_email_list': List of group member emails
+    }
+    """
+    email_list = []
+    out = {'group_name': '',
+           'member_email_list': email_list}
+    enrolment = Enrolled.objects.filter(person=learner, group__gp=gID)
+    if enrolment.count():
+        # Assuming the student is only enrolled in 1 group
+        out['group_name'] = enrolment[0].group.name
+
+        group_learners = Enrolled.objects.filter(group__gp=gID,
+                                                 group=enrolment[0].group)
+        for item in group_learners:
+            email_list.append(item.person.email)
+
+    return out
 
 def handle_uploaded_file(classlist, gID, auto_create_and_enroll_groups=True):
     """
