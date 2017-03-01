@@ -437,9 +437,10 @@ def upload_submission(request):
                      #)
     #sub.save()
 
+    return HttpResponse('Thank you. Your review has been successfully '
+                        'received. You still have to complete {0} review(s).'
+                        '<br>You may close this tab/window, and return back.')
 
-
-    return HttpResponse('Received')
 
 @csrf_exempt
 @xframe_options_exempt
