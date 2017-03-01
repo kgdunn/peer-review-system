@@ -9,7 +9,7 @@
 {% if allow_submit %}
 
 <p>You{% if pr.uses_groups %}, or any person in your group,{% endif %} may upload a
-file submisison. Only the following file types are accepted: {{pr.accepted_file_types_comma_separated|upper}}
+file submisison. Only the following file types are accepted: {{pr.accepted_file_types_comma_separated|upper}}.
 <p>Upload file:
 <form enctype="multipart/form-data" method="post" action="/upload">
     {% csrf_token %}
