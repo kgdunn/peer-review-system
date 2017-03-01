@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
-
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
@@ -21,11 +21,13 @@ from random import shuffle
 import logging
 logger = logging.getLogger(__name__)
 
+# Move this to localsettings.py, but it is good enough here, for now.
+base_dir_for_file_uploads = '/var/www/peer/documents/'
 
-# SECURITY ISSUES
+
+# Alternative LTI methods
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
 # Brightspace: https://github.com/open-craft/django-lti-tool-provider
-from django.views.decorators.csrf import csrf_exempt
 #---------
 
 def starting_point(request):
@@ -423,6 +425,7 @@ def upload_submission(request, learner, pr_process):
     extension = filename.split('.')[-1]
     submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
                      generate_random_token(token_length=16) + '.' + extension)
+    submitted_file_name = base_dir_for_file_uploads + submitted_file_name
     #copyfile(source_file, base_dir + os.sep + submitted_file_name)
     with open(submitted_file_name, 'wb+') as destination:
         for chunk in request.FILES['file_upload'].chunks():
