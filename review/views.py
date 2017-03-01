@@ -57,11 +57,12 @@ def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
+
     if request.POST.get('ext_d2l_token_digest', None):
         first_name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         full_name = request.POST['lis_person_name_full']
-        user_ID = request.POST['user_id']
+        user_ID = request.POST.get('user_id', '')
         role = request.POST['roles']
         # You can also use: request.POST['ext_d2l_role']
         if 'Instructor' in role:
@@ -197,8 +198,11 @@ def index(request):
     report__overall_max_score = 0
     report__learner_avg = 0
 
-    # STEP 1: prior to submission date?
-    # Code here to allow submission
+    # Prior to submission date?
+    #Just outline the coming steps
+
+
+    # During the submission time frame?
 
     if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
         and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
