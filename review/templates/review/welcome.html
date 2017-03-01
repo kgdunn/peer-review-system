@@ -24,7 +24,7 @@ file submisison. Only the following file types are accepted: {{pr.accepted_file_
 </form>
 
 {% if submission %}
-<p>A prior submission was uploaded by you{% if pr.uses_groups %}, or a group member,{% endif %} on {{submission.datetime_submitted|date:"l, d F Y"}} {{submission.datetime_submitted|time:"H:i"}}. You can <a href="{{submission.file_upload.url}}">preview the document</a> (opens in a new tab).
+<p>A prior submission was uploaded by you{% if pr.uses_groups %}, or a group member,{% endif %} on {{submission.datetime_submitted|date:"l, d F Y"}} {{submission.datetime_submitted|time:"H:i"}}. You can <a href="{{submission.file_upload.url}}" target="_blank">preview the document</a> (opens in a new tab).
 {% endif %}{# submission #}
 
 
