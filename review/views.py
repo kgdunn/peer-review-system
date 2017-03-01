@@ -175,7 +175,7 @@ def index(request):
         return HttpResponse(("You have reached the Peer Review LTI component "
                              "without authorization."))
 
-    #logger.debug('POST = ' + str(request.POST))
+    logger.debug('POST = ' + str(request.POST))
     person_or_error, course, pr = starting_point(request)
 
     if not(isinstance(person_or_error, Person)):
