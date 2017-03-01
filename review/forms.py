@@ -11,6 +11,7 @@ class UploadFileForm(forms.Form):
 
 class UploadFF(forms.ModelForm):
 
+    learner_ID = forms.TextInput(attrs=None)
     class Meta:
         model= Submission
         fields = ( 'file_upload',)

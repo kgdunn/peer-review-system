@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
+
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
@@ -69,19 +71,26 @@ def get_create_student(request):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
+
+        learner, newbie = Person.objects.get_or_create(first_name=first_name,
+                                                       email=email,
+                                                       full_name=full_name,
+                                                       role=role)
+
+    elif request.POST.get('learner_ID', ''):
+        newbie = False
+        learner_ID = request.POST.get('learner_ID', '')
+        learner = Person.objects.filter(user_ID=learner_ID)
+        if learner:
+            learner = learner[0]
+        else:
+            learner = None
     else:
         return None
 
-    #logger.debug('About to check: name={0}, email = {1}, full_name = {2},
-    #user_ID = {3}, role = {4}'.format(first_name, email, full_name, user_ID, role))
-    learner, newbie = Person.objects.get_or_create(first_name=first_name,
-                                                   email=email,
-                                                   full_name=full_name,
-                                                   role=role)
 
     if newbie:
         logger.info('Created new learner: %s' % learner.full_name)
-
 
     if learner:
         # Augments the learner with extra fields that might not be there
@@ -169,7 +178,7 @@ def get_n_reviews(learner, pr):
 
 @csrf_exempt
 @xframe_options_exempt
-def index(request):
+def index(request, message=''):
 
     if request.method != 'POST':
         return HttpResponse(("You have reached the Peer Review LTI component "
@@ -210,8 +219,12 @@ def index(request):
     if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
         and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
         allow_submit = True
+
         from . forms import UploadFF
         file_upload_form = UploadFF()
+
+        logger.debug(request.POST)
+        logger.debug(request.FILES)
 
 
     # STEP 2: between review start and end time?
@@ -284,7 +297,8 @@ def index(request):
             report_sort.append((key, value))
         report_sort = sorted(report_sort)
 
-    ctx = {'person': learner,
+    ctx = {'message': message,
+           'person': learner,
            'course': course,
            'pr': pr,
            'file_upload_form': file_upload_form,
@@ -413,7 +427,9 @@ def upload_submission(request):
     # let them know the cut-off for further submissions.
     logger.debug(request.POST)
     logger.debug(request.FILES)
-
+    message = ('Thank you. Your upload has been successfully '
+               'received.')
+    return HttpResponseRedirect('/')
 
     #status = 'S'
     #is_valid = True
@@ -437,9 +453,6 @@ def upload_submission(request):
                      #)
     #sub.save()
 
-    return HttpResponse('Thank you. Your review has been successfully '
-                        'received. You still have to complete {0} review(s).'
-                        '<br>You may close this tab/window, and return back.')
 
 
 @csrf_exempt
