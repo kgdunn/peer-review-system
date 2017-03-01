@@ -483,7 +483,7 @@ def upload_submission(request, learner, pr_process):
                'This is for the course: {2}\n'
                '\n'
                'You may submit multiple times, up to the deadline. Only the '
-               'most recent submission is kept. {4}\n'
+               'most recent submission is kept. {3}\n'
                '\n--\n'
                'This is an automated message from the Peer Review system. '
                'Please do not reply to this email address.\n')
