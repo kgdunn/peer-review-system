@@ -18,6 +18,9 @@ import numpy as np
 import json
 from random import shuffle
 
+# 3rd party imports
+import magic  # used to check if file uploads are of the required type
+
 # Logging
 import logging
 logger = logging.getLogger(__name__)
@@ -195,6 +198,7 @@ def index(request, message=''):
     allow_report = False
 
     file_upload_form = {}# we want to fill this in the "submission" step
+    submission = None    # we want to fill this in the "submission" step
     r_actuals = []       # we want to fill this in the "review" step
     peers = {}           # we want to fill this in the "report" step
 
@@ -222,6 +226,22 @@ def index(request, message=''):
 
         if request.FILES:
             upload_submission(request, learner, pr)
+
+        grp_info = get_group_information(learner, pr.gf_process)
+        submission = None
+        if pr.uses_groups:
+            subs = Submission.objects.filter(pr_process=pr,
+                   group_submitted=grp_info['group_instance']).order_by(\
+                       '-datetime_submitted')
+
+        else:
+            subs = Submission.objects.filter(submitted_by=learner,
+                                             pr_process=pr).\
+                  order_by('-datetime_submitted')
+
+        if subs:
+            submission = subs[0]
+
 
 
     # STEP 2: between review start and end time?
@@ -299,6 +319,7 @@ def index(request, message=''):
            'course': course,
            'pr': pr,
            'file_upload_form': file_upload_form,
+           'submission': submission,
            'r_actuals': r_actuals,
            'report': report_sort,
            'report__comments': report__comments,
@@ -432,7 +453,11 @@ def upload_submission(request, learner, pr_process):
         for chunk in request.FILES['file_upload'].chunks():
             destination.write(chunk)
 
+
+    group_members = get_group_information(learner, pr_process.gf_process)
+
     sub = Submission(submitted_by=learner,
+                     group_submitted=group_members['group_instance'],
                      status = 'S',
                      pr_process = pr_process,
                      is_valid = True,
@@ -461,7 +486,7 @@ def upload_submission(request, learner, pr_process):
                'The closing time for submissions is: {3}\n'
                'You may submit multiple times, up to the deadline. Only the '
                'most recent submission is kept. {4}\n'
-               ''
+               '\n--\n'
                'This is an automated message from the Peer Review system. '
                'Please do not reply to this email address.\n')
     message = message.format(first_line, pr_process.LTI_title,
@@ -471,7 +496,8 @@ def upload_submission(request, learner, pr_process):
 
     logger.debug('Sending email: {0}'.format(address))
     subject = 'Peer review file: successfully submitted'
-    send_email(address, subject, message)
+    out = send_email(address, subject, message)
+    logger.debug('Numer of emails sent (should be 1): {0}'.format(out[0]))
 
     return None
 

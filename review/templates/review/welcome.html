@@ -23,6 +23,11 @@ file submisison. Only the following file types are accepted: {{pr.accepted_file_
     <input type="submit" value="Submit your{% if pr.uses_groups %} group's{% endif %} report" /> (maximum size: {{pr.max_file_upload_size_MB}} MB).
 </form>
 
+{% if submission %}
+<p>A prior submission was uploaded by you{% if pr.uses_groups %}, or a group member,{% endif %} on {{submission.datetime_submitted|date:"l, d F Y"}} {{submission.datetime_submitted|time:"H:i"}}. You can <a href="{{submission.file_upload.url}}">preview the document</a> (opens in a new tab).
+{% endif %}{# submission #}
+
+
 {% else %}{# if allow_submit #}
 
 <hr>

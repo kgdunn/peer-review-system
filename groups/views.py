@@ -61,17 +61,23 @@ def get_group_information(learner, gID):
     }
     """
     email_list = []
+    members = []
     out = {'group_name': '',
-           'member_email_list': email_list}
+           'group_instance': None,
+           'member_email_list': email_list,
+           'member_instances': members,
+           }
     enrolment = Enrolled.objects.filter(person=learner, group__gp=gID)
     if enrolment.count():
         # Assuming the student is only enrolled in 1 group
         out['group_name'] = enrolment[0].group.name
+        out['group_instance'] = enrolment[0].group
 
         group_learners = Enrolled.objects.filter(group__gp=gID,
                                                  group=enrolment[0].group)
         for item in group_learners:
             email_list.append(item.person.email)
+            members.append(item.person)
 
     return out
 

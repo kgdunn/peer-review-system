@@ -191,6 +191,8 @@ class Submission(models.Model):
               )
 
     submitted_by = models.ForeignKey(Person)
+    group_submitted = models.ForeignKey('groups.Group', blank=True, null=True,
+        default=None, help_text="If a group submission, it links back to it.")
     status = models.CharField(max_length=2, choices=STATUS, default='N')
     pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
     is_valid = models.BooleanField(default=False,
