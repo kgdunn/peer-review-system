@@ -13,7 +13,7 @@
 <p>You{% if pr.uses_groups %}, or any person in your group,{% endif %} may upload a
 file submisison. Only the following file types are accepted: {{pr.accepted_file_types_comma_separated|upper}}.
 <p>
-<form enctype="multipart/form-data" method="post" action="https://peer.connectmv.com{% url 'upload_submission' %}">
+<form enctype="multipart/form-data" method="post" action="#">
     {% csrf_token %}
     <input type='hidden' name='learner_ID' value='{{person.user_ID}}' />
     <input type='hidden' name='context_id' value='{{course.label}}'>
