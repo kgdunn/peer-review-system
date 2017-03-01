@@ -462,7 +462,7 @@ def upload_submission(request, learner, pr_process):
                      is_valid = True,
                      file_upload = submitted_file_name,
                      submitted_file_name = filename,
-                     ip_address = '0.0.0.0',
+                     ip_address = get_IP_address(request),
                      )
     sub.save()
 

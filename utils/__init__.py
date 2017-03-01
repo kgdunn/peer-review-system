@@ -47,6 +47,8 @@ def get_IP_address(request):
     ip = request.META.get('HTTP_X_FORWARDED_FOR', '')
     if ip == '' or ip.lower() in ('unkown', ):
         ip = request.META.get('REMOTE_ADDR', '')   # User is not on a proxy
+    if ip == '' or ip.lower() in ('unkown', ):
+        ip = request.META.get('HTTP_X_REAL_IP')
     return ip
 
 # From: http://djangosnippets.org/snippets/690/
