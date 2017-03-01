@@ -13,7 +13,7 @@ import logging
 import datetime
 
 email_from = 'Peer-Review Brightspace <kgdunn@gmail.com>'
-logger = logging.getLogger('quest')
+logger = logging.getLogger(__name__)
 
 rest_help_extra = """Use <a href="http://sphinx.pocoo.org/latest/rest.html">reStructuredText</a>.
 <div class="spc-markup-help"><ul>
