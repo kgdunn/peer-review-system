@@ -6,6 +6,19 @@
 <h2>Submission phase</h2>
 <p>Submission of your work: allowed from {{pr.dt_submissions_open_up|date:"l, d F Y"}} at {{pr.dt_submissions_open_up|time:"H:i" }} until {{pr.dt_submission_deadline|date:"l, d F Y"}} at {{pr.dt_submission_deadline|time:"H:i" }}
 
+{% if allow_submit %}
+
+<p>You{% if pr.uses_groups %}, or any person in your group,{% endif %} may upload a
+file submisison. Only the following file types are accepted: {{pr.accepted_file_types_comma_separated|upper}}
+<p>Upload file:
+<form enctype="multipart/form-data" method="post" action="/upload">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% endif %}
+
 <hr>
 <h2>Review phase{% if person.role == 'Learn'%}: {{pr.number_of_reviews_per_learner}} peer reviews required{%endif%}</h2>
 <p>Start date and time for this review: {{pr.dt_peer_reviews_start_by|date:"l, d F Y"}} at {{pr.dt_peer_reviews_start_by|time:"H:i" }}
@@ -74,11 +87,5 @@ Overall score: {{report__learner_avg|floatformat}} out of a maximum of {{report_
 
 {% endblock %}
 
-<!--
-<form enctype="multipart/form-data" method="post" action="/">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" />
-</form>
--->
+
 

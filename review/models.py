@@ -40,13 +40,6 @@ class Person(models.Model):
     def __str__(self):
         return u'{0} [{1}]'.format(self.full_name, self.email)
 
-#@python_2_unicode_compatible
-#class Group(models.Model):
-    #""" Used when learners work/submit in groups."""
-    #name = models.CharField(max_length=300, verbose_name="Group name")
-
-    #def __str__(self):
-        #return u'{0}' % self.name
 
 @python_2_unicode_compatible
 class Course(models.Model):
@@ -67,7 +60,6 @@ class Course(models.Model):
     def save(self, *args, **kwargs):
 
         super(Course, self).save(*args, **kwargs) # Call the "real" save()
-
 
 
 @python_2_unicode_compatible
@@ -137,7 +129,6 @@ class PR_process(models.Model):
     dt_peer_reviews_received_back = models.DateTimeField(
         verbose_name='When will learners receive their results back?')
 
-
     # True/False settings:
     show_rubric_prior_to_submission = models.BooleanField(default=False,
         help_text=('Can learners see the rubric before they submit?'))
@@ -146,9 +137,11 @@ class PR_process(models.Model):
        help_text=('Can learners see all submissions from peers after the '
                   'reviewing step?'))
 
-    # TO DO:
     max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
-    #limitations of the number of files
+
+    accepted_file_types_comma_separated = models.CharField(default='PDF',
+        max_length=100,
+        help_text='Comma separated list, for example: pdf, docx, doc')
 
     number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
         help_text='How many reviews must each learner complete?')

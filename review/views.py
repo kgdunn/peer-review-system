@@ -187,8 +187,11 @@ def index(request):
     allow_submit = False
     allow_review = False
     allow_report = False
+
+    file_upload_form = {}# we want to fill this in the "submission" step
     r_actuals = []       # we want to fill this in the "review" step
     peers = {}           # we want to fill this in the "report" step
+
 
     # This is a bit hackish, but required to work towards a deadline.
     report_sort = []
@@ -207,6 +210,8 @@ def index(request):
     if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
         and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
         allow_submit = True
+        from .forms import UploadFileForm
+        file_upload_form = UploadFileForm()
 
 
     # STEP 2: between review start and end time?
@@ -223,7 +228,6 @@ def index(request):
 
         # If this is the second or subequent time here, simply return
         # the N ``RubricActual`` instances
-
 
         n_reviews = get_n_reviews(learner, pr)
         query = RubricActual.objects.filter(graded_by = learner,
@@ -283,6 +287,7 @@ def index(request):
     ctx = {'person': learner,
            'course': course,
            'pr': pr,
+           'file_upload_form': file_upload_form,
            'r_actuals': r_actuals,
            'report': report_sort,
            'report__comments': report__comments,
