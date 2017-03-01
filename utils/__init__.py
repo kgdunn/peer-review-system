@@ -12,7 +12,7 @@ import errno
 import logging
 import datetime
 
-email_from = 'Peer-Review Brightspace <kgdunn@gmail.com>'
+email_from = settings.DEFAULT_FROM_EMAIL
 logger = logging.getLogger(__name__)
 
 rest_help_extra = """Use <a href="http://sphinx.pocoo.org/latest/rest.html">reStructuredText</a>.
@@ -183,7 +183,7 @@ def send_email(to_addresses, subject, messages):
         if len(to_addresses) == len(messages):
             data = []
             for idx, message in enumerate(messages):
-                if settings.DEBUG or settings.TESTING:
+                if settings.DEBUG:
                     data.append((subject, message, from_address,
                                                      ['test@example.com',]))
                     to_list.append('test@example.com')
@@ -195,7 +195,7 @@ def send_email(to_addresses, subject, messages):
         use_mass_email = True
     else:
         use_mass_email = False
-        if settings.DEBUG or settings.TESTING:
+        if settings.DEBUG:
             logger.debug('Overwriting the email: sending to @example.com.')
             # Overwrite sender address in debug mode
             to_addresses = ['test@example.com',]
