@@ -447,11 +447,10 @@ def upload_submission(request, learner, pr_process):
     extension = filename.split('.')[-1]
     submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
                      generate_random_token(token_length=16) + '.' + extension)
-    submitted_file_name = base_dir_for_file_uploads + submitted_file_name
     #copyfile(source_file, base_dir + os.sep + submitted_file_name)
-    with open(submitted_file_name, 'wb+') as destination:
+    with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
         for chunk in request.FILES['file_upload'].chunks():
-            destination.write(chunk)
+            dst.write(chunk)
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
