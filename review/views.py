@@ -482,7 +482,6 @@ def upload_submission(request, learner, pr_process):
     message = ('{0} have successfully submitted a document for: {1}.\n'
                'This is for the course: {2}\n'
                '\n'
-               'The closing time for submissions is: {3}\n'
                'You may submit multiple times, up to the deadline. Only the '
                'most recent submission is kept. {4}\n'
                '\n--\n'
@@ -490,7 +489,6 @@ def upload_submission(request, learner, pr_process):
                'Please do not reply to this email address.\n')
     message = message.format(first_line, pr_process.LTI_title,
                              pr_process.course.name,
-                             pr_process.dt_submission_deadline,
                              extra_line)
 
     logger.debug('Sending email: {0}'.format(address))
