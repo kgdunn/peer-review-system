@@ -42,12 +42,24 @@ def starting_point(request):
 
     """
     person = get_create_student(request)
-
     course_ID = request.POST.get('context_id', None)
-    course = get_object_or_404(Course, label=course_ID)
-
     pr_ID = request.POST.get('resource_link_id', None)
-    pr = get_object_or_404(PR_process, LTI_id=pr_ID)
+
+    if (pr_ID is None) or (course_ID is None):
+        return HttpResponse(("You are not registered in this course."))
+
+
+    try:
+        pr = PR_process.objects.get(LTI_id=pr_ID)
+    except PR_process.DoesNotExist:
+        return (HttpResponse('Config error. Try LTI_id={}'.format(pr_ID)),
+               None, None)
+
+    try:
+        course = Course.objects.get(label=course_ID)
+    except Course.DoesNotExist:
+        return (HttpResponse('Configuration error. Try context_id={}'.format(\
+                course_ID)), None, None)
 
     if person:
         return person, course, pr
@@ -241,7 +253,6 @@ def index(request, message=''):
 
         if subs:
             submission = subs[0]
-
 
 
     # STEP 2: between review start and end time?

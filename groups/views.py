@@ -43,7 +43,6 @@ def starting_point(request):
         return HttpResponse(("You are not registered in this course."))
 
 
-
 def randomly_enroll_function(gID):
     """
     Runs the process of randomly enrolling the remaining users.
