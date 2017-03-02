@@ -8,7 +8,7 @@ from .models import Person, Course, PR_process, Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from utils import generate_random_token, send_email, get_IP_address
-from groups.views import get_group_information
+
 
 # Python imports
 import re
@@ -52,13 +52,13 @@ def starting_point(request):
     try:
         pr = PR_process.objects.get(LTI_id=pr_ID)
     except PR_process.DoesNotExist:
-        return (HttpResponse('Config error. Try LTI_id={}'.format(pr_ID)),
-               None, None)
+        return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
+            pr_ID)), None, None)
 
     try:
         course = Course.objects.get(label=course_ID)
     except Course.DoesNotExist:
-        return (HttpResponse('Configuration error. Try context_id={}'.format(\
+        return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
                 course_ID)), None, None)
 
     if person:
@@ -187,6 +187,11 @@ def get_n_reviews(learner, pr):
 
     return n_reviews
 
+
+
+
+# intentional late import
+from groups.views import get_group_information
 
 @csrf_exempt
 @xframe_options_exempt

@@ -6,6 +6,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 # Our imports
 from utils import generate_random_token
 from review.models import Person, Course
+from review.views import get_create_student
 from .models import Group_Formation_Process, Group, Enrolled
 from .forms import UploadFileForm
 
@@ -32,10 +33,19 @@ def starting_point(request):
     person = get_create_student(request)
 
     course_ID = request.POST.get('context_id', None)
-    course = get_object_or_404(Course, label=course_ID)
-
     group_ID = request.POST.get('resource_link_id', None)
-    gID = get_object_or_404(Group_Formation_Process, LTI_id=group_ID)
+
+    try:
+        gID = Group_Formation_Process.objects.get(LTI_id=group_ID)
+    except Group_Formation_Process.DoesNotExist:
+        return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
+            group_ID)), None, None)
+
+    try:
+        course = Course.objects.get(label=course_ID)
+    except Course.DoesNotExist:
+        return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
+            course_ID)), None, None)
 
     if person:
         return person, course, gID
