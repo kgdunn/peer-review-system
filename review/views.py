@@ -208,7 +208,7 @@ def index(request, message=''):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
-    now_time = datetime.datetime.now()
+    now_time = datetime.datetime.utcnow()
 
     allow_submit = False
     allow_review = False
