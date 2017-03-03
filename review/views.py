@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from django.template.context_processors import csrf
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
-
+from django.template import Context, Template
 
 # Our imports
 from .models import Person, Course, PR_process
-from .models import PRPhase, SubmissionPhase#, SelfEvaluationPhase, PeerEvaluationPhase,
+from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase#, SelfEvaluationPhase, PeerEvaluationPhase,
                     #ScorePhase, FeedbackPhase
 from .models import Submission
 from .models import RubricActual, ROptionActual, RItemActual
@@ -197,9 +198,79 @@ def get_n_reviews(learner, pr):
 
     return n_reviews
 
+def render_phase(phase, ctx_objects):
+    """
+    Renders the HTML template for this phase
+    """
+    template = Template(phase.templatetext)
+    context = Context(ctx_objects)
+    return template.render(context)
 
 
+def get_related(self, request, learner, ctx_objects, now_time):
+    """
+    Gets all the necessary objects used to render the template for an object
+    in this phase (``self``)
+    """
+    within_phase = False
+    if (self.start_dt.replace(tzinfo=None) <= now_time) \
+                              and (self.end_dt.replace(tzinfo=None)>now_time):
+        within_phase = True
 
+    # Objects required for a submission: file_upload_form, (prior) submission.
+    try:
+        sub_phase = SubmissionPhase.objects.get(id=self.id)
+        allow_submit = within_phase
+        if not(within_phase):
+            return ctx_objects
+
+        from . forms import UploadFF
+        file_upload_form = UploadFF()
+
+        if request.FILES:
+            upload_submission(request, learner, self.pr)
+
+        grp_info = get_group_information(learner, self.pr.gf_process)
+
+        submission = None
+        if self.pr.uses_groups:
+            # NOTE: an error condition can develop if a learner isn't
+            #       allocated into a group, and you are using group submissions.
+            subs = Submission.objects.filter(pr_process=self.pr,
+                   group_submitted=grp_info['group_instance']).order_by(\
+                       '-datetime_submitted')
+        else:
+            subs = Submission.objects.filter(submitted_by=learner,
+                                             pr_process=self.pr).\
+                  order_by('-datetime_submitted')
+
+        if subs:
+            submission = subs[0]
+
+        ctx_objects['allow_submit'] = allow_submit
+        ctx_objects['file_upload_form'] = file_upload_form
+        ctx_objects['submission'] = submission
+
+    except SubmissionPhase.DoesNotExist:
+        pass
+
+
+    # Objects required for a self-review: r_actual ???
+    try:
+        sub_phase = SelfEvaluationPhase.objects.get(id=self.id)
+        allow_self_review = within_phase
+        if not(allow_self_review):
+            return ctx_objects
+
+        ctx_objects['allow_self_review'] = allow_self_review
+        ctx_objects['item'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
+        ctx_objects['file_upload_form'] = file_upload_form
+        ctx_objects['submission'] = submission
+
+    except SelfEvaluationPhase.DoesNotExist:
+        pass
+
+    return ctx_objects
 
 # intentional late import: for ``index``
 from groups.views import get_group_information
@@ -221,34 +292,43 @@ def index(request, message=''):
     learner = person_or_error
 
     # Get all the possible phases
-    phases = PRPhase.objects.filter(pr=pr).order_by('order')
+    phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
 
     html = []
     now_time = datetime.datetime.utcnow()
-    related_objects = []
+    ctx_objects = {'now_time': now_time,
+                   'person': learner,
+                   'course': course,
+                   'pr': pr}
+    ctx_objects.update(csrf(request)) # add the csrf; used in forms
+
     for phase in phases:
 
-        # We start with no ``related_objects``, but then add to them, with each
+        # We start with no ``ctx_objects``, but then add to them, with each
         # phase. This way a later phase can use (modify even) the state of a
         # variable.
-        related_objects = get_related(phase, related_objects)
+        ctx_objects = get_related(phase,
+                                  request,
+                                  learner,
+                                  ctx_objects,
+                                  now_time)
 
         # Render the HTML for this phase: it depends on the ``pr`` settings,
         # the date and time, and related objects specifically required for
         # that phase. The rendering happens per phase. That means if the state
         # of a variable changes, it might be rendered differently in a later
         # phase [though this is not expected to be used].
-        html.append(render_phase(phase,
-                                 pr,
-                                 now_time,
-                                 related_objects))
+        ctx_objects['self'] = phase
+        html.append(render_phase(phase, ctx_objects))
 
     # end rendering
     # Return the HTTP Response
 
+    return HttpResponse(''.join(html)   )
 
 
-
+# Old-code: prior to modularization
+if False:
     allow_submit = False
     allow_review = False
     allow_report = False
