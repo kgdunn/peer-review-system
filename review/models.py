@@ -111,7 +111,6 @@ class PR_process(models.Model):
                                    default=None, null=True,
         help_text=('Must be specified if groups are being used.'))
 
-
     instructions = models.TextField(help_text='May contain HTML instructions',
                 verbose_name='Overall instructions to learners', )
 
@@ -134,28 +133,14 @@ class PR_process(models.Model):
     dt_peer_reviews_received_back = models.DateTimeField(
         verbose_name='When will learners receive their results back?')
 
-    # True/False settings:
-    show_rubric_prior_to_submission = models.BooleanField(default=False,
-        help_text=('Can learners see the rubric before they submit?'))
 
     make_submissions_visible_after_review = models.BooleanField(default=False,
        help_text=('Can learners see all submissions from peers after the '
                   'reviewing step?'))
 
-    max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
-
-    accepted_file_types_comma_separated = models.CharField(default='PDF',
-        max_length=100,
-        help_text='Comma separated list, for example: pdf, docx, doc')
-
-    number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
-        help_text='How many reviews must each learner complete?')
-
-
     def save(self, *args, **kwargs):
-        #self.slug = slugify(self.name)
         unique_slugify(self, self.title, 'slug')
-        super(PR_process, self).save(*args, **kwargs) # Call the "real" save()
+        super(PR_process, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -170,13 +155,57 @@ def peerreview_directory_path(instance, filename):
                                     instance.pr_process.id,
                                     filename)
 
+# https://docs.djangoproject.com/en/1.10/topics/db/models/#model-inheritance
+class PRPhase(models.Model):
+    pr = models.ForeignKey(PR_process, verbose_name="Peer review")
+    order = models.PositiveIntegerField(default=1)
+    start_dt = models.DateTimeField(
+                    verbose_name='Learners can start to submit',)
+    end_dt = models.DateTimeField(
+                    verbose_name='Learners must submit their work before', )
+    instructions = models.TextField(default='', blank=True)
+    templatetext = models.TextField(default='', blank=True,
+                    help_text='The template rendered to the user')
+
+
+class SubmissionPhase(PRPhase):
+    """
+    All peer reviews have a submission phase, usually the first step.
+    This describes what is needed.
+    """
+    #show_rubric_prior_to_submission = models.BooleanField(default=False,
+            #help_text=('Can learners see the rubric before they submit?'))
+    max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
+    accepted_file_types_comma_separated = models.CharField(default='PDF',
+                max_length=100,
+                help_text='Comma separated list, for example: pdf, docx, doc')
+
+class SelfEvaluationPhase(PRPhase):
+    """
+    If a self-evaluation is required...
+    """
+    # No extra fields
+    pass
+
+class PeerEvaluationPhase(PRPhase):
+    """
+    If a peer-evaluation is required...
+    """
+    number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
+        help_text='How many reviews must each learner complete?')
+
+class FeedbackPhase(PRPhase):
+    """
+    Text feedback is shown to the user
+    """
+    # No extra fields
+    pass
+
 
 @python_2_unicode_compatible
 class Submission(models.Model):
     """
     An instance of a submission for a learner/group of learners.
-
-    TODO: allow multiple files as a submission.
 
     Old files are kept, but not available for download.<-- remove old submissions
 

@@ -6,7 +6,10 @@ from django.conf import settings
 
 
 # Our imports
-from .models import Person, Course, PR_process, Submission
+from .models import Person, Course, PR_process
+from .models import PRPhase, SubmissionPhase#, SelfEvaluationPhase, PeerEvaluationPhase,
+                    #ScorePhase, FeedbackPhase
+from .models import Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from utils import generate_random_token, send_email, get_IP_address
@@ -215,7 +218,38 @@ def index(request, message=''):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
+
+    # Get all the possible phases
+    phases = SubmissionPhase.objects.filter(pr=pr).order_by('order')
+
+
+
+
+    html = []
     now_time = datetime.datetime.utcnow()
+    related_objects = []
+    for phase in phases:
+
+        # We start with no ``related_objects``, but then add to them, with each
+        # phase. This way a later phase can use (modify even) the state of a
+        # variable.
+        related_objects = get_related(phase, related_objects)
+
+        # Render the HTML for this phase: it depends on the ``pr`` settings,
+        # the date and time, and related objects specifically required for
+        # that phase. The rendering happens per phase. That means if the state
+        # of a variable changes, it might be rendered differently in a later
+        # phase [though this is not expected to be used].
+        html.append(render_phase(phase,
+                                 pr,
+                                 now_time,
+                                 related_objects))
+
+    # end rendering
+    # Return the HTTP Response
+
+
+
 
     allow_submit = False
     allow_review = False

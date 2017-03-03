@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from .models import Person, Course, Submission, PR_process
-
+from .models import Person, Course, PR_process
+from .models import SubmissionPhase, SelfEvaluationPhase
+from .models import Submission
 from .models import RItemActual, RItemTemplate
 from .models import ROptionActual, ROptionTemplate
 from .models import RubricActual, RubricTemplate
@@ -11,6 +12,16 @@ class PersonAdmin(admin.ModelAdmin):
 
 class PR_processAdmin(admin.ModelAdmin):
     list_display = ("title", "course", "uses_groups", "LTI_system", "LTI_id")
+
+
+class SubmissionPhaseAdmin(admin.ModelAdmin):
+    list_display = ("pr", "order", "start_dt", "end_dt",
+                    "max_file_upload_size_MB",
+                    "accepted_file_types_comma_separated")
+
+class SelfEvaluationPhaseAdmin(admin.ModelAdmin):
+    list_display = ("pr", "order", "start_dt", "end_dt",
+                    "instructions",)
 
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
@@ -34,6 +45,8 @@ admin.site.register(Person, PersonAdmin)
 admin.site.register(Course)
 admin.site.register(PR_process, PR_processAdmin)
 admin.site.register(Submission, SubmissionAdmin)
+admin.site.register(SubmissionPhase, SubmissionPhaseAdmin)
+admin.site.register(SelfEvaluationPhase, SelfEvaluationPhaseAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)
 admin.site.register(RItemTemplate)

@@ -11,7 +11,7 @@
 {% if allow_submit %}
 
 <p>You{% if pr.uses_groups %}, or any person in your group,{% endif %} may upload a
-file submisison. Only the following file types are accepted: {{pr.accepted_file_types_comma_separated|upper}}.
+file submission. Only the following file types are accepted: {{TODO.accepted_file_types_comma_separated|upper}}.
 <p>
 <form enctype="multipart/form-data" method="post" action="#">
     {% csrf_token %}
@@ -20,7 +20,7 @@ file submisison. Only the following file types are accepted: {{pr.accepted_file_
     <input type='hidden' name='resource_link_id' value='{{pr.LTI_id}}'>
 
     {{ file_upload_form }}
-    <input type="submit" value="Submit your{% if pr.uses_groups %} group's{% endif %} report" /> (maximum size: {{pr.max_file_upload_size_MB}} MB).
+    <input type="submit" value="Submit your{% if pr.uses_groups %} group's{% endif %} report" /> (maximum size: {{TODO.max_file_upload_size_MB}} MB).
 </form>
 
 {% if submission %}
