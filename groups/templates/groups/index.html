@@ -1,11 +1,81 @@
 
 {% extends "review/base.html" %}
 
+
 {% block content %}
 
-You are currently enrolled in the following groups for this activity:
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js" crossorigin="anonymous"></script>
+<script>
+// Attach a submit handler to the form
+
+$(document).on("click", "a", function(event, data){
+    //$(this).text("It works!");
+    $ajax({
+     type: 'POST',
+     url: 'join',
+     data: { url: 'join' },
+     beforeSend: function()
+     {
+
+     },
+     success: function()
+     {
+
+     },
+     error: function()
+     {
+
+     },
+     complete: function()
+     {
+
+     }
+ });
+
+});
+
+$(document).ready(function(){
+    $("join a").trigger("click", { linktype: "join" });
+});
 
 
-{{group.name}}  {{group.description}}  {{group.join_link}} {{group.leave_link}}       {{group.capacity}}   {{group.member_details}}
+
+
+
+</script>
+
+Activity name: {{gID.title}}
+
+{% if allow_activity %}
+
+   <table><th><td>Groups</td>
+              <td>Description</td>
+              <td>Members</td>
+              <td>Enrol</td>
+              <td>Leave</td>
+              <td>Outcome</td>
+          </td>
+   {% for idx, group in groups.items %}
+      <tr>
+        <td>{{group.obj.name}}</td>
+        <td>{{group.obj.description}}</td>
+        <td>{{group.n_filled}}/{{group.obj.capacity}}</td>
+        <td><a class="joiners" href="#">{{group.enrol_link}}</a></td>
+        <td><a href="#">{{group.leave_link}}</a</td>
+        <td><div id="result"></div></td>
+      </tr>
+   {% endfor %}
+   </table>
+{% else %}   {# if allow_activity #}
+You are currently enrolled in the following group(s):
+
+
+{% endif %}  {# if allow_activity #}
+
+
+
+
+
 
 {% endblock %}

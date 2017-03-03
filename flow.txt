@@ -8,6 +8,8 @@ Open time
 Closing time
 Allow more than N enrollments
 Groups of different sizes
+
+
 Can be prefilled
 Allow self-removal and re-enrollment
 Longer term: waitlist
@@ -27,6 +29,9 @@ Check for PDF
 File upload: the upload process should also create the directory, if not existing
 
 
+Add the group name in the email to the students.
+A more modular system for the various phases.
+The phase link to a PR process
 Release as BSD license and open up
 Statistics tracking for duration of review.
 Make it clear that these reviews are all for 1 session (not N=3 sessions)

@@ -67,7 +67,9 @@ class Group(models.Model):
     description = models.TextField(blank=True,
                                    verbose_name="Detailed group description")
     capacity = models.PositiveIntegerField(default=0,
-        help_text=('How many people in this particular group instance   '))
+        help_text=('How many people in this particular group instance?'))
+    order = models.PositiveIntegerField(default=0, help_text=('For ordering '
+            'purposes in the tables.'))
 
     def __str__(self):
         return u'{0}'.format(self.name)

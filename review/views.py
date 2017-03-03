@@ -215,7 +215,7 @@ def index(request, message=''):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
-    now_time = datetime.datetime.now()
+    now_time = datetime.datetime.utcnow()
 
     allow_submit = False
     allow_review = False
@@ -239,7 +239,7 @@ def index(request, message=''):
     #Just outline the coming steps
 
 
-    # During the submission time frame?
+    # Do all time comparisons in UTC.
 
     if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
         and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):

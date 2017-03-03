@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.conf import settings
 
 # Our imports
 from utils import generate_random_token
@@ -32,8 +33,10 @@ def starting_point(request):
     """
     person = get_create_student(request)
 
-    course_ID = request.POST.get('context_id', None)
-    group_ID = request.POST.get('resource_link_id', None)
+    course_ID = request.POST.get('context_id',
+                                    request.GET.get('context_id', None))
+    group_ID = request.POST.get('resource_link_id',
+                                    request.GET.get('resource_link_id', None))
 
     try:
         gID = Group_Formation_Process.objects.get(LTI_id=group_ID)
@@ -152,19 +155,6 @@ def import_classlist(request):
         form = UploadFileForm()
         return render(request, 'groups/import_classlist.html', {'form': form})
 
-        #return HttpResponse(("You have reached the Group LTI component "
-        #                     "without authorization."))
-
-    #logger.debug('POST = ' + str(request.POST))
-    #person_or_error = get_create_student(request)
-    #if not(isinstance(person_or_error, Person)):
-        #return person_or_error      # Error path if learner does not exist
-
-    #person = person_or_error
-    #if person.role == 'Learn':
-        #return HttpResponse(("You have reached the Group LTI component "
-                             #"without authorization."))
-
     if request.method == 'POST':
 
         #person_or_error, course, gID = starting_point(request)
@@ -176,6 +166,17 @@ def import_classlist(request):
             output = handle_uploaded_file(request.FILES['classlist'], gID)
             return HttpResponse(str(output))
 
+@csrf_exempt
+@xframe_options_exempt
+def join(request):
+    """
+    Process the join
+    """
+    if request.method != 'POST':
+        return HttpResponse('Selection failed; reload page!')
+
+    return HttpResponse('Success')
+
 
 @csrf_exempt
 @xframe_options_exempt
@@ -183,7 +184,7 @@ def start_groups(request):
     """
     The group functionality is rendered to the end-learner here.
     """
-    if request.method != 'POST':
+    if request.method != 'POST' and not(settings.DEBUG):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
@@ -197,16 +198,29 @@ def start_groups(request):
 
     learner = person_or_error
     now_time = datetime.datetime.now()
-
+    valid_groups = Group.objects.filter(gp=gID,
+                                        capacity__gt=0).order_by('order')
+    groups = {}
     allow_activity = False
     allow_selfenrol = False
-    enrolled_into = []
-    group_for_course = []
+    enrollments = []
 
+    # allow_activity: allows for students to enrol/unenrol/etc
     if (gID.dt_groups_open_up.replace(tzinfo=None) <= now_time):
         allow_activity = True
-        enrolled_into = Enrolled.objects.filter(person=learner)
-        #group_for_course = gID
+        enrollments = Enrolled.objects.filter(person=learner)
+        for idx, group in enumerate(valid_groups):
+            groups[idx] = {}
+            groups[idx]['gp'] = gID
+            groups[idx]['obj'] = group
+            groups[idx]['n_filled'] = enrollments.filter(group=group).count()
+            groups[idx]['enrol_link'] = 'join'
+            groups[idx]['leave_link'] = 'leave'
+
+
+    else:
+        # Students simply see which groups they have been enrolled in.
+        pass
 
     if (gID.dt_selfenroll_starts.replace(tzinfo=None) <= now_time) and \
         (gID.allow_unenroll):
@@ -216,9 +230,16 @@ def start_groups(request):
         allow_activity = False
         randomly_enroll_function(gID)
 
-    ctx = {'person': learner,
+    ctx = {# Data structures
+           'person': learner,
            'course': course,
            'gID': gID,
+           'groups': groups,
+
+           # Various flags
+           'allow_activity': allow_activity,
+           'allow_selfenrol': allow_selfenrol,
+           'enrollments': enrollments,
 
           }
     return render(request, 'groups/index.html', ctx)
