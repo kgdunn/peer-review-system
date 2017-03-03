@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.conf import settings
+
 
 # Our imports
 from .models import Person, Course, PR_process, Submission
@@ -83,15 +85,17 @@ def get_create_student(request):
         elif 'Student' in role:
             role = 'Learn'
 
-        learner, newbie = Person.objects.get_or_create(first_name=first_name,
-                                                       email=email,
-                                                       full_name=full_name,
+        learner, newbie = Person.objects.get_or_create(email=email,
                                                        role=role)
 
-    elif request.POST.get('learner_ID', ''):
+
+    elif request.POST.get('learner_ID', '') or (settings.DEBUG and \
+                                            request.GET.get('learner_ID','')):
         logger.debug('Getting user from POST field')
         newbie = False
-        learner_ID = request.POST.get('learner_ID', '')
+        learner_ID = request.POST.get('learner_ID', '') or \
+                     request.GET.get('learner_ID','')
+
         learner = Person.objects.filter(user_ID=learner_ID)
         if learner:
             learner = learner[0]
@@ -102,7 +106,10 @@ def get_create_student(request):
 
 
     if newbie:
-        logger.info('Created new learner: %s' % learner.full_name)
+        learner.full_name = full_name
+        learner.first_name = first_name
+        learner.save()
+        logger.info('Created/saved new learner: %s' % learner.full_name)
 
     if learner:
         # Augments the learner with extra fields that might not be there
@@ -494,7 +501,7 @@ def upload_submission(request, learner, pr_process):
         extra_line = ''
 
     message = ('{0} have successfully submitted a document for: {1}.\n'
-               'This is for the course: {2}\n'
+               'This is for the course: {2}.\n'
                '\n'
                'You may submit multiple times, up to the deadline. Only the '
                'most recent submission is kept. {3}\n'
