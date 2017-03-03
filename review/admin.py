@@ -14,7 +14,8 @@ class PR_processAdmin(admin.ModelAdmin):
 
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
-                    "submitted_file_name", "number_reviews_assigned",
+                    "submitted_file_name", "group_submitted",
+                    "number_reviews_assigned",
                     "number_reviews_completed", "datetime_submitted")
 
 class RItemActualAdmin(admin.ModelAdmin):
