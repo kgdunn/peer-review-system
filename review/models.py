@@ -200,6 +200,9 @@ class PeerEvaluationPhase(PRPhase):
     """
     number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
         help_text='How many reviews must each learner complete?')
+    def __str__(self):
+        return '*' + super(PeerEvaluationPhase, self).__str__()
+
 
 class FeedbackPhase(PRPhase):
     """
@@ -230,6 +233,8 @@ class Submission(models.Model):
         default=None, help_text="If a group submission, it links back to it.")
     status = models.CharField(max_length=2, choices=STATUS, default='N')
     pr_process = models.ForeignKey(PR_process, verbose_name="Peer review")
+    phase = models.ForeignKey(PRPhase, verbose_name="Attached with which phase",
+                              default=None, null=True) #to allow migrations
     is_valid = models.BooleanField(default=False,
         help_text=('Valid if: it was submitted on time, or if this is the most '
                    'recent submission (there might be older ones).'))

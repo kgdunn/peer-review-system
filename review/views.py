@@ -8,8 +8,8 @@ from django.template import Context, Template
 
 # Our imports
 from .models import Person, Course, PR_process
-from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase#, SelfEvaluationPhase, PeerEvaluationPhase,
-                    #ScorePhase, FeedbackPhase
+from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
+                    PeerEvaluationPhase, FeedbackPhase
 from .models import Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
@@ -185,290 +185,19 @@ def get_next_submission_to_evaluate(pr, learner):
     else:
         return valid_subs[0]
 
-def get_n_reviews(learner, pr):
+def get_n_reviews(learner, phase):
     """
     How many reviews are required for this ``learner`` for this ``pr``?
     """
     if learner.role == 'Learn':
-        n_reviews = pr.number_of_reviews_per_learner
+        n_reviews = phase.number_of_reviews_per_learner
     else:
         # Administrators/TAs can have unlimited number of reviews
-        n_reviews = Submission.objects.filter(pr_process=pr,
-                                                  is_valid=True).count()
+        n_reviews = Submission.objects.filter(pr_process=phase.pr,
+                                              phase=phase,
+                                              is_valid=True).count()
 
     return n_reviews
-
-def render_phase(phase, ctx_objects):
-    """
-    Renders the HTML template for this phase
-    """
-    template = Template(phase.templatetext)
-    context = Context(ctx_objects)
-    return template.render(context)
-
-
-def get_related(self, request, learner, ctx_objects, now_time):
-    """
-    Gets all the necessary objects used to render the template for an object
-    in this phase (``self``)
-    """
-    within_phase = False
-    if (self.start_dt.replace(tzinfo=None) <= now_time) \
-                              and (self.end_dt.replace(tzinfo=None)>now_time):
-        within_phase = True
-
-    # Objects required for a submission: file_upload_form, (prior) submission.
-    try:
-        sub_phase = SubmissionPhase.objects.get(id=self.id)
-        allow_submit = within_phase
-        if not(within_phase):
-            return ctx_objects
-
-        from . forms import UploadFF
-        file_upload_form = UploadFF()
-
-        if request.FILES:
-            upload_submission(request, learner, self.pr)
-
-        grp_info = get_group_information(learner, self.pr.gf_process)
-
-        submission = None
-        if self.pr.uses_groups:
-            # NOTE: an error condition can develop if a learner isn't
-            #       allocated into a group, and you are using group submissions.
-            subs = Submission.objects.filter(pr_process=self.pr,
-                   group_submitted=grp_info['group_instance']).order_by(\
-                       '-datetime_submitted')
-        else:
-            subs = Submission.objects.filter(submitted_by=learner,
-                                             pr_process=self.pr).\
-                  order_by('-datetime_submitted')
-
-        if subs:
-            submission = subs[0]
-
-        ctx_objects['self'] = sub_phase
-        ctx_objects['allow_submit'] = allow_submit
-        ctx_objects['file_upload_form'] = file_upload_form
-        ctx_objects['submission'] = submission
-
-    except SubmissionPhase.DoesNotExist:
-        pass
-
-
-    # Objects required for a self-review: r_actual ???
-    try:
-        selfreview_phase = SelfEvaluationPhase.objects.get(id=self.id)
-        allow_self_review = within_phase
-        if not(allow_self_review):
-            return ctx_objects
-
-        ctx_objects['self'] = selfreview_phase
-        ctx_objects['allow_self_review'] = allow_self_review
-        ctx_objects['item'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
-
-    except SelfEvaluationPhase.DoesNotExist:
-        pass
-
-    return ctx_objects
-
-# intentional late import: for ``index``
-from groups.views import get_group_information
-
-@csrf_exempt
-@xframe_options_exempt
-def index(request, message=''):
-
-    if request.method != 'POST':
-        return HttpResponse(("You have reached the Peer Review LTI component "
-                             "without authorization."))
-
-    logger.debug('POST = ' + str(request.POST))
-    person_or_error, course, pr = starting_point(request)
-
-    if not(isinstance(person_or_error, Person)):
-        return person_or_error      # Error path if student does not exist
-
-    learner = person_or_error
-
-    # Get all the possible phases
-    phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
-
-    html = []
-    now_time = datetime.datetime.utcnow()
-    ctx_objects = {'now_time': now_time,
-                   'person': learner,
-                   'course': course,
-                   'pr': pr}
-    ctx_objects.update(csrf(request)) # add the csrf; used in forms
-
-    for phase in phases:
-
-        # Start with no ``ctx_objects``, but then add to them, with each phase.
-        # A later phase can use (modify even) the state of a variable.
-        # The "self" variable is certainly altered every phase
-        ctx_objects['self'] = phase
-        ctx_objects = get_related(phase,
-                                  request,
-                                  learner,
-                                  ctx_objects,
-                                  now_time)
-
-        # Render the HTML for this phase: it depends on the ``pr`` settings,
-        # the date and time, and related objects specifically required for
-        # that phase. The rendering happens per phase. That means if the state
-        # of a variable changes, it might be rendered differently in a later
-        # phase [though this is not expected to be used].
-
-        html.append(render_phase(phase, ctx_objects))
-
-    # end rendering
-    # Return the HTTP Response
-
-    return HttpResponse(''.join(html)   )
-
-
-# Old-code: prior to modularization
-if False:
-    allow_submit = False
-    allow_review = False
-    allow_report = False
-
-    file_upload_form = {}# we want to fill this in the "submission" step
-    submission = None    # we want to fill this in the "submission" step
-    r_actuals = []       # we want to fill this in the "review" step
-    peers = {}           # we want to fill this in the "report" step
-
-
-    # This is a bit hackish, but required to work towards a deadline.
-    report_sort = []
-    report__comments = []
-    report__n_reviews = 0
-    report__did_submit = False
-    report__overall_max_score = 0
-    report__learner_avg = 0
-
-    # Prior to submission date?
-    #Just outline the coming steps
-
-
-    # Do all time comparisons in UTC.
-
-    if (pr.dt_submissions_open_up.replace(tzinfo=None) <= now_time) \
-        and (pr.dt_submission_deadline.replace(tzinfo=None)>now_time):
-        allow_submit = True
-
-        from . forms import UploadFF
-        file_upload_form = UploadFF()
-
-        if request.FILES:
-            upload_submission(request, learner, pr)
-
-        grp_info = get_group_information(learner, pr.gf_process)
-        submission = None
-        if pr.uses_groups:
-            subs = Submission.objects.filter(pr_process=pr,
-                   group_submitted=grp_info['group_instance']).order_by(\
-                       '-datetime_submitted')
-
-        else:
-            subs = Submission.objects.filter(submitted_by=learner,
-                                             pr_process=pr).\
-                  order_by('-datetime_submitted')
-
-        if subs:
-            submission = subs[0]
-
-
-    # STEP 2: between review start and end time?
-    # Code here to display the available reviews
-    # Also display the user's/group's own submission
-
-    if (pr.dt_peer_reviews_start_by.replace(tzinfo=None) <= now_time) \
-         and (pr.dt_peer_reviews_completed_by.replace(tzinfo=None)>now_time):
-        allow_review = True
-
-        # Is this the first time the learner is here: create the
-        # N = pr.number_of_reviews_per_learner rubrics for the learner
-        # and return N ``RubricActual`` instances
-
-        # If this is the second or subequent time here, simply return
-        # the N ``RubricActual`` instances
-
-        n_reviews = get_n_reviews(learner, pr)
-        query = RubricActual.objects.filter(graded_by = learner,
-                rubric_template = pr.rubrictemplate).order_by('created')
-
-        logger.debug('Need to create {0} reviews'.format(n_reviews))
-
-        if query.count() == n_reviews:
-            r_actuals = list(query)
-        else:
-
-            # We need to create and append a few more reviews here
-            r_actuals = list(query)
-
-            for k in range(n_reviews - query.count()):
-                # Hit database to get the next submission to grade:
-                next_sub = get_next_submission_to_evaluate(pr, learner)
-                if next_sub:
-                    next_sub.number_reviews_assigned += 1
-                    next_sub.save()
-
-                    # Create an ``rubric_actual`` instance:
-                    r_actual, new_rubric = RubricActual.objects.get_or_create(\
-                                submitted = False,
-                                graded_by = learner,
-                                rubric_template = pr.rubrictemplate,
-                                submission = next_sub)
-
-                    if new_rubric:
-                        create_items(r_actual)
-
-                    r_actuals.append(r_actual)
-
-                    logger.debug('Created: ' + str(next_sub))
-
-        # Now we have the peer review ojects: ``r_actual``
-
-
-    # STEP 3: after the time when feedback is available?
-    # Code here to display the results
-    if (pr.dt_peer_reviews_received_back.replace(tzinfo=None) <= now_time):
-        allow_report = True
-
-        report = get_peer_grading_data(learner, pr)
-        report__comments = report.pop('comments', ['',])
-        shuffle(report__comments)
-        report__n_reviews = report.pop('n_reviews')
-        report__did_submit = report.pop('did_submit')
-        report__overall_max_score = report.pop('overall_max_score', 0)
-        report__learner_avg = report.pop('learner_avg',0)
-
-        report_sort = []
-        for key, value in report.items():
-            report_sort.append((key, value))
-        report_sort = sorted(report_sort)
-
-    ctx = {'message': message,
-           'person': learner,
-           'course': course,
-           'pr': pr,
-           'file_upload_form': file_upload_form,
-           'submission': submission,
-           'r_actuals': r_actuals,
-           'report': report_sort,
-           'report__comments': report__comments,
-           'report__n_reviews': report__n_reviews,
-           'report__did_submit': report__did_submit,
-           'report__overall_max_score': report__overall_max_score,
-           'report__learner_avg': report__learner_avg,
-           'allow_submit': allow_submit,
-           'allow_review': allow_review,
-           'allow_report': allow_report,
-           }
-    return render(request, 'review/welcome.html', ctx)
-
 
 def get_peer_grading_data(learner, pr):
     """
@@ -549,6 +278,250 @@ def get_peer_grading_data(learner, pr):
     peer_data['learner_avg'] = np.sum(np.nanmean(scores, axis=1)) # ignore NaNs
     return peer_data
 
+def render_phase(phase, ctx_objects):
+    """
+    Renders the HTML template for this phase
+    """
+    template = Template(phase.templatetext)
+    context = Context(ctx_objects)
+    return template.render(context)
+
+
+def get_related(self, request, learner, ctx_objects, now_time, prior):
+    """
+    Gets all the necessary objects used to render the template for an object
+    in this phase (``self``).
+
+    You will need to know, for certain phases, the ``request``, the ``learner``,
+    the ``ctx_objects`` (context objects), the current time ``now_time``, and
+    some phases (like the evaluation phase), need to know the prior phase
+    (usually the submission phase).
+    """
+    within_phase = False
+    if (self.start_dt.replace(tzinfo=None) <= now_time) \
+                              and (self.end_dt.replace(tzinfo=None)>now_time):
+        within_phase = True
+
+    # Objects required for a submission: file_upload_form, (prior) submission.
+    try:
+        sub_phase = SubmissionPhase.objects.get(id=self.id)
+        ctx_objects['self'] = sub_phase
+        allow_submit = within_phase
+
+        # Whether or not we are submitting, we might have a prior submission
+        # to display
+        grp_info = get_group_information(learner, self.pr.gf_process)
+        submission = None
+        if self.pr.uses_groups:
+            # NOTE: an error condition can develop if a learner isn't
+            #       allocated into a group, and you are using group submissions.
+            subs = Submission.objects.filter(pr_process=self.pr,
+                   group_submitted=grp_info['group_instance']).order_by(\
+                       '-datetime_submitted')
+        else:
+            subs = Submission.objects.filter(submitted_by=learner,
+                                             pr_process=self.pr).\
+                  order_by('-datetime_submitted')
+
+        if subs:
+            submission = subs[0]
+
+        ctx_objects['submission'] = submission
+
+        if not(within_phase):
+            return ctx_objects
+
+        from . forms import UploadFF
+        file_upload_form = UploadFF()
+
+        if request.FILES:
+            upload_submission(request, learner, self.pr)
+
+
+        ctx_objects['allow_submit'] = allow_submit
+        ctx_objects['file_upload_form'] = file_upload_form
+
+
+    except SubmissionPhase.DoesNotExist:
+        pass
+
+
+    # Objects required for a self-review: r_actual
+    try:
+        selfreview_phase = SelfEvaluationPhase.objects.get(id=self.id)
+        ctx_objects['self'] = selfreview_phase
+        allow_self_review = within_phase
+        if not(allow_self_review):
+            return ctx_objects
+
+
+        ctx_objects['allow_self_review'] = allow_self_review
+        ctx_objects['item'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
+
+    except SelfEvaluationPhase.DoesNotExist:
+        pass
+
+
+    # Objects required for a peer-review: r_actuals
+    try:
+        peerreview_phase = PeerEvaluationPhase.objects.get(id=self.id)
+        ctx_objects['self'] = peerreview_phase
+        allow_review = within_phase
+        if not(allow_review):
+            return ctx_objects
+
+
+        # Is this the first time the learner is here: create the
+        # N = self.number_of_reviews_per_learner rubrics for the learner
+        # and return N ``RubricActual`` instances
+
+        # If this is the second or subequent time here, simply return
+        # the N ``RubricActual`` instances
+
+        n_reviews = get_n_reviews(learner, peerreview_phase)
+        query = RubricActual.objects.filter(graded_by = learner,
+                rubric_template = self.pr.rubrictemplate).order_by('created')
+
+        logger.debug('Need to create {0} reviews'.format(n_reviews))
+
+        if query.count() == n_reviews:
+            r_actuals = list(query)
+        else:
+
+            # We need to create and append the necessary reviews here
+            r_actuals = list(query)
+
+            for k in range(n_reviews - query.count()):
+                # Hit database to get the next submission to grade:
+                next_sub = get_next_submission_to_evaluate(self.pr, learner)
+                if next_sub:
+                    next_sub.number_reviews_assigned += 1
+                    next_sub.save()
+
+                    # Create an ``rubric_actual`` instance:
+                    r_actual, new_rubric = RubricActual.objects.get_or_create(\
+                                submitted = False,
+                                graded_by = learner,
+                                rubric_template = pr.rubrictemplate,
+                                submission = next_sub)
+
+                    if new_rubric:
+                        create_items(r_actual)
+
+                    r_actuals.append(r_actual)
+
+                    logger.debug('Created: ' + str(next_sub))
+
+        # Now we have the peer review ojects: ``r_actuals``
+
+        ctx_objects['allow_review'] = allow_review
+        ctx_objects['r_actuals'] = r_actuals
+
+    except PeerEvaluationPhase.DoesNotExist:
+        pass
+
+    # Objects required for the feedback phase: quite a few!
+    try:
+        feedback_phase = FeedbackPhase.objects.get(id=self.id)
+        ctx_objects['self'] = feedback_phase
+
+        allow_report = within_phase
+        if not(allow_report):
+            return ctx_objects
+
+        # This is a bit hackish, but required to work towards a deadline.
+        report = get_peer_grading_data(learner, self.pr)
+        report__comments = report.pop('comments', ['',])
+        shuffle(report__comments)
+        report__n_reviews = report.pop('n_reviews')
+        report__did_submit = report.pop('did_submit')
+        report__overall_max_score = report.pop('overall_max_score', 0)
+        report__learner_avg = report.pop('learner_avg',0)
+
+        report_sort = []
+        for key, value in report.items():
+            report_sort.append((key, value))
+        report_sort = sorted(report_sort)
+
+        ctx_objects['allow_report'] = allow_report
+        ctx_objects['report__n_reviews'] = report__n_reviews
+        ctx_objects['report__comments'] = report__comments
+        ctx_objects['report__did_submit'] = report__did_submit
+        ctx_objects['report__overall_max_score'] = report__overall_max_score
+        ctx_objects['report__learner_avg'] = report__learner_avg
+        ctx_objects['report'] = report_sort
+
+    except SelfEvaluationPhase.DoesNotExist:
+        pass
+
+    return ctx_objects
+
+
+
+@csrf_exempt
+@xframe_options_exempt
+def index(request):
+
+    if request.method != 'POST':
+        return HttpResponse(("You have reached the Peer Review LTI component "
+                             "without authorization."))
+
+    logger.debug('POST = ' + str(request.POST))
+    person_or_error, course, pr = starting_point(request)
+
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if student does not exist
+
+    learner = person_or_error
+
+    # Get all the possible phases
+    phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
+
+    html = []
+    now_time = datetime.datetime.utcnow()
+    ctx_objects = {'now_time': now_time,
+                   'person': learner,
+                   'course': course,
+                   'pr': pr}
+    ctx_objects.update(csrf(request)) # add the csrf; used in forms
+
+    # All the work takes place here
+    prior = None
+    for phase in phases:
+
+        # Start with no ``ctx_objects``, but then add to them, with each phase.
+        # A later phase can use (modify even) the state of a variable.
+        # The "self" variable is certainly altered every phase
+        ctx_objects['self'] = phase
+        ctx_objects = get_related(phase,
+                                  request,
+                                  learner,
+                                  ctx_objects,
+                                  now_time,
+                                  prior)
+
+        # Prior element in the Peer Review chain for the next iteration
+        prior = phase
+
+        # Render the HTML for this phase: it depends on the ``pr`` settings,
+        # the date and time, and related objects specifically required for
+        # that phase. The rendering happens per phase. That means if the state
+        # of a variable changes, it might be rendered differently in a later
+        # phase [though this is not expected to be used].
+
+        html.append(render_phase(phase, ctx_objects))
+        html.append('<hr>\n')
+
+    # end rendering
+    # Return the HTTP Response
+
+    return HttpResponse(''.join(html)   )
+
+
+
+
+
+
 def get_learner_details(ractual_code):
     """
     Verifies the learner is genuine.
@@ -566,6 +539,8 @@ def get_learner_details(ractual_code):
     return r_actual, learner
 
 
+# intentional late import: for ``index``
+from groups.views import get_group_information
 def upload_submission(request, learner, pr_process):
     """
     Handles the upload of the user's submission.
@@ -602,9 +577,8 @@ def upload_submission(request, learner, pr_process):
                      )
     sub.save()
 
-    group_info = get_group_information(learner, pr_process.gf_process)
-    if group_info['group_name']:
-        address = group_info['member_email_list']
+    if group_members['group_name']:
+        address = group_members['member_email_list']
         first_line = 'You, or someone in your group,'
         extra_line = ('That is why all members in your group will receive '
                       'this message.')
