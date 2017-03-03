@@ -164,11 +164,12 @@ class PRPhase(models.Model):
                     verbose_name='Start of this phase',)
     end_dt = models.DateTimeField(
                     verbose_name='End of this phase', )
+    is_active = models.BooleanField(default=True,
+            help_text='An override, allowing you to stage/draft phases.')
     instructions = models.TextField(default='', blank=True)
     templatetext = models.TextField(default='', blank=True,
                     help_text='The template rendered to the user')
-    is_active = models.BooleanField(default=True,
-        help_text='An override, allowing you to stage/draft phases.')
+
 
     def __str__(self):
         return '[{0}] {1}'.format(self.order, self.name)

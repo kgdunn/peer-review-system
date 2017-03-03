@@ -247,6 +247,7 @@ def get_related(self, request, learner, ctx_objects, now_time):
         if subs:
             submission = subs[0]
 
+        ctx_objects['self'] = sub_phase
         ctx_objects['allow_submit'] = allow_submit
         ctx_objects['file_upload_form'] = file_upload_form
         ctx_objects['submission'] = submission
@@ -257,15 +258,14 @@ def get_related(self, request, learner, ctx_objects, now_time):
 
     # Objects required for a self-review: r_actual ???
     try:
-        sub_phase = SelfEvaluationPhase.objects.get(id=self.id)
+        selfreview_phase = SelfEvaluationPhase.objects.get(id=self.id)
         allow_self_review = within_phase
         if not(allow_self_review):
             return ctx_objects
 
+        ctx_objects['self'] = selfreview_phase
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['item'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
-        ctx_objects['file_upload_form'] = file_upload_form
-        ctx_objects['submission'] = submission
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -304,9 +304,10 @@ def index(request, message=''):
 
     for phase in phases:
 
-        # We start with no ``ctx_objects``, but then add to them, with each
-        # phase. This way a later phase can use (modify even) the state of a
-        # variable.
+        # Start with no ``ctx_objects``, but then add to them, with each phase.
+        # A later phase can use (modify even) the state of a variable.
+        # The "self" variable is certainly altered every phase
+        ctx_objects['self'] = phase
         ctx_objects = get_related(phase,
                                   request,
                                   learner,
@@ -318,7 +319,7 @@ def index(request, message=''):
         # that phase. The rendering happens per phase. That means if the state
         # of a variable changes, it might be rendered differently in a later
         # phase [though this is not expected to be used].
-        ctx_objects['self'] = phase
+
         html.append(render_phase(phase, ctx_objects))
 
     # end rendering

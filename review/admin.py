@@ -15,7 +15,7 @@ class PR_processAdmin(admin.ModelAdmin):
 
 
 class PRPhaseAdmin(admin.ModelAdmin):
-    list_display = ("name", "pr", "order", "start_dt", "end_dt")
+    list_display = ("name", "pr", "order", "is_active", "start_dt", "end_dt")
     ordering = ['pr', 'order']
 
 class SubmissionPhaseAdmin(admin.ModelAdmin):
