@@ -200,7 +200,8 @@ def get_n_reviews(learner, pr):
 
 
 
-# intentional late import
+
+# intentional late import: for ``index``
 from groups.views import get_group_information
 
 @csrf_exempt
@@ -220,10 +221,7 @@ def index(request, message=''):
     learner = person_or_error
 
     # Get all the possible phases
-    phases = SubmissionPhase.objects.filter(pr=pr).order_by('order')
-
-
-
+    phases = PRPhase.objects.filter(pr=pr).order_by('order')
 
     html = []
     now_time = datetime.datetime.utcnow()

@@ -157,15 +157,19 @@ def peerreview_directory_path(instance, filename):
 
 # https://docs.djangoproject.com/en/1.10/topics/db/models/#model-inheritance
 class PRPhase(models.Model):
+    name = models.CharField(max_length=50, default='... Phase ...')
     pr = models.ForeignKey(PR_process, verbose_name="Peer review")
     order = models.PositiveIntegerField(default=1)
     start_dt = models.DateTimeField(
-                    verbose_name='Learners can start to submit',)
+                    verbose_name='Start of this phase',)
     end_dt = models.DateTimeField(
-                    verbose_name='Learners must submit their work before', )
+                    verbose_name='End of this phase', )
     instructions = models.TextField(default='', blank=True)
     templatetext = models.TextField(default='', blank=True,
                     help_text='The template rendered to the user')
+
+    def __str__(self):
+        return '[{0}] {1}'.format(self.order, self.name)
 
 
 class SubmissionPhase(PRPhase):
@@ -184,8 +188,8 @@ class SelfEvaluationPhase(PRPhase):
     """
     If a self-evaluation is required...
     """
-    # No extra fields
     pass
+
 
 class PeerEvaluationPhase(PRPhase):
     """
@@ -198,7 +202,6 @@ class FeedbackPhase(PRPhase):
     """
     Text feedback is shown to the user
     """
-    # No extra fields
     pass
 
 
