@@ -378,10 +378,11 @@ class ROptionTemplate(models.Model):
 
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
-    short_text = models.CharField(max_length=50, default='',
+    short_text = models.CharField(max_length=50, default='', blank=True,
             help_text='This text is in the drop down')
     option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
-    criterion = models.TextField(help_text='A prompt/criterion to the peers')
+    criterion = models.TextField(help_text='A prompt/criterion to the peers',
+                                 blank=True)
     order = models.IntegerField()
     # NOTE: the ``order`` is ignored for type ``LText``, as there will/should
     #       only be 1 of those per Item.
