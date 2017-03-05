@@ -276,11 +276,14 @@ class RubricTemplate(models.Model):
     pr_process = models.OneToOneField(PR_process, on_delete=models.CASCADE,
                                       primary_key=True)
 
+    # Make this the primary way to access the rubric (through a phase, not a PR)
+    phase = models.ForeignKey(PRPhase, default=None, null=True, blank=True)
+
     general_instructions = models.TextField(default='')
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.title, 'slug')
-        super(RubricTemplate, self).save(*args, **kwargs) # Call the "real" save()
+        super(RubricTemplate, self).save(*args, **kwargs)
 
     def __str__(self):
         return u'%s' % self.title
@@ -296,7 +299,7 @@ class RubricActual(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=2, default='A')
+    status = models.CharField(max_length=2, default='A', choices=STATUS)
     submitted = models.BooleanField(default=False,
         help_text='Has been completed reviewed AND submitted by peer grader.')
     graded_by = models.ForeignKey(Person)
@@ -369,11 +372,14 @@ class ROptionTemplate(models.Model):
     other options to the left and right of it.
     """
     TYPE = (('Radio', 'Radio buttons (default)'),
+            ('DropD', 'Dropdown of score'),
             ('LText', 'Long text [HTML Text area]'),
             ('SText', 'Short text [HTML input=text]'),)
 
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
+    short_text = models.CharField(max_length=50, default='',
+            help_text='This text is in the drop down')
     option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
     criterion = models.TextField(help_text='A prompt/criterion to the peers')
     order = models.IntegerField()

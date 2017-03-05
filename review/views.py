@@ -139,6 +139,29 @@ def create_items(r_actual):
                                     as_displayed = '')
         r_item_actual.save()
 
+
+def get_create_actual_rubric(learner, template, submission):
+    """
+    Creates a new actual rubric for a given ``learner`` (the person doing the)
+    evaluation. It will be based on the parent template defined in ``template``,
+    and for the given ``submission`` (either their own submission if it is a
+    self-review, or another person's submission for peer-review).
+
+    If the rubric already exists, it returns it.
+    """
+    # Create an ``rubric_actual`` instance:
+    r_actual, new_rubric = RubricActual.objects.get_or_create(\
+                submitted = False,
+                graded_by = learner,
+                rubric_template = template,
+                submission = submission)
+
+    if new_rubric:
+        create_items(r_actual)
+
+    return r_actual
+
+
 def get_next_submission_to_evaluate(pr, learner):
     """
     Gets the single next peer review submission for the approapriate peer review
@@ -354,9 +377,25 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(allow_self_review):
             return ctx_objects
 
+        # Get the submission from the prior step. Note, this must be a
+        # relevant submission (i.e. group or individual submission) related
+        # to a prior Submission step. I'm not going to check it here, but the
+        # variable ctx_objects['submission'] should be the correct on
+        #
+        # Submission.objects.filter(phase=prior, learner=..., group=...)
+        ctx_objects['submission']
+
+        # Create the R_actual for the self-review
+        r_template = RubricTemplate.objects.get(pr_process=self.pr,
+                                                phase = self)
+
+        r_actual = get_create_actual_rubric(learner,
+                                            r_template,
+                                            ctx_objects['submission'])
 
         ctx_objects['allow_self_review'] = allow_self_review
-        ctx_objects['own_submission'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
+        ctx_objects['own_submission'] = r_actual
+        #<-- r_actual goes here
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -398,12 +437,10 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                     next_sub.number_reviews_assigned += 1
                     next_sub.save()
 
-                    # Create an ``rubric_actual`` instance:
-                    r_actual, new_rubric = RubricActual.objects.get_or_create(\
-                                submitted = False,
-                                graded_by = learner,
-                                rubric_template = pr.rubrictemplate,
-                                submission = next_sub)
+                    template = 'ac13' #<-- must change: was "pr.rubrictemplate"
+                    r_actual = get_create_actual_rubric(learner,
+                                                        template,
+                                                        next_sub)
 
                     if new_rubric:
                         create_items(r_actual)
@@ -500,8 +537,10 @@ def index(request):
                                   now_time,
                                   prior)
 
-        # Prior element in the Peer Review chain for the next iteration
-        prior = phase
+        # Prior element in the Peer Review chain for the next iteration.
+        # Note: the prior is NOT of type "PRPhase", it is the actual
+        #       prior phase instance.
+        prior = ctx_objects['self']
 
         # Render the HTML for this phase: it depends on the ``pr`` settings,
         # the date and time, and related objects specifically required for
@@ -516,10 +555,6 @@ def index(request):
     # Return the HTTP Response
 
     return HttpResponse(''.join(html)   )
-
-
-
-
 
 
 def get_learner_details(ractual_code):
