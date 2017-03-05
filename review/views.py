@@ -205,8 +205,12 @@ def get_next_submission_to_evaluate(pr, learner):
 
 def get_n_reviews(learner, phase):
     """
-    How many reviews are required for this ``learner`` for this ``pr``?
+    How many reviews are required for this ``learner`` for this ``phase``?
     """
+    # TODO:
+
+    # IF it is a self-review then there is only 1 review required
+
     if learner.role == 'Learn':
         n_reviews = phase.number_of_reviews_per_learner
     else:
@@ -517,6 +521,19 @@ def index(request):
                    'pr': pr}
     ctx_objects.update(csrf(request)) # add the csrf; used in forms
 
+
+    global_page = """{% extends "review/base.html" %}
+    {% block content %}
+    <!--SPLIT HERE-->
+    {% endblock %}"""
+    template_page = Template(global_page)
+    context = Context(ctx_objects)
+    page_header_footer = template.render(context)
+    page_header, page_footer = page_header_footer.split('<!--SPLIT HERE-->')
+
+
+
+
     # All the work takes place here
     prior = None
     for phase in phases:
@@ -764,15 +781,15 @@ def submit_peer_review_feedback(request, ractual_code):
     r_actual.submission.save()
 
     # Reviews to still complete by this learner:
-    n_graded_already = RubricActual.objects.filter(graded_by=learner,
-                                                   status='C').count()
-    pr = r_actual.rubric_template.pr_process
-    n_to_do = max(0, get_n_reviews(learner, pr) - n_graded_already)
+    #n_graded_already = RubricActual.objects.filter(graded_by=learner,
+    #                                               status='C').count()
+    #phase = r_actual.rubric_template.phase
+    #n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
 
-    return HttpResponse(('Thank you. Your review has been successfully '
-                         'received. You still have to complete {0} review(s).'
-                         '<br>You may close this tab/window, and return back.'
-                         '').format(n_to_do,))
+    return HttpResponse('Thank you. Your review has been successfully '
+                        'received.'
+                        '<br>You may close this tab/window, and return back.'
+                        '')
 
 
 

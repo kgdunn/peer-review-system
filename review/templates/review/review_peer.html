@@ -153,14 +153,7 @@ textarea
 				{# Criterion is given here #}
                 {% if rubric.show_order %}{{item.ritem_template.order}}. {% endif %}
 				{{item.ritem_template.criterion|safe}} <span style="float:right; margin-bottom:10px">(maximum score: <b>{{item.ritem_template.max_score|floatformat}} point{{item.ritem_template.max_score|pluralize}}</b>)</span>
-
-
-				<select name="selectionField">
-  <option value="CA" >California -- CA </option>
-  <option value="CO" >Colorado -- CO</option>
-  <option value="CN" >Connecticut -- CN</option>
-</select>
-
+				<hr>
 
                 {% for option in item.options %}
 					{% if option.option_type == 'Radio' %}
@@ -170,7 +163,7 @@ textarea
 					{% endif %}
 					{% if option.option_type == 'DropD' %}
 					   {% if option.criterion %}
-                           <p><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}}
+                           <ul><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}}</ul>
 					   {% endif %}
 					{% endif %}
 					{% if option.option_type == 'LText' %}
@@ -182,6 +175,17 @@ textarea
 						</div>
 					{% endif %}
                 {% endfor %} {#for: option in item.options #}
+				{%if item.ritem_template.option_type == 'DropD'%}
+					<div class="dropdown-score" style="padding:	10px">
+					<p>Your score: <select name="selectionField">
+					<option value="option-NA" selected disabled>Based on the above descriptions, please give a score ...</option>
+						{% for option in item.options %}
+							<option value="option-{{option.order}}">{{option.score|floatformat}} point{{option.score|pluralize}}{%if option.short_text%}: {{option.short_text}}{% endif%}</option>
+						{% endfor %}
+					</select>
+					</div>
+				{% endif %} {#item.ritem_template.option_type#}
+
 				</fieldset>
             <hr>
             {% endfor %}

@@ -29,8 +29,11 @@ Check for PDF
 File upload: the upload process should also create the directory, if not existing
 
 
+To do next
+-----------
+""Your review has been successfully"" <-- better styling
+
 Add the group name in the email to the students.
-A more modular system for the various phases.
 The phase link to a PR process
 Release as BSD license and open up
 Statistics tracking for duration of review.
@@ -45,11 +48,10 @@ Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
 
 Shows in the HTML if it has been successfully submitted.
-Replicate the infrastructore on Webfaction
+
 Show review as being completed in the browser
 
 Track review text and selections immediately in the database
-Allow multiple attempts for the review, until the cut-off point is reached.
 Strip out the PDF information.
 
 Link to return back more apparent.
