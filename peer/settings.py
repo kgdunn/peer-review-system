@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 # For Django 1.9 and 1.10 compatibility
-MIDDLEWARE_CLASSES = MIDDLEWARE
+# MIDDLEWARE_CLASSES = MIDDLEWARE
 
 ROOT_URLCONF = 'peer.urls'
 
