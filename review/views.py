@@ -125,20 +125,6 @@ def get_create_student(request):
 
     return learner
 
-def create_items(r_actual):
-    """Creates the items (rows) associated with an actual rubric"""
-
-    r_template = r_actual.rubric_template
-    r_items = RItemTemplate.objects.filter(r_template=r_template).order_by('order')
-
-    for r_item in r_items:
-        r_item_actual = RItemActual(ritem_template = r_item,
-                                    r_actual = r_actual,
-                                    comment = '',
-                                    submitted = False,
-                                    as_displayed = '')
-        r_item_actual.save()
-
 
 def get_create_actual_rubric(learner, template, submission):
     """
@@ -156,8 +142,17 @@ def get_create_actual_rubric(learner, template, submission):
                 rubric_template = template,
                 submission = submission)
 
+
     if new_rubric:
-        create_items(r_actual)
+        # Creates the items (rows) associated with an actual rubric
+        for r_item in RItemTemplate.objects.filter(r_template=template)\
+                                                           .order_by('order'):
+            r_item_actual = RItemActual(ritem_template = r_item,
+                                        r_actual = r_actual,
+                                        comment = '',
+                                        submitted = False,
+                                        as_displayed = '')
+            r_item_actual.save()
 
     return r_actual
 
@@ -658,6 +653,9 @@ def review(request, ractual_code):
     if learner is None:
         # This branch only happens with error conditions.
         return r_actual
+
+    # Intentionally put the order_by here, to ensure that any errors in the
+    # next part of the code (zip-ordering) are highlighted
     r_item_actuals = r_actual.ritemactual_set.all().order_by('-modified')
 
     # Ensure the ``r_item_actuals`` are in the right order. These 3 lines
@@ -681,7 +679,11 @@ def review(request, ractual_code):
         # Small experiment: do rubrics from low to high (+order),  or
         # from high to low (-order), score better or worse?
         if value % 2 == 0: # even
-            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('-order')
+
+            # from hg revision 200 onwards, both will be ordered from
+            # low to high (experiment is over!). Since we sometimes use
+            # dropdowns, and this is cleaner without the confused order.
+            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
         else:
             item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
 

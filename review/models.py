@@ -281,6 +281,10 @@ class RubricTemplate(models.Model):
 
     general_instructions = models.TextField(default='')
 
+    show_order = models.BooleanField(default=True,
+            help_text=("Shows the order numbers. e.g 1. Assess ...; else it "
+                       "just show: Assess ..."))
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.title, 'slug')
         super(RubricTemplate, self).save(*args, **kwargs)
