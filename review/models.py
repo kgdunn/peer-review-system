@@ -282,8 +282,8 @@ class RubricTemplate(models.Model):
     general_instructions = models.TextField(default='')
 
     show_order = models.BooleanField(default=True,
-            help_text=("Shows the order numbers. e.g 1. Assess ...; else it "
-                       "just show: Assess ..."))
+            help_text=('Shows the order numbers. e.g "1. Assess ..."; else '
+                       'it just shows: "Assess ..."'))
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.title, 'slug')
@@ -355,16 +355,10 @@ class RItemActual(models.Model):
     comment = models.TextField(blank=True) # comment added by the learner
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    #score_awared = models.FloatField(help_text=('Usually corresponds to the '
-    #    'score from ROptionTemplate; but allow an override.'))
 
     # Has the question been submitted yet? True: user actively clicked the
     # submit button; ``False``: XHR stored answer.
     submitted = models.BooleanField(default=False)
-
-    # HTML formatted code that was displayed to the user, so we have an
-    # accurate reflection of the question
-    #as_displayed = models.TextField(blank=True)
 
     def __str__(self):
         return u'[Item {0}]'.format(self.ritem_template.order)
