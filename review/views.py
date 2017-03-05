@@ -335,7 +335,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         file_upload_form = UploadFF()
 
         if request.FILES:
-            upload_submission(request, learner, self.pr)
+            upload_submission(request, learner, self.pr, sub_phase)
 
 
         ctx_objects['allow_submit'] = allow_submit
@@ -356,7 +356,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
 
         ctx_objects['allow_self_review'] = allow_self_review
-        ctx_objects['item'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
+        ctx_objects['own_submission'] = {'unique_code': 'abc123'}  #<-- r_actual goes here
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -451,7 +451,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['report__learner_avg'] = report__learner_avg
         ctx_objects['report'] = report_sort
 
-    except SelfEvaluationPhase.DoesNotExist:
+    except FeedbackPhase.DoesNotExist:
         pass
 
     return ctx_objects
@@ -541,7 +541,7 @@ def get_learner_details(ractual_code):
 
 # intentional late import: for ``index``
 from groups.views import get_group_information
-def upload_submission(request, learner, pr_process):
+def upload_submission(request, learner, pr_process, phase):
     """
     Handles the upload of the user's submission.
     """
@@ -568,13 +568,14 @@ def upload_submission(request, learner, pr_process):
 
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
-                     status = 'S',
-                     pr_process = pr_process,
-                     is_valid = True,
-                     file_upload = submitted_file_name,
-                     submitted_file_name = filename,
-                     ip_address = get_IP_address(request),
-                     )
+                     status='S',
+                     pr_process=pr_process,
+                     phase=phase,
+                     is_valid=True,
+                     file_upload=submitted_file_name,
+                     submitted_file_name=filename,
+                     ip_address=get_IP_address(request),
+                    )
     sub.save()
 
     if group_members['group_name']:
@@ -737,86 +738,7 @@ def submit_peer_review_feedback(request, ractual_code):
                          '').format(n_to_do,))
 
 
-def manual_create_uploads(request):
-    """
-    Manually upload the submissions for Conny Bakker IO3075 Aerobics Peer Review
 
-    """
-    import csv
-    import os
-    from shutil import copyfile
-    from os.path import join, getsize
-
-    person_or_error, course, pr_process = starting_point(request)
-    if not(isinstance(person_or_error, Person)):
-        return person_or_error      # Error path if learner does not exist
-
-    person = person_or_error
-    if person.role == 'Learn':
-        return HttpResponse(("You have reached the Group LTI component "
-                             "without authorization."))
-
-    #pr_process = PR_process.objects.filter(id=1)[0]
-
-    classlist = {}
-    classlist_CSV = '/home/kevindunn/IO3075-classlist.csv'
-#    classlist_CSV = '/Users/kevindunn/DELETE/IO3075-classlist.csv'
-    with open(classlist_CSV, 'rt') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            print(row)
-
-            classlist[row[2] + ' ' + row[1]] = [row[2], row[3]]
-
-    folder = '/home/kevindunn/allsub/'
-    level_deep = 4
-#    folder = '/Users/kevindunn/DELETE/allsub/'
-#    level_deep = 5
-
-    for root, dirs, files in os.walk(folder):
-        logger.debug(root)
-        if files and files[0].lower().endswith('.pdf'):
-
-            # Only import PDF files
-
-            student_folder = root.split(os.sep)[level_deep]
-            student_name = student_folder.split('-')[2].strip()
-            student = classlist[student_name]
-
-
-            classlist[student_name].append(root + os.sep + files[0])
-            learner, newbie = Person.objects.get_or_create(first_name=student[0],
-                                                    email = student[1],
-                                                    full_name = student_name,
-                                                    role='Learn')
-
-            learner.save()
-
-            status = 'S'
-            is_valid = True
-            filename = root + os.sep + files[0]
-            extension = filename.split('.')[-1]
-            submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
-                            generate_random_token(token_length=16) + '.' + extension)
-            ip_address = '0.0.0.0'
-
-            base_dir = '/var/www/peer/documents'
-#            base_dir = '/Users/kevindunn/TU-Delft/CLE/peer'
-            copyfile(filename, base_dir + os.sep + submitted_file_name)
-
-            sub = Submission(submitted_by = learner,
-                             status = status,
-                             pr_process = pr_process,
-                             is_valid = True,
-                             file_upload = submitted_file_name,
-                             submitted_file_name = filename,
-                             ip_address = ip_address,
-                            )
-            sub.save()
-
-
-        else:
-            print(files)
 
 def reset_counts(request):
     """
