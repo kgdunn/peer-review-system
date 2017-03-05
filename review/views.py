@@ -48,12 +48,15 @@ def starting_point(request):
 
     """
     person = get_create_student(request)
-    course_ID = request.POST.get('context_id', None)
-    pr_ID = request.POST.get('resource_link_id', None)
+    course_ID = request.POST.get('context_id', None) or (settings.DEBUG and \
+                             request.GET.get('context_id', None))
+
+    pr_ID = request.POST.get('resource_link_id', None) or (settings.DEBUG and \
+                             request.GET.get('resource_link_id', None))
+
 
     if (pr_ID is None) or (course_ID is None):
         return HttpResponse(("You are not registered in this course."))
-
 
     try:
         pr = PR_process.objects.get(LTI_id=pr_ID)
@@ -71,6 +74,7 @@ def starting_point(request):
         return person, course, pr
     else:
         return HttpResponse(("You are not registered in this course."))
+
 
 def get_create_student(request):
     """
@@ -150,8 +154,7 @@ def get_create_actual_rubric(learner, template, submission):
             r_item_actual = RItemActual(ritem_template = r_item,
                                         r_actual = r_actual,
                                         comment = '',
-                                        submitted = False,
-                                        as_displayed = '')
+                                        submitted = False)
             r_item_actual.save()
 
     return r_actual
@@ -394,7 +397,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['own_submission'] = r_actual
-        #<-- r_actual goes here
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -498,9 +500,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 @xframe_options_exempt
 def index(request):
 
-    if request.method != 'POST':
-        return HttpResponse(("You have reached the Peer Review LTI component "
-                             "without authorization."))
+    if request.method != 'POST' and (len(request.GET.keys())==0):
+        return HttpResponse("You have reached the Peer Review LTI component.")
 
     logger.debug('POST = ' + str(request.POST))
     person_or_error, course, pr = starting_point(request)
@@ -528,11 +529,9 @@ def index(request):
     {% endblock %}"""
     template_page = Template(global_page)
     context = Context(ctx_objects)
-    page_header_footer = template.render(context)
+    page_header_footer = template_page.render(context)
     page_header, page_footer = page_header_footer.split('<!--SPLIT HERE-->')
-
-
-
+    html.append(page_header)
 
     # All the work takes place here
     prior = None
@@ -564,9 +563,10 @@ def index(request):
         html.append('<hr>\n')
 
     # end rendering
-    # Return the HTTP Response
+    html.append(page_footer)
 
-    return HttpResponse(''.join(html)   )
+    # Return the HTTP Response
+    return HttpResponse(''.join(html))
 
 
 def get_learner_details(ractual_code):
@@ -653,6 +653,64 @@ def upload_submission(request, learner, pr_process, phase):
     logger.debug('Numer of emails sent (should be 1): {0}'.format(out[0]))
 
     return None
+
+
+
+#@csrf_exempt
+@xframe_options_exempt
+def xhr_store(request):
+    """
+    Stores, in real-time, the results from the peer review.
+    """
+    option = request.POST.get('option', None)
+    if option is None or option=='option-NA':
+        return HttpResponse('')
+    item = request.POST.get('item', None)
+
+
+    if item.startswith('item-'):
+        item_number = int(item.split('item-')[1])
+
+        # Just store the ROptionActual
+        #ROptionActual.objects.get_or_create(roption_template=r_opt_template,
+        #                                     ritem_actual=items[item_number][0],
+        #                                     submitted=True,
+        #                                     comment=comment)
+
+
+        #comment = ''
+        #if items[item_number][1][0].option_type == 'LText':
+            #r_opt_template = items[item_number][1][0]
+            #comment = value
+
+        #if items[item_number][1][0].option_type == 'Radio':
+            #selected = int(value.split('option-')[1])
+
+            ## in "selected-1": the '-1' part is critical
+            #r_opt_template = items[item_number][1][selected-1]
+
+        ## If necessary, prior submissions for the same option are adjusted
+        ## as being .submitted=False (perhaps the user changed their mind)
+        #prior_options_submitted = ROptionActual.objects.filter(
+                                         #ritem_actual=items[item_number][0])
+
+        #for option in prior_options_submitted:
+            #option.delete()
+
+        ## Then set the "submitted" field on each OPTION
+        #ROptionActual.objects.get_or_create(roption_template=r_opt_template,
+                                        #ritem_actual=items[item_number][0],
+                                        #submitted=True,
+                                        #comment=comment)
+
+        ## Set the RItemActual.submitted = True for this ITEM
+        #items[item_number][0].submitted = True
+        #items[item_number][0].save()
+
+
+
+    return HttpResponse('Success')
+
 
 @csrf_exempt
 @xframe_options_exempt

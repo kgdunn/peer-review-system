@@ -1,10 +1,6 @@
-
 {% extends "review/base.html" %}
-
 {% block content %}
-
 <style>
-
 /* Header styles */
 #header {
     clear:both;
@@ -158,7 +154,7 @@ textarea
                 {% for option in item.options %}
 					{% if option.option_type == 'Radio' %}
                     <div class="radio">
-                        <label><span class="radio_button"><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"></span><span class="radio_text"><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}} </span></label>
+                        <label><span class="radio_button peeroption"><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"></span><span class="radio_text"><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}} </span></label>
                     </div>
 					{% endif %}
 					{% if option.option_type == 'DropD' %}
@@ -177,10 +173,10 @@ textarea
                 {% endfor %} {#for: option in item.options #}
 				{%if item.ritem_template.option_type == 'DropD'%}
 					<div class="dropdown-score" style="padding:	10px">
-					<p>Your score: <select name="selectionField">
+					<p>Your evaluation: <select id="item-{{item.ritem_template.order}}">
 					<option value="option-NA" selected disabled>Based on the above descriptions, please give a score ...</option>
 						{% for option in item.options %}
-							<option value="option-{{option.order}}">{{option.score|floatformat}} point{{option.score|pluralize}}{%if option.short_text%}: {{option.short_text}}{% endif%}</option>
+							<option class="peeroption" value="option-{{option.order}}">{{option.score|floatformat}} point{{option.score|pluralize}}{%if option.short_text%}: {{option.short_text}}{% endif%}</option>
 						{% endfor %}
 					</select>
 					</div>
@@ -196,9 +192,35 @@ textarea
         </div>
     </div>
 </div>
+
 <div id="footer">
-    <p>
 </div>
 
+{% endblock %}
+{% block footer %}
+<script>
+$( "select" ).change(function (event) {
+    var str = event.target.value + " " + event.target.id;
 
+	//$( "#header" ).text( str );
+	var postdata = {'csrfmiddlewaretoken': '{{ csrf_token }}',
+	                'option': event.target.value,
+					'item': event.target.id};
+
+	$.ajax({
+		method: "POST",
+		url: '/xhr-store',
+		data: postdata,
+		dataType: 'json',
+		cache: false,
+		success: function(result) {$('#XHRdiv').html(result);},
+		error: function (response, desc, exception) {// custom error
+		}
+	}).done(function( msg ) {
+	  alert( "Data Saved: " + msg );
+  });
+
+
+}).change();
+</script>
 {% endblock %}
