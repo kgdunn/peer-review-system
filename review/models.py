@@ -328,13 +328,19 @@ class RItemTemplate(models.Model):
     and also (probably) comment on the criterion.
     """
     r_template = models.ForeignKey(RubricTemplate)
-    comment_required = models.BooleanField(default=False)
+    #comment_required = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     order = models.IntegerField()
     criterion = models.TextField(help_text=('The prompt/criterion for the row '
                                             'in the rubric'))
     max_score = models.FloatField(help_text='Highest score achievable here')
+
+    TYPE = (('Radio', 'Radio buttons (default)'),
+            ('DropD', 'Dropdown of scores'),
+            ('LText', 'Long text [HTML Text area]'),
+            ('SText', 'Short text [HTML input=text]'),)
+    option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
 
 
     def save(self, *args, **kwargs):
