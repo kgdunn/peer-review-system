@@ -339,7 +339,7 @@ class RItemTemplate(models.Model):
         super(RItemTemplate, self).save(*args, **kwargs)
 
     def __str__(self):
-        return u'%d. %s' % (self.order, self.criterion)
+        return u'%d. %s' % (self.order, self.criterion[0:50])
 
 @python_2_unicode_compatible
 class RItemActual(models.Model):
@@ -360,7 +360,7 @@ class RItemActual(models.Model):
 
     # HTML formatted code that was displayed to the user, so we have an
     # accurate reflection of the question
-    as_displayed = models.TextField(blank=True)
+    #as_displayed = models.TextField(blank=True)
 
     def __str__(self):
         return u'[Item {0}]'.format(self.ritem_template.order)
@@ -372,7 +372,7 @@ class ROptionTemplate(models.Model):
     other options to the left and right of it.
     """
     TYPE = (('Radio', 'Radio buttons (default)'),
-            ('DropD', 'Dropdown of score'),
+            ('DropD', 'Dropdown of scores'),
             ('LText', 'Long text [HTML Text area]'),
             ('SText', 'Short text [HTML input=text]'),)
 

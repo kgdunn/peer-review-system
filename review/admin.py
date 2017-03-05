@@ -53,6 +53,10 @@ class ROptionActualAdmin(admin.ModelAdmin):
     list_display = ("roption_template", "ritem_actual", "submitted",
                     "comment", "created", "modified")
 
+class ROptionTemplateAdmin(admin.ModelAdmin):
+    list_display = ("rubric_item", "order", "score", "short_text",
+                    "option_type", )
+
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Course)
 admin.site.register(PR_process, PR_processAdmin)
@@ -67,6 +71,6 @@ admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(RItemActual, RItemActualAdmin)
 admin.site.register(RItemTemplate)
 admin.site.register(ROptionActual, ROptionActualAdmin)
-admin.site.register(ROptionTemplate)
+admin.site.register(ROptionTemplate, ROptionTemplateAdmin)
 admin.site.register(RubricActual, RubricActualAdmin)
 admin.site.register(RubricTemplate)
