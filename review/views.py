@@ -56,7 +56,8 @@ def starting_point(request):
 
 
     if (pr_ID is None) or (course_ID is None):
-        return HttpResponse(("You are not registered in this course."))
+        return (HttpResponse(("You are not registered in this course.")), None,
+                None)
 
     try:
         pr = PR_process.objects.get(LTI_id=pr_ID)
@@ -73,7 +74,8 @@ def starting_point(request):
     if person:
         return person, course, pr
     else:
-        return HttpResponse(("You are not registered in this course."))
+        return (HttpResponse(("You are not registered in this course.")), None,
+                None)
 
 
 def get_create_student(request):

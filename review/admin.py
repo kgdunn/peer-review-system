@@ -41,6 +41,11 @@ class SubmissionAdmin(admin.ModelAdmin):
                     "number_reviews_assigned",
                     "number_reviews_completed", "datetime_submitted")
 
+class RItemTemplateAdmin(admin.ModelAdmin):
+    list_display = ("r_template", "order", "max_score", "option_type",
+                    "created", "modified",)
+    ordering = ['-r_template', 'order']
+
 class RItemActualAdmin(admin.ModelAdmin):
     list_display = ("ritem_template", "submitted", "comment",
                     "created", "modified",)
@@ -56,6 +61,7 @@ class ROptionActualAdmin(admin.ModelAdmin):
 class ROptionTemplateAdmin(admin.ModelAdmin):
     list_display = ("rubric_item", "order", "score", "short_text",
                     "option_type", )
+    ordering = ['-rubric_item', 'order']
 
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Course)
@@ -69,7 +75,7 @@ admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)
-admin.site.register(RItemTemplate)
+admin.site.register(RItemTemplate, RItemTemplateAdmin)
 admin.site.register(ROptionActual, ROptionActualAdmin)
 admin.site.register(ROptionTemplate, ROptionTemplateAdmin)
 admin.site.register(RubricActual, RubricActualAdmin)

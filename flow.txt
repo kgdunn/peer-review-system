@@ -1,6 +1,13 @@
 TO DO
 ======
 
+* Does it matter that there are duplicate "Enrolled" instances?
+* Don't allow non-PDF for upload
+* Return error messages for non-PDF; too large files
+
+
+
+
 Groups
 --------
 

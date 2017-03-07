@@ -375,16 +375,16 @@ class ROptionTemplate(models.Model):
     A rubric option template (a single cell in the rubric). Usually with
     other options to the left and right of it.
     """
-    TYPE = (('Radio', 'Radio buttons (default)'),
-            ('DropD', 'Dropdown of scores'),
-            ('LText', 'Long text [HTML Text area]'),
-            ('SText', 'Short text [HTML input=text]'),)
+    #TYPE = (('Radio', 'Radio buttons (default)'),
+    #        ('DropD', 'Dropdown of scores'),
+    #        ('LText', 'Long text [HTML Text area]'),
+    #        ('SText', 'Short text [HTML input=text]'),)
 
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
     short_text = models.CharField(max_length=50, default='', blank=True,
             help_text='This text is in the drop down')
-    option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
+    #option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
     criterion = models.TextField(help_text='A prompt/criterion to the peers',
                                  blank=True)
     order = models.IntegerField()
