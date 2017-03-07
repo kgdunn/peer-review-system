@@ -59,8 +59,7 @@ class ROptionActualAdmin(admin.ModelAdmin):
                     "comment", "created", "modified")
 
 class ROptionTemplateAdmin(admin.ModelAdmin):
-    list_display = ("rubric_item", "order", "score", "short_text",
-                    "option_type", )
+    list_display = ("rubric_item", "order", "score", "short_text",)
     ordering = ['-rubric_item', 'order']
 
 admin.site.register(Person, PersonAdmin)
