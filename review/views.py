@@ -179,7 +179,11 @@ def get_submission(learner, phase=None, pr_process=None):
     if phase.pr.uses_groups:
         # NOTE: an error condition can develop if a learner isn't
         #       allocated into a group, and you are using group submissions.
+
+        # NOTE: will only get submissions for a phase LTE (less than and equal)
+        #       to the current ``phase``.
         subs = Submission.objects.filter(pr_process=phase.pr,
+                                         phase__order__lte=phase.order,
                                          is_valid=True,
                   group_submitted=grp_info['group_instance']).order_by(\
                                              '-datetime_submitted')
