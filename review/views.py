@@ -386,7 +386,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         file_upload_form = UploadFF()
 
         if request.FILES:
-            upload_submission(request, learner, self.pr, sub_phase)
+            submission = upload_submission(request, learner, self.pr, sub_phase)
+            ctx_objects['submission'] = submission
 
 
         ctx_objects['allow_submit'] = allow_submit
@@ -664,7 +665,7 @@ def upload_submission(request, learner, pr_process, phase):
     out = send_email(address, subject, message)
     logger.debug('Number of emails sent (should be 1): {0}'.format(out[0]))
 
-    return None
+    return sub
 
 
 #@csrf_exempt
