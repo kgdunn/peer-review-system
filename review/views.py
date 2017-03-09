@@ -723,6 +723,9 @@ def xhr_store(request, ractual_code):
     # Set the RItemActual.submitted = True for this ITEM
     r_item.submitted = True
     r_item.save()
+    logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
+                                                           item_number,
+                                                           option))
 
     return HttpResponse('Success')
 
