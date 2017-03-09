@@ -369,6 +369,9 @@ class RItemActual(models.Model):
     def __str__(self):
         return u'[Item {0}]'.format(self.ritem_template.order)
 
+    def get_filled_in_values(self):
+        return 'ab'
+
 @python_2_unicode_compatible
 class ROptionTemplate(models.Model):
     """
@@ -422,6 +425,8 @@ class ROptionActual(models.Model):
 
     def __str__(self):
         return u'%s' % (self.roption_template, )
+
+
 
 
 

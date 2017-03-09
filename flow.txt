@@ -1,16 +1,41 @@
+* Give a link at "THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW"
+* CHeck the XHR is doing it appropriately.
+* XHR for text fields?
+* Send XHR feedback back to the user
+* CHeck that all PDF's open
+* Simulate 2 people from same group: how are their results returned?
+* XHR saving verified
+* Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
+* Check that all the text feedback gets to the right group.
+* Log the XHR events
+* Error on not filling out all fields
+* ""Your review has been successfully"" <-- better styling
+
+* Slow load: not due to PDF object;
+
 TO DO
 ======
 
+* Send a grading breakdown to Conny
+* Add an "improvement" block in between every seection: mention sectino 2.1, 2.2 etc
+* Log the date/time XHR events
+* Auto-save XHR as you go is imperative
+* Error on not filling in all fields
 * Does it matter that there are duplicate "Enrolled" instances?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
+* Peer review is taking a long time to load
 
 
+Check submission:
+149 (doc -> PDF)
+3 submissions that were replaced should not show up
+Group 4 (submission issue POST) Koen Braker
+Group XXXX JOris Blok: names in PDF removed
 
 
 Groups
 --------
-
 Open time
 Closing time
 Allow more than N enrollments
@@ -35,10 +60,8 @@ Check for PDF
 
 File upload: the upload process should also create the directory, if not existing
 
-
 To do next
 -----------
-""Your review has been successfully"" <-- better styling
 
 Add the group name in the email to the students.
 The phase link to a PR process

@@ -43,7 +43,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 class RItemTemplateAdmin(admin.ModelAdmin):
     list_display = ("r_template", "order", "max_score", "option_type",
-                    "created", "modified",)
+                    "criterion", "created", "modified",)
     ordering = ['-r_template', 'order']
 
 class RItemActualAdmin(admin.ModelAdmin):

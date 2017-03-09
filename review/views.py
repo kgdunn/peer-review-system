@@ -660,56 +660,69 @@ def upload_submission(request, learner, pr_process, phase):
 
 #@csrf_exempt
 @xframe_options_exempt
-def xhr_store(request):
+def xhr_store(request, ractual_code):
     """
     Stores, in real-time, the results from the peer review.
     """
+
     option = request.POST.get('option', None)
     if option is None or option=='option-NA':
-        return HttpResponse('')
-    item = request.POST.get('item', None)
+        return HttpResponse('Invalid')
+
+    item_post = request.POST.get('item', None)
+    if item_post.startswith('item-'):
+        item_number = int(item_post.split('item-')[1])
+    else:
+        return HttpResponse('Invalid')
 
 
-    if item.startswith('item-'):
-        item_number = int(item.split('item-')[1])
-
-        # Just store the ROptionActual
-        #ROptionActual.objects.get_or_create(roption_template=r_opt_template,
-        #                                     ritem_actual=items[item_number][0],
-        #                                     submitted=True,
-        #                                     comment=comment)
-
-
-        #comment = ''
-        #if items[item_number][1][0].option_type == 'LText':
-            #r_opt_template = items[item_number][1][0]
-            #comment = value
-
-        #if items[item_number][1][0].option_type == 'Radio':
-            #selected = int(value.split('option-')[1])
-
-            ## in "selected-1": the '-1' part is critical
-            #r_opt_template = items[item_number][1][selected-1]
-
-        ## If necessary, prior submissions for the same option are adjusted
-        ## as being .submitted=False (perhaps the user changed their mind)
-        #prior_options_submitted = ROptionActual.objects.filter(
-                                         #ritem_actual=items[item_number][0])
-
-        #for option in prior_options_submitted:
-            #option.delete()
-
-        ## Then set the "submitted" field on each OPTION
-        #ROptionActual.objects.get_or_create(roption_template=r_opt_template,
-                                        #ritem_actual=items[item_number][0],
-                                        #submitted=True,
-                                        #comment=comment)
-
-        ## Set the RItemActual.submitted = True for this ITEM
-        #items[item_number][0].submitted = True
-        #items[item_number][0].save()
+    r_actual, learner = get_learner_details(ractual_code)
+    r_item_actual = r_actual.ritemactual_set.filter(\
+                                             ritem_template__order=item_number)
+    if r_item_actual.count() == 0:
+        return HttpResponse('Invalid')
+    else:
+        r_item = r_item_actual[0]
 
 
+    item_template = r_item.ritem_template
+    r_options = item_template.roptiontemplate_set.all().order_by('order')
+
+    r_opt_template = None
+    comment = ''
+    if item_template.option_type == 'LText':
+        if value:
+            r_opt_template = r_options[0]
+            comment = value
+        else:
+            return HttpResponse('Invalid')
+
+    if (item_template.option_type == 'Radio') or \
+       (item_template.option_type == 'DropD'):
+        selected = int(option.split('option-')[1])
+
+        # in "selected-1": the '-1' part is critical
+        try:
+            r_opt_template = r_options[selected-1]
+        except (IndexError, AssertionError):
+            return HttpResponse('Invalid')
+
+    # If necessary, prior submissions for the same option are adjusted
+    # as being .submitted=False (perhaps the user changed their mind)
+    prior_options_submitted = ROptionActual.objects.filter(ritem_actual=r_item)
+    prior_options_submitted.update(submitted=False)
+
+    # Then set the "submitted" field on each OPTION
+    ROptionActual.objects.get_or_create(roption_template=r_opt_template,
+
+                        # This is the way we bind it back to the user!
+                        ritem_actual=r_item,
+                        submitted=True,
+                        comment=comment)
+
+    # Set the RItemActual.submitted = True for this ITEM
+    r_item.submitted = True
+    r_item.save()
 
     return HttpResponse('Success')
 
@@ -731,6 +744,7 @@ def review(request, ractual_code):
         # This branch only happens with error conditions.
         return r_actual
 
+
     # Intentionally put the order_by here, to ensure that any errors in the
     # next part of the code (zip-ordering) are highlighted
     r_item_actuals = r_actual.ritemactual_set.all().order_by('-modified')
@@ -743,26 +757,37 @@ def review(request, ractual_code):
     zipped = list(zip(r_item_actuals, r_item_template_order))
     r_item_actuals, _ = list(zip(*(sorted(zipped, key=lambda x: x[1]))))
 
+    # Small experiment: do rubrics from low to high (+order),  or
+    # from high to low (-order), score better or worse?
+    hash_name = hashlib.md5(learner.full_name.encode())
+    digit = re.search("\d", hash_name.hexdigest())
+    if digit:
+        value = int(hash_name.hexdigest()[digit.start()])
+    else:
+        value = 0
+
+
     for item in r_item_actuals:
         item_template = item.ritem_template
 
-        hash_name = hashlib.md5(learner.full_name.encode())
-        digit = re.search("\d", hash_name.hexdigest())
-        if digit:
-            value = int(hash_name.hexdigest()[digit.start()])
-        else:
-            value = 0
-
-        # Small experiment: do rubrics from low to high (+order),  or
-        # from high to low (-order), score better or worse?
         if value % 2 == 0: # even
-
             # from hg revision 200 onwards, both will be ordered from
             # low to high (experiment is over!). Since we sometimes use
             # dropdowns, and this is cleaner without the confused order.
             item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
         else:
             item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
+
+
+        for option in item.options:
+            prior_answer = ROptionActual.objects.filter(roption_template=option,
+                                                        ritem_actual=item,
+                                                        submitted=True)
+            if prior_answer.count():
+                if item_template.option_type == 'DropD':
+                    option.selected = True
+                elif item_template.option_type == 'LText':
+                    option.prior_text = prior_answer[0].comment
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
@@ -786,59 +811,101 @@ def submit_peer_review_feedback(request, ractual_code):
 
     r_actual, learner = get_learner_details(ractual_code)
     r_item_actuals = r_actual.ritemactual_set.all()
-    r_item_actuals
-    items = {}
 
-    # ``dict``, for example: items[3] = list of the OPTIONS in item 3
+    items = {}
+    # Create the dictionary: one key per ITEM.
+    # The value associated with the key is a dictionary itself.
+    # items[1] = {'options': [....]  <-- list of the options associated
+    #             'item_obj': the item instance / object}
+    #
+
     for item in r_item_actuals:
         item_template = item.ritem_template
-        items[item_template.order] = (item,
-               item_template.roptiontemplate_set.all().order_by('order'))
+        item_dict = {}
+        items[item_template.order] = item_dict
+        item_dict['options'] = item_template.roptiontemplate_set.all()\
+                                                          .order_by('order')
+        item_dict['item_obj'] = item
+        item_dict['template'] = item_template
+
+
+        #items[item_template.order] = (item,
+        #       item_template.roptiontemplate_set.all().order_by('order'))
 
     # Stores the users selections as "ROptionActual" instances
     for key, value in request.POST.items():
-        # Process each item in the rubric, one at a time
-        if key.startswith('item-'):
-            item_number = int(key.split('item-')[1])
 
-            comment = ''
-            if items[item_number][1][0].option_type == 'LText':
-                r_opt_template = items[item_number][1][0]
+        # Process each item in the rubric, one at a time. Only ``item``
+        # values returned in the form are considered.
+        if not(key.startswith('item-')):
+            continue
+
+        r_opt_template = None
+        item_number = int(key.split('item-')[1])
+        comment = ''
+        if items[item_number]['template'].option_type == 'LText':
+            if value:
+                r_opt_template = items[item_number]['options'][0]
                 comment = value
+            else:
+                # We get for text feedback fields that they can be empty.
+                # In these cases we must continue as if they were not filled
+                # in.
+                continue
 
-            if items[item_number][1][0].option_type == 'Radio':
-                selected = int(value.split('option-')[1])
+        if (items[item_number]['template'].option_type == 'Radio') or \
+           (items[item_number]['template'].option_type == 'DropD'):
+            selected = int(value.split('option-')[1])
 
-                # in "selected-1": the '-1' part is critical
-                r_opt_template = items[item_number][1][selected-1]
+            # in "selected-1": the '-1' part is critical
+            try:
+                r_opt_template = items[item_number]['options'][selected-1]
+            except (IndexError, AssertionError):
+                continue
 
-            # If necessary, prior submissions for the same option are adjusted
-            # as being .submitted=False (perhaps the user changed their mind)
-            prior_options_submitted = ROptionActual.objects.filter(
-                                             ritem_actual=items[item_number][0])
+        # If necessary, prior submissions for the same option are adjusted
+        # as being .submitted=False (perhaps the user changed their mind)
+        prior_options_submitted = ROptionActual.objects.filter(
+                                ritem_actual=items[item_number]['item_obj'])
 
-            for option in prior_options_submitted:
-                option.delete()
+        prior_options_submitted.update(submitted=False)
 
-            # Then set the "submitted" field on each OPTION
-            ROptionActual.objects.get_or_create(roption_template=r_opt_template,
-                                            ritem_actual=items[item_number][0],
-                                            submitted=True,
-                                            comment=comment)
+        # Then set the "submitted" field on each OPTION
+        ROptionActual.objects.get_or_create(roption_template=r_opt_template,
 
-            # Set the RItemActual.submitted = True for this ITEM
-            items[item_number][0].submitted = True
-            items[item_number][0].save()
+                            # This is the way we bind it back to the user!
+                            ritem_actual=items[item_number]['item_obj'],
+                            submitted=True,
+                            comment=comment)
+
+        # Set the RItemActual.submitted = True for this ITEM
+        items[item_number]['item_obj'].submitted = True
+        items[item_number]['item_obj'].save()
+
+
+        # Only right at the end: if all the above were successful:
+        items.pop(item_number)
+
+
+    # All done with storing the results. Did the user fill everything in?
+    if len(items) > 0:
+        return HttpResponse(('THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW. '
+            '<br>Please go back to add the {0} missing entries.').format(
+                                                                  len(items)))
+    else:
+        return HttpResponse(('Thank you. Your review has been successfully '
+            'received.<br>You may close this tab/window, and return back.'))
+
 
     # And once we have processed all options and all items, we can also:
-    r_actual.submitted = True
-    r_actual.status = 'C' # completed
-    r_actual.save()
+    #r_actual.submitted = True
+    #r_actual.status = 'C' # completed
+    #r_actual.save()
 
     # And also mark the submission as having one extra submission:
-    r_actual.submission.number_reviews_completed += 1
-    r_actual.submission.status = 'G' # in progress
-    r_actual.submission.save()
+    #r_actual.submission.number_reviews_completed += 1
+    #r_actual.submission.status = 'G' # in progress
+    #r_actual.submission.save()
 
     # Reviews to still complete by this learner:
     #n_graded_already = RubricActual.objects.filter(graded_by=learner,
@@ -846,10 +913,7 @@ def submit_peer_review_feedback(request, ractual_code):
     #phase = r_actual.rubric_template.phase
     #n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
 
-    return HttpResponse('Thank you. Your review has been successfully '
-                        'received.'
-                        '<br>You may close this tab/window, and return back.'
-                        '')
+
 
 
 

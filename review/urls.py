@@ -7,7 +7,7 @@ urlpatterns = [
 
     url(r'^review/(?P<ractual_code>.+)/$', views.review, name='review'),
 
-    url(r'^xhr-store$', views.xhr_store, name='xhr_store'),
+    url(r'^xhr_store/(?P<ractual_code>.+)/$', views.xhr_store, name='xhr_store'),
 
     url(r'^upload_submission$',
         views.upload_submission,
