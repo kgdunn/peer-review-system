@@ -122,7 +122,7 @@ textarea
 <div id="header">
     <h2>Hello {{person.full_name}}</h2>
 	{% if show_feedback %}
-		Your report is shown below, with the review results alongside.
+		Your report is shown below, with the review from {{report.n_reviews}} reviewers. If this is a self-review, then some of the comments and scores are your own. Your score is {{report.learner_average}}
 	{% else %}
         <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the peer review carefully, in a new tab, to prevent loss of your review feedback.</span>
 	{% endif %}
@@ -141,17 +141,18 @@ textarea
         </div>
         <div class="col2">
             <!-- Column 2 start -->
-            {{rubric.general_instructions|safe}}
-	    <br>
+
 		{% spaceless %}
 	    {% if not show_feedback %}
+			{{rubric.general_instructions|safe}}<br>
 		    Assess the work based on these criteria. Submit your review when complete.
 		    <form action="{% url 'submit_peer_review_feedback' ractual_code=ractual_code %}"
 		          method="POST" enctype="multipart/form-data">{% csrf_token %}
 		    <div class="submit_button" ><input  type="submit" name="{{ractual_code}}" value="Submit your review"></div>
+			<hr>
 		{% endif %}
 		<div class="clear"></div>
-	    <hr>
+
             {% for item in r_item_actuals %} {# This alternates the major ITEMS in the rubric #}
 				<fieldset id="fieldset-item-{{item.ritem_template.order}}" class="{% cycle 'odd' 'even' %}">
 				{# Criterion is given here #}
@@ -176,7 +177,7 @@ textarea
 						    {% if show_feedback %}
 							    The feedback you received was:
 						        <div class="textwrapper">
-									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.randomized_comments}}</textarea>
+									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.0}}</textarea>
 								</div>
 							{% else %}
 							    <div class="textwrapper">

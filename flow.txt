@@ -1,13 +1,11 @@
-* Simulate 2 people from same group: how are their results returned?
-* Check that all the text feedback gets to the right group.
-
+* Better styling of the landing page regarding times
 
 * Error on not filling out all fields
-* show: self.order in the template
 * Give a link at "THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW"
 * XHR for text fields?
 * Send XHR feedback back to the user
 * Log the XHR events
+
 
 * CHeck that all PDF's open
 * Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase

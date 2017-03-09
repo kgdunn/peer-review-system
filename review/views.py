@@ -139,14 +139,13 @@ def get_create_actual_rubric(learner, template, submission):
     and for the given ``submission`` (either their own submission if it is a
     self-review, or another person's submission for peer-review).
 
-    If the rubric already exists, it returns it.
+    If the rubric already exists it returns it.
     """
     # Create an ``rubric_actual`` instance:
     r_actual, new_rubric = RubricActual.objects.get_or_create(\
-                submitted = False,
-                graded_by = learner,
-                rubric_template = template,
-                submission = submission)
+                                    graded_by = learner,
+                                    rubric_template = template,
+                                    submission = submission)
 
 
     if new_rubric:
@@ -160,6 +159,40 @@ def get_create_actual_rubric(learner, template, submission):
             r_item_actual.save()
 
     return r_actual
+
+
+def get_submission(learner, phase=None, pr_process=None):
+    """
+    Gets the ``submission`` instance at the particular ``phase`` in the PR
+    process.
+    Allow some flexibility in the function signature here, to allow retrieval
+    via the ``pr_process`` in the future.
+    """
+    # Whether or not we are submitting, we might have a prior submission
+    # to display
+    grp_info = {}
+    if phase:
+        grp_info = get_group_information(learner, phase.pr.gf_process)
+
+
+    submission = None
+    if phase.pr.uses_groups:
+        # NOTE: an error condition can develop if a learner isn't
+        #       allocated into a group, and you are using group submissions.
+        subs = Submission.objects.filter(pr_process=phase.pr,
+                                         is_valid=True,
+                  group_submitted=grp_info['group_instance']).order_by(\
+                                             '-datetime_submitted')
+    else:
+        # Individual submission
+        subs = Submission.objects.filter(submitted_by=learner,
+                                         is_valid=True,
+                           pr_process=phase.pr).order_by('-datetime_submitted')
+
+    if subs:
+        return subs[0]
+    else:
+        return None
 
 
 def get_next_submission_to_evaluate(pr, learner):
@@ -226,83 +259,84 @@ def get_n_reviews(learner, phase):
 
     return n_reviews
 
-def get_peer_grading_data(learner, pr):
+def get_peer_grading_data(learner, phase):
     """
     Gets the grading data and associated feedback for this ``learner`` for the
-    given ``pr`` (peer review).
+    given ``phase`` in the peer review.
     """
-    """
-    IGNORE: but come back to later, to see if this is an improvement
-    Returns a ``dict`` of the peers comments for each rubric criterion. If
-    ``learner`` did not submit, then ``peers = {'n_reviews': 0}``.
-
-    peers = {
-        'item-01': [3, 4, 1, 5, 7, 1],
-        'item-02': [2, 1, 4, 5, 2, 6],
-        'item-03': [2, 1, 4, 5, 2, 6],
-        'n_reviews': 6,
-        'overall': 5.1,
-    }
-    """
-    # Only valid submissions are accepted
-    submission = Submission.objects.filter(submitted_by=learner,
-                                           pr_process=pr,
-                                           is_valid=True,
-                                          ).order_by('-datetime_submitted')
-
-    if submission.count() == 0:
+    submission = get_submission(learner, phase)
+    if submission is None:
         return {'n_reviews': 0,
                 'did_submit': False}
 
     # and only completed reviews
-    completed_reviews = RubricActual.objects.filter(submission=submission[0],
-                                                    status='C')
+    reviews = RubricActual.objects.filter(submission=submission, status='C')
 
-    if completed_reviews.count() == 0:
+    if reviews.count() == 0:
+        # You must return here if there are no reviews. The rest of the
+        # code is not otherwise valid.
         return {'n_reviews': 0,
                 'did_submit': True}
 
     peer_data = {'did_submit': True}
-    n_reviews = completed_reviews.count()
-    n_items = completed_reviews[0].rubric_template.ritemtemplate_set.count()
+    peer_data['n_reviews'] = n_reviews = reviews.count() # completed! reviews
 
-    # Store the scores: one column per peer review, one row per item in rubric
-    scores = np.zeros((n_items, n_reviews))
-    comments = []
-    for idx, rubric_actual in enumerate(completed_reviews):
-        overall_max_score = 0.0
-        r_template = rubric_actual.rubric_template
+    n_items = reviews[0].rubric_template.ritemtemplate_set.count()
 
-        item_scores = np.zeros(n_items) * np.NaN
-        #comments = []  # <--- come back and change processing order. This only
-                        # <--- works now because there is 1 text feedback field.
-        ritems_submitted = rubric_actual.ritemactual_set.filter(submitted=True)
-        for actual_item in ritems_submitted:
-            for actual_option in actual_item.roptionactual_set.all():
-                score = actual_option.roption_template.score
-                item_scores[actual_item.ritem_template.order-1] = score
+    # Iterate per completed review, then per item, and within each item
+    # we will iterate per option (extracting the score or comment)
 
-                if actual_option.roption_template.option_type == 'LText':
-                    comments.append(actual_option.comment)
 
+    raw_scores = np.zeros((n_items, n_reviews)) * np.nan
+    for idxr, completed_review in enumerate(reviews):
+        items = completed_review.ritemactual_set.filter(submitted=True)
+        overall_max_score = 0.0 # just compute this on the last completed_review
+        for idxi, item in enumerate(items):
+
+            ritem_template = item.ritem_template
+
+            # Each key/value in the dictionary stores a list. The list has 4
+            # elements:
+            #   1. [list of raw scores],
+            #   2. the maximum for this item,
+            #   3. the average for this learner for this item
+            #   4. the class average (not used at the moment)
+            if idxr == 0:
+                peer_data[ritem_template] = [[], 0.0, 0.0, np.NaN]
+
+
+            for option in item.roptionactual_set.filter(submitted=True):
+
+                if ritem_template.option_type == 'LText':
+                    peer_data[ritem_template][0].append(option.comment)
+                else:
+                    score = option.roption_template.score
+                    raw_scores[idxi, idxr] = score
+                    peer_data[ritem_template][0].append(score)
 
             # OK, done with this row, for this learner, and all evalutions
-            peer_data[actual_item.ritem_template.order] = {
-                        'max_score': actual_item.ritem_template.max_score}
-            overall_max_score += actual_item.ritem_template.max_score
+            peer_data[ritem_template][1] = item.ritem_template.max_score
+            overall_max_score += item.ritem_template.max_score
 
-        # Update the scores: one column per completed review
-        scores[:, idx] = item_scores
+        # All done processing a review
 
-    # Process scores here:
-    for idx, actual_item in enumerate(ritems_submitted):
-        peer_data[actual_item.ritem_template.order]['raw'] = str(scores[idx,:])
-        peer_data[actual_item.ritem_template.order]['avg_score'] = np.nanmean(scores[idx,:])
 
-    peer_data['comments'] = comments
-    peer_data['n_reviews'] = n_reviews
+    # All the reviews for this submission have been processed.
+    # Process scores here to calculate the average. Just use the last
+    # completed review to iterate over, no
+    items = completed_review.ritemactual_set.filter(submitted=True)
+    for idxi, item in enumerate(items):
+        ritem_template = item.ritem_template
+        peer_data[ritem_template][2] = np.nanmean(raw_scores[idxi,:])
+
     peer_data['overall_max_score'] = overall_max_score
-    peer_data['learner_avg'] = np.sum(np.nanmean(scores, axis=1)) # ignore NaNs
+    # ignore NaNs: these will show up for items, such as comments
+    peer_data['learner_total'] = np.nansum(np.nanmean(raw_scores, axis=1))
+    average = peer_data['learner_total'] / peer_data['overall_max_score'] * 100
+    peer_data['learner_average'] = ('{:0.0f} out of a maximum of {:0.0f} '
+                                    'points; {:3.1f}%').format(
+                    peer_data['learner_total'], peer_data['overall_max_score'],
+                    average)
     return peer_data
 
 def render_phase(phase, ctx_objects):
@@ -312,7 +346,6 @@ def render_phase(phase, ctx_objects):
     template = Template(phase.templatetext)
     context = Context(ctx_objects)
     return template.render(context)
-
 
 def get_related(self, request, learner, ctx_objects, now_time, prior):
     """
@@ -335,23 +368,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['self'] = sub_phase
         allow_submit = within_phase
 
-        # Whether or not we are submitting, we might have a prior submission
-        # to display
-        grp_info = get_group_information(learner, self.pr.gf_process)
-        submission = None
-        if self.pr.uses_groups:
-            # NOTE: an error condition can develop if a learner isn't
-            #       allocated into a group, and you are using group submissions.
-            subs = Submission.objects.filter(pr_process=self.pr,
-                   group_submitted=grp_info['group_instance']).order_by(\
-                       '-datetime_submitted')
-        else:
-            subs = Submission.objects.filter(submitted_by=learner,
-                                             pr_process=self.pr).\
-                  order_by('-datetime_submitted')
-
-        if subs:
-            submission = subs[0]
+        submission = get_submission(learner, self)
 
         ctx_objects['submission'] = submission
 
@@ -362,6 +379,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         file_upload_form = UploadFF()
 
         if request.FILES:
+            subject
             upload_submission(request, learner, self.pr, sub_phase)
 
 
@@ -384,7 +402,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # Get the submission from the prior step. Note, this must be a
         # relevant submission (i.e. group or individual submission) related
         # to a prior Submission step. I'm not going to check it here, but the
-        # variable ctx_objects['submission'] should be the correct on
+        # variable ctx_objects['submission'] should be the correct one
         #
         # Submission.objects.filter(phase=prior, learner=..., group=...)
         ctx_objects['submission']
@@ -440,7 +458,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                     next_sub.number_reviews_assigned += 1
                     next_sub.save()
 
-                    template = 'ac13' #<-- must change: was "pr.rubrictemplate"
+                    template = None #<-- must change: was "pr.rubrictemplate"
                     r_actual = get_create_actual_rubric(learner,
                                                         template,
                                                         next_sub)
@@ -469,27 +487,9 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(allow_report):
             return ctx_objects
 
-        # This is a bit hackish, but required to work towards a deadline.
-        #report = get_peer_grading_data(learner, self.pr)
-        #report__comments = report.pop('comments', ['',])
-        #shuffle(report__comments)
-        #report__n_reviews = report.pop('n_reviews')
-        #report__did_submit = report.pop('did_submit')
-        #report__overall_max_score = report.pop('overall_max_score', 0)
-        #report__learner_avg = report.pop('learner_avg',0)
-
-        #report_sort = []
-        #for key, value in report.items():
-            #report_sort.append((key, value))
-        #report_sort = sorted(report_sort)
+        report = get_peer_grading_data(learner, self)
 
         ctx_objects['allow_report'] = allow_report
-        #ctx_objects['report__n_reviews'] = report__n_reviews
-        #ctx_objects['report__comments'] = report__comments
-        #ctx_objects['report__did_submit'] = report__did_submit
-        #ctx_objects['report__overall_max_score'] = report__overall_max_score
-        #ctx_objects['report__learner_avg'] = report__learner_avg
-        #ctx_objects['report'] = report_sort
 
     except FeedbackPhase.DoesNotExist:
         pass
@@ -648,12 +648,11 @@ def upload_submission(request, learner, pr_process, phase):
                              extra_line)
 
     logger.debug('Sending email: {0}'.format(address))
-    subject = 'Peer review file: successfully submitted'
+    subject = phase.name + ' for peer review: successfully submitted'
     out = send_email(address, subject, message)
-    logger.debug('Numer of emails sent (should be 1): {0}'.format(out[0]))
+    logger.debug('Number of emails sent (should be 1): {0}'.format(out[0]))
 
     return None
-
 
 
 #@csrf_exempt
@@ -732,7 +731,7 @@ def xhr_store(request, ractual_code):
 @xframe_options_exempt
 def review(request, ractual_code):
     """
-    From the unique URL
+    From the unique URL:
 
     1. Get the ``RubricActual`` instance
     2. Format the text for the user
@@ -756,10 +755,13 @@ def review(request, ractual_code):
         except FeedbackPhase.DoesNotExist:
             continue
 
-        if (phase.start_dt.replace(tzinfo=None) <= now_time) \
-                              and (phase.end_dt.replace(tzinfo=None)>now_time):
+        if (feedback_phase.start_dt.replace(tzinfo=None) <= now_time) \
+                      and (feedback_phase.end_dt.replace(tzinfo=None)>now_time):
             show_feedback = True
 
+    report = {}
+    if show_feedback:
+        report = get_peer_grading_data(learner, feedback_phase)
 
     # Intentionally put the order_by here, to ensure that any errors in the
     # next part of the code (zip-ordering) are highlighted
@@ -807,19 +809,15 @@ def review(request, ractual_code):
                 elif item_template.option_type == 'LText':
                     option.prior_text = prior_answer[0].comment
 
-        item.results = ([1, 3, 5], 5, 60.0, np.NaN)
-        item.randomized_comments = ["Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."]
 
-    report = {}
-    if show_feedback:
-        # Gather the peer feedback to display in the template
-        report = {}
-        ##report['item-1'] = ([1, 3, 5], 5, 60.0, np.NaN)
-        #report['item-2'] = ([2, 2, 4], 5, 53.3, np.NaN)
-        #report['item-4'] = (['Random text', 'More text', 'And more.'], 0, 0, 0)
-        #report['n_reviews'] = 3
-        #report['overall_average'] = '110 out of 115 points; 86.2%'
+        # Store the peer- or self-review results in the item; to use in the
+        # template to display the feedback.
+        item.results = report.get(item_template, [[], None, None, None])
 
+        # Randomize the comments and numerical scores before returning.
+        shuffle(item.results[0])
+        if item_template.option_type == 'LText':
+            item.results[0] = '\n'.join(item.results[0])
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
@@ -981,7 +979,8 @@ def get_stats_comments(request):
         statsfile.write('FullName\tEmail\tQuestion1Score\tQuestion2Score\tQuestion3Score\t Question4Score\tAverageOutOf12\tComments\n')
         for idx, sub in enumerate(all_subs):
 
-            peer = get_peer_grading_data(sub.submitted_by, pr_process)
+            # Function has changed
+            #peer = get_peer_grading_data(sub.submitted_by, pr_process)
             statsfile.write('{}\t{}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{}\n'.format(
                 sub.submitted_by.full_name,
                 sub.submitted_by.email,
