@@ -157,6 +157,16 @@ def peerreview_directory_path(instance, filename):
 
 # https://docs.djangoproject.com/en/1.10/topics/db/models/#model-inheritance
 class PRPhase(models.Model):
+    """
+    A peer review has multiple phases; e.g. file submission; self-evaluation,
+    re-submit; peer-evaluation; feedback report.  (5 phases in that example).
+
+    These phases can be ordered, as needed.
+    """
+    class Meta:
+            verbose_name = 'PR phase'
+            verbose_name_plural = 'PR phases'
+
     name = models.CharField(max_length=50, default='... Phase ...')
     pr = models.ForeignKey(PR_process, verbose_name="Peer review")
     order = models.PositiveIntegerField(default=1)

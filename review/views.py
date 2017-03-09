@@ -403,8 +403,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         selfreview_phase = SelfEvaluationPhase.objects.get(id=self.id)
         ctx_objects['self'] = selfreview_phase
         allow_self_review = within_phase
-        if not(allow_self_review):
-            return ctx_objects
+
+
 
         # Get the submission from the prior step. Note, this must be a
         # relevant submission (i.e. group or individual submission) related
@@ -414,16 +414,22 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # Submission.objects.filter(phase=prior, learner=..., group=...)
         ctx_objects['submission']
 
-        # Create the R_actual for the self-review
         r_template = RubricTemplate.objects.get(pr_process=self.pr,
-                                                phase = self)
+                                                phase=self)
 
+        # Get/create the R_actual for the self-review
         r_actual = get_create_actual_rubric(learner,
                                             r_template,
                                             ctx_objects['submission'])
 
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['own_submission'] = r_actual
+
+        # For this phase, we do require to return "late"; the ``own_submission``
+        # is required for the phase following this: the own-submission review.
+
+        if not(allow_self_review):
+            return ctx_objects
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -532,7 +538,7 @@ def index(request):
     ctx_objects.update(csrf(request)) # add the csrf; used in forms
 
 
-    global_page = """{% extends "review/base.html" %}{% block content %}
+    global_page = """{% extends "review/base.html" %}{% block content %}<hr>
     <!--SPLIT HERE-->\n{% endblock %}"""
     template_page = Template(global_page)
     context = Context(ctx_objects)
