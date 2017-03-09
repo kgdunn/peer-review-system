@@ -343,7 +343,14 @@ def render_phase(phase, ctx_objects):
     """
     Renders the HTML template for this phase
     """
-    template = Template(phase.templatetext)
+    template = Template(\
+        """
+        <div class="end_dt"><b>Ends</b>: {{self.end_dt|date:"l, d F"}} at
+                                         {{self.end_dt|time:"H:i" }}</div>
+        <div class="start_dt"><em>Starts</em>:
+                                {{self.start_dt|date:"l, d F"}} at
+                                {{self.start_dt|time:"H:i" }}&nbsp;&nbsp;</div>
+        """ + phase.templatetext)
     context = Context(ctx_objects)
     return template.render(context)
 
