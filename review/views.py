@@ -470,26 +470,26 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             return ctx_objects
 
         # This is a bit hackish, but required to work towards a deadline.
-        report = get_peer_grading_data(learner, self.pr)
-        report__comments = report.pop('comments', ['',])
-        shuffle(report__comments)
-        report__n_reviews = report.pop('n_reviews')
-        report__did_submit = report.pop('did_submit')
-        report__overall_max_score = report.pop('overall_max_score', 0)
-        report__learner_avg = report.pop('learner_avg',0)
+        #report = get_peer_grading_data(learner, self.pr)
+        #report__comments = report.pop('comments', ['',])
+        #shuffle(report__comments)
+        #report__n_reviews = report.pop('n_reviews')
+        #report__did_submit = report.pop('did_submit')
+        #report__overall_max_score = report.pop('overall_max_score', 0)
+        #report__learner_avg = report.pop('learner_avg',0)
 
-        report_sort = []
-        for key, value in report.items():
-            report_sort.append((key, value))
-        report_sort = sorted(report_sort)
+        #report_sort = []
+        #for key, value in report.items():
+            #report_sort.append((key, value))
+        #report_sort = sorted(report_sort)
 
         ctx_objects['allow_report'] = allow_report
-        ctx_objects['report__n_reviews'] = report__n_reviews
-        ctx_objects['report__comments'] = report__comments
-        ctx_objects['report__did_submit'] = report__did_submit
-        ctx_objects['report__overall_max_score'] = report__overall_max_score
-        ctx_objects['report__learner_avg'] = report__learner_avg
-        ctx_objects['report'] = report_sort
+        #ctx_objects['report__n_reviews'] = report__n_reviews
+        #ctx_objects['report__comments'] = report__comments
+        #ctx_objects['report__did_submit'] = report__did_submit
+        #ctx_objects['report__overall_max_score'] = report__overall_max_score
+        #ctx_objects['report__learner_avg'] = report__learner_avg
+        #ctx_objects['report'] = report_sort
 
     except FeedbackPhase.DoesNotExist:
         pass
@@ -525,10 +525,8 @@ def index(request):
     ctx_objects.update(csrf(request)) # add the csrf; used in forms
 
 
-    global_page = """{% extends "review/base.html" %}
-    {% block content %}
-    <!--SPLIT HERE-->
-    {% endblock %}"""
+    global_page = """{% extends "review/base.html" %}{% block content %}
+    <!--SPLIT HERE-->\n{% endblock %}"""
     template_page = Template(global_page)
     context = Context(ctx_objects)
     page_header_footer = template_page.render(context)
@@ -577,7 +575,7 @@ def get_learner_details(ractual_code):
     Returns: r_actual (an instance of ``RubricActual``)
              learner  (an instance of ``Person``)
     """
-    logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
+    #logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
     r_actual = RubricActual.objects.filter(unique_code=ractual_code)
     if r_actual.count() == 0:
         return HttpResponse(("You have an incorrect link. Either something "
@@ -748,6 +746,21 @@ def review(request, ractual_code):
         return r_actual
 
 
+    show_feedback = False
+    pr = r_actual.rubric_template.pr_process
+    now_time = datetime.datetime.utcnow()
+    phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
+    for phase in phases:
+        try:
+            feedback_phase = FeedbackPhase.objects.get(id=phase.id)
+        except FeedbackPhase.DoesNotExist:
+            continue
+
+        if (phase.start_dt.replace(tzinfo=None) <= now_time) \
+                              and (phase.end_dt.replace(tzinfo=None)>now_time):
+            show_feedback = True
+
+
     # Intentionally put the order_by here, to ensure that any errors in the
     # next part of the code (zip-ordering) are highlighted
     r_item_actuals = r_actual.ritemactual_set.all().order_by('-modified')
@@ -777,9 +790,11 @@ def review(request, ractual_code):
             # from hg revision 200 onwards, both will be ordered from
             # low to high (experiment is over!). Since we sometimes use
             # dropdowns, and this is cleaner without the confused order.
-            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
+            item.options = ROptionTemplate.objects.filter(\
+                                 rubric_item=item_template).order_by('order')
         else:
-            item.options = ROptionTemplate.objects.filter(rubric_item=item_template).order_by('order')
+            item.options = ROptionTemplate.objects.filter(\
+                                rubric_item=item_template).order_by('order')
 
 
         for option in item.options:
@@ -792,6 +807,20 @@ def review(request, ractual_code):
                 elif item_template.option_type == 'LText':
                     option.prior_text = prior_answer[0].comment
 
+        item.results = ([1, 3, 5], 5, 60.0, np.NaN)
+        item.randomized_comments = ["Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."]
+
+    report = {}
+    if show_feedback:
+        # Gather the peer feedback to display in the template
+        report = {}
+        ##report['item-1'] = ([1, 3, 5], 5, 60.0, np.NaN)
+        #report['item-2'] = ([2, 2, 4], 5, 53.3, np.NaN)
+        #report['item-4'] = (['Random text', 'More text', 'And more.'], 0, 0, 0)
+        #report['n_reviews'] = 3
+        #report['overall_average'] = '110 out of 115 points; 86.2%'
+
+
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
            'person': r_actual.graded_by,
@@ -799,6 +828,8 @@ def review(request, ractual_code):
            'r_item_actuals' : r_item_actuals,
            'rubric' : r_actual.rubric_template,
            'person': learner,
+           'show_feedback': show_feedback,
+           'report': report,
            }
     return render(request, 'review/review_peer.html', ctx)
 
@@ -896,29 +927,13 @@ def submit_peer_review_feedback(request, ractual_code):
             '<br>Please go back to add the {0} missing entries.').format(
                                                                   len(items)))
     else:
+        # And once we have processed all options and all items, we can also:
+        r_actual.submitted = True
+        r_actual.status = 'C' # completed
+        r_actual.save()
+
         return HttpResponse(('Thank you. Your review has been successfully '
             'received.<br>You may close this tab/window, and return back.'))
-
-
-    # And once we have processed all options and all items, we can also:
-    #r_actual.submitted = True
-    #r_actual.status = 'C' # completed
-    #r_actual.save()
-
-    # And also mark the submission as having one extra submission:
-    #r_actual.submission.number_reviews_completed += 1
-    #r_actual.submission.status = 'G' # in progress
-    #r_actual.submission.save()
-
-    # Reviews to still complete by this learner:
-    #n_graded_already = RubricActual.objects.filter(graded_by=learner,
-    #                                               status='C').count()
-    #phase = r_actual.rubric_template.phase
-    #n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
-
-
-
-
 
 
 def reset_counts(request):

@@ -1,17 +1,33 @@
+* Simulate 2 people from same group: how are their results returned?
+* Check that all the text feedback gets to the right group.
+
+
+* Error on not filling out all fields
+* show: self.order in the template
 * Give a link at "THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW"
-* CHeck the XHR is doing it appropriately.
 * XHR for text fields?
 * Send XHR feedback back to the user
-* CHeck that all PDF's open
-* Simulate 2 people from same group: how are their results returned?
-* XHR saving verified
-* Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
-* Check that all the text feedback gets to the right group.
 * Log the XHR events
-* Error on not filling out all fields
+
+* CHeck that all PDF's open
+* Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
 * ""Your review has been successfully"" <-- better styling
 
 * Slow load: not due to PDF object;
+* Completed submissions via an intermediate database table
+
+    # And also mark the submission as having one extra submission:
+    #r_actual.submission.number_reviews_completed += 1
+    #r_actual.submission.status = 'G' # in progress
+    #r_actual.submission.save()
+
+    # Reviews to still complete by this learner:
+    #n_graded_already = RubricActual.objects.filter(graded_by=learner,
+    #                                               status='C').count()
+    #phase = r_actual.rubric_template.phase
+    #n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
+
+
 
 TO DO
 ======
