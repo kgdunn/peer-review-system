@@ -386,7 +386,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         file_upload_form = UploadFF()
 
         if request.FILES:
-            subject
             upload_submission(request, learner, self.pr, sub_phase)
 
 
