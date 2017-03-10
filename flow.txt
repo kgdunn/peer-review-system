@@ -1,8 +1,11 @@
 * Impersonate a student
 * Show all reviews for Conny and team to evaluate
+* Get start and end timings
+* XHR of text feedback
 
 
 * Log the XHR events with a model
+
 * CHeck that all PDF's open
 * Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
 
