@@ -3,9 +3,11 @@ Strip student informaiton from
 * rM2c5LYN4hamS58B.pdf
 * tXF5RczpeFVgLFkU.pdf
 
-
-Popup text: https://codepen.io/imprakash/pen/GgNMXO
-
+Add model answers: Popup text: https://codepen.io/imprakash/pen/GgNMXO
+Check that peer feedback results are the correct ones
+Add all students to the master list for the Admin to provide instructor review
+How are you going to collate the grades?
+Add statistics for review duration
 
 * Impersonate a student
 * Show all reviews for Conny and team to evaluate
@@ -13,7 +15,7 @@ Popup text: https://codepen.io/imprakash/pen/GgNMXO
 * XHR of text feedback
 * Log the XHR events with a model
 * CHeck that all PDF's open
-* Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
+
 * Completed submissions via an intermediate database table
 
     # And also mark the submission as having one extra submission:
@@ -64,24 +66,10 @@ To do next
 -----------
 
 Add the group name in the email to the students.
-The phase link to a PR process
 Release as BSD license and open up
-Statistics tracking for duration of review.
-
-
-Make it clear that these reviews are all for 1 session (not N=3 sessions)
-Show the score they awarded in the peer review.
-
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
-Show review as being completed in the browser
-Track review text and selections immediately in the database
 Strip out the PDF information.
-Be able to impersonate a student and see their feedback.
-Make it mandatory to fill in all fields.
-Be able to come back and edit your reviews.
-
 
 During the run:
 ----
@@ -95,7 +83,6 @@ Dump the data to text file:
 
 Review process
 ==============
-in a responsive way that the rubric goes below the document
 
 
 Use the LTI checker: http://ltiapps.net/test/tc.php
