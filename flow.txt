@@ -2,13 +2,9 @@
 * Show all reviews for Conny and team to evaluate
 * Get start and end timings
 * XHR of text feedback
-
-
 * Log the XHR events with a model
-
 * CHeck that all PDF's open
 * Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
-
 * Completed submissions via an intermediate database table
     # And also mark the submission as having one extra submission:
     #r_actual.submission.number_reviews_completed += 1
@@ -48,6 +44,7 @@ Upload
 =-------
 Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
 Size limit
+Strip out the PDF information
 Check for PDF
 >>> import magic
 >>> magic.from_file("testdata/test.pdf")

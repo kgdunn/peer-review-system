@@ -56,8 +56,8 @@ def starting_point(request):
 
 
     if (pr_ID is None) or (course_ID is None):
-        return (HttpResponse(("You are not registered in this course.")), None,
-                None)
+        return (HttpResponse(("You are not registered in this course. NCNPR")),
+                None, None)
 
     try:
         pr = PR_process.objects.get(LTI_id=pr_ID)
@@ -78,15 +78,33 @@ def starting_point(request):
                 None)
 
 
+def recognise_LTI_LMS(request):
+    """
+    Trys to recognize the LMS from the LTI post.
+
+    Returns one of ('edx', 'brightspace', 'coursera', None). The last option
+    is if nothing can be determined.
+    """
+    if request.POST.get('resource_link_id', '').find('edx.org')>0:
+        return 'edx'
+    elif request.POST.get('ext_d2l_token_digest', None):
+        return 'brightspace'
+    elif request.POST.get('tool_consumer_instance_guid', '').find('coursera')>1:
+        return 'coursera'
+    else:
+        return None
+
+
 def get_create_student(request):
     """
     Gets or creates the learner from the POST request.
     """
-
-    if request.POST.get('ext_d2l_token_digest', None):
+    newbie = False
+    LTI_consumer = recognise_LTI_LMS(request)
+    if LTI_consumer == 'brightspace':
         first_name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
-        full_name = request.POST['lis_person_name_full']
+        display_name = request.POST['lis_person_name_full']
         user_ID = request.POST.get('user_id', '')
         role = request.POST['roles']
         # You can also use: request.POST['ext_d2l_role']
@@ -95,14 +113,23 @@ def get_create_student(request):
         elif 'Student' in role:
             role = 'Learn'
 
-        learner, newbie = Person.objects.get_or_create(email=email,
-                                                       role=role)
+    elif LTI_consumer == 'edx':
+        first_name = request.POST['lis_person_name_given']
+        email = request.POST['lis_person_contact_email_primary']
+        user_ID = request.POST.get('user_id', '')
+        display_name = request.POST['lis_person_sourcedid']
+        if 'Instructor' in request.POST['roles']:
+            role = 'Admin'
+        elif 'Student' in request.POST['roles']:
+            role = 'Learn'
 
 
     elif request.POST.get('learner_ID', '') or (settings.DEBUG and \
                                             request.GET.get('learner_ID','')):
+
+        # Used to get the user when they are redirected outside the LMS.
         logger.debug('Getting user from POST field')
-        newbie = False
+
         learner_ID = request.POST.get('learner_ID', '') or \
                      request.GET.get('learner_ID','')
 
@@ -114,12 +141,13 @@ def get_create_student(request):
     else:
         return None
 
+    learner, newbie = Person.objects.get_or_create(email=email, role=role)
 
     if newbie:
-        learner.full_name = full_name
+        learner.display_name = display_name
         learner.first_name = first_name
         learner.save()
-        logger.info('Created/saved new learner: %s' % learner.full_name)
+        logger.info('Created/saved new learner: %s' % learner.display_name)
 
     if learner:
         # Augments the learner with extra fields that might not be there
@@ -801,7 +829,7 @@ def review(request, ractual_code):
 
     # Small experiment: do rubrics from low to high (+order),  or
     # from high to low (-order), score better or worse?
-    #hash_name = hashlib.md5(learner.full_name.encode())
+    #hash_name = hashlib.md5(learner.display_name.encode())
     #digit = re.search("\d", hash_name.hexdigest())
     #if digit:
     #    value = int(hash_name.hexdigest()[digit.start()])
@@ -1013,7 +1041,7 @@ def get_stats_comments(request):
             # Function has changed
             #peer = get_peer_grading_data(sub.submitted_by, pr_process)
             statsfile.write('{}\t{}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{}\n'.format(
-                sub.submitted_by.full_name,
+                sub.submitted_by.display_name,
                 sub.submitted_by.email,
                 peer[1]['avg_score'],
                 peer[2]['avg_score'],

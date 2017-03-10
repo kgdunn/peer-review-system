@@ -17,7 +17,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 
 # Our imports
-from utils import unique_slugify, generate_random_token
+from utils import generate_random_token
 
 @python_2_unicode_compatible
 class Person(models.Model):
@@ -28,11 +28,10 @@ class Person(models.Model):
              ('Learn', "Learner"),
              ('TA', 'Teaching Assistant')
             )
-    first_name = models.CharField(max_length=200, verbose_name="First name")
     is_active = models.BooleanField(default=True, help_text=('NOT USED'))
     email = models.EmailField(blank=False)
     student_number = models.CharField(max_length=15, blank=True, default='')
-    full_name = models.CharField(max_length=400, verbose_name='Full name',
+    display_name = models.CharField(max_length=400, verbose_name='Full name',
                                  blank=True)
     user_ID = models.CharField(max_length=100, verbose_name=('User ID from '
             'Brightspace'), blank=True)
@@ -50,6 +49,8 @@ class Course(models.Model):
         help_text=("Obtain this from the HTML POST field: 'context_id' "))
     # Brightspace:   u'lis_course_offering_sourcedid': <--- is another option
     #                                  [u'brightspace.tudelft.nl:training-IDE'],
+    #
+    # edX:   u'context_id': [u'course-v1:DelftX+IDEMC.1x+1T2017']
 
     offering = models.PositiveIntegerField(default='0000', blank=True,
         help_text="Which year/quarter is it being offered?")
@@ -76,11 +77,16 @@ class PR_process(models.Model):
     class Meta:
         verbose_name = 'Peer review process'
         verbose_name_plural = 'PR processes'
+
     # This can be used to branch code, if needed, for different LTI systems
     CHOICES = (('Brightspace-v1', 'Brightspace-v1'),
-               ('edX-v1', 'edX-v1'))
+               ('edX-v1',         'edX-v1'),
+               ('Coursera-v1',    'Coursera-v1'))
 
+    # How to identify the LTI consumer?
+    # ---------------------------------
     # Brightspace: HTML-POST: u'lti_version': [u'LTI-1p0'],
+    # edX:         HTML-POST: resource_link_id contains "edX"
 
     LTI_system = models.CharField(max_length=50, choices=CHOICES,)
     title = models.CharField(max_length=300, verbose_name="Your peer review title")
@@ -100,7 +106,6 @@ class PR_process(models.Model):
         #
         # More reliable is "resource_link_id"
 
-    slug = models.SlugField(default='', editable=False)
     course = models.ForeignKey(Course)
     # rubrictemplate <--- from the One-To-One relationship
 
@@ -114,40 +119,14 @@ class PR_process(models.Model):
     instructions = models.TextField(help_text='May contain HTML instructions',
                 verbose_name='Overall instructions to learners', )
 
-    # Date 1: submit their work
-    dt_submissions_open_up = models.DateTimeField(
-        verbose_name='When can learners start to submit their work by', )
-
-    dt_submission_deadline = models.DateTimeField(
-        verbose_name='When should learners submit their work before', )
-
-    # Date 2: start reviewing their peers
-    dt_peer_reviews_start_by = models.DateTimeField(
-        verbose_name='When does the reviewing step open for learners to start?')
-
-    # Date 3: complete the reviews of their peers
-    dt_peer_reviews_completed_by = models.DateTimeField(
-        verbose_name='When must learners submit their reviews by?')
-
-    # Date 4: receive the results back
-    dt_peer_reviews_received_back = models.DateTimeField(
-        verbose_name='When will learners receive their results back?')
-
-
-    make_submissions_visible_after_review = models.BooleanField(default=False,
-       help_text=('Can learners see all submissions from peers after the '
-                  'reviewing step?'))
-
-    def save(self, *args, **kwargs):
-        unique_slugify(self, self.title, 'slug')
-        super(PR_process, self).save(*args, **kwargs)
-
     def __str__(self):
         return self.title
 
 
 def peerreview_directory_path(instance, filename):
-    # The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
+    """
+    The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
+    """
     extension = filename.split('.')[-1]
     filename = generate_random_token(token_length=16) + '.' + extension
     return '{0}{1}{2}{1}{3}'.format('uploads',
@@ -155,6 +134,7 @@ def peerreview_directory_path(instance, filename):
                                     instance.pr_process.id,
                                     filename)
 
+# Our models for the phases uses ideas from:
 # https://docs.djangoproject.com/en/1.10/topics/db/models/#model-inheritance
 class PRPhase(models.Model):
     """
@@ -280,7 +260,6 @@ class RubricTemplate(models.Model):
 
     """
     title = models.CharField(max_length=300, verbose_name="Peer review rubric")
-    slug = models.SlugField(default='', editable=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     pr_process = models.OneToOneField(PR_process, on_delete=models.CASCADE,
@@ -296,11 +275,11 @@ class RubricTemplate(models.Model):
                        'it just shows: "Assess ..."'))
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.title, 'slug')
         super(RubricTemplate, self).save(*args, **kwargs)
 
     def __str__(self):
         return u'%s' % self.title
+
 
 @python_2_unicode_compatible
 class RubricActual(models.Model):
@@ -328,6 +307,7 @@ class RubricActual(models.Model):
 
     def __str__(self):
         return u'Peer: {0}; Sub: {1}'.format(self.graded_by, self.submission)
+
 
 @python_2_unicode_compatible
 class RItemTemplate(models.Model):
@@ -379,8 +359,6 @@ class RItemActual(models.Model):
     def __str__(self):
         return u'[Item {0}]'.format(self.ritem_template.order)
 
-    def get_filled_in_values(self):
-        return 'ab'
 
 @python_2_unicode_compatible
 class ROptionTemplate(models.Model):
@@ -388,16 +366,10 @@ class ROptionTemplate(models.Model):
     A rubric option template (a single cell in the rubric). Usually with
     other options to the left and right of it.
     """
-    #TYPE = (('Radio', 'Radio buttons (default)'),
-    #        ('DropD', 'Dropdown of scores'),
-    #        ('LText', 'Long text [HTML Text area]'),
-    #        ('SText', 'Short text [HTML input=text]'),)
-
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
     short_text = models.CharField(max_length=50, default='', blank=True,
             help_text='This text is in the drop down')
-    #option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')
     criterion = models.TextField(help_text='A prompt/criterion to the peers',
                                  blank=True)
     order = models.IntegerField()
@@ -435,8 +407,3 @@ class ROptionActual(models.Model):
 
     def __str__(self):
         return u'%s' % (self.roption_template, )
-
-
-
-
-

@@ -108,7 +108,6 @@ def handle_uploaded_file(classlist, gID, auto_create_and_enroll_groups=True):
         row = row.decode().split(',')
         student_number = row[0].strip('#')
         last_name = row[2].strip()
-        first_name = row[3].strip()
         email = row[4].strip()
         if len(row) > 5:
             group = row[5].strip()

@@ -121,7 +121,7 @@ textarea
 
 <div id="header">
 	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
-    <h2>Hello {{person.full_name}}</h2>
+    <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
 		Your report is shown below, with the review from {{report.n_reviews}} reviewers. If this is a self-review, then some of the comments and scores are your own. Your score is {{report.learner_average}}
 	{% else %}

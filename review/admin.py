@@ -8,7 +8,7 @@ from .models import ROptionActual, ROptionTemplate
 from .models import RubricActual, RubricTemplate
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "email", "is_active", "user_ID", "role")
+    list_display = ("display_name", "email", "is_active", "user_ID", "role")
 
 class PR_processAdmin(admin.ModelAdmin):
     list_display = ("title", "course", "uses_groups", "LTI_system", "LTI_id")
