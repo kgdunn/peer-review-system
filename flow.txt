@@ -1,4 +1,5 @@
 Popup text: https://codepen.io/imprakash/pen/GgNMXO
+File upload: the upload process should also create the directory, if not existing
 
 
 * Impersonate a student
@@ -52,7 +53,6 @@ Check for PDF
 >>> import magic
 >>> magic.from_file("testdata/test.pdf")
 
-File upload: the upload process should also create the directory, if not existing
 
 To do next
 -----------

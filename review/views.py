@@ -18,6 +18,7 @@ from utils import generate_random_token, send_email, get_IP_address
 
 # Python imports
 import re
+import os
 import datetime
 import hashlib
 import numpy as np
@@ -651,7 +652,9 @@ def upload_submission(request, learner, pr_process, phase):
     extension = filename.split('.')[-1]
     submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
                      generate_random_token(token_length=16) + '.' + extension)
-    #copyfile(source_file, base_dir + os.sep + submitted_file_name)
+
+    base_full_path = base_dir_for_file_uploads + 'uploads/{0}/'.format(pr_process.id)
+    os.makedirs(base_full_path, exist_ok=True)
     with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
         for chunk in request.FILES['file_upload'].chunks():
             dst.write(chunk)
