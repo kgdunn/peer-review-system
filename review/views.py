@@ -69,7 +69,7 @@ def starting_point(request):
         return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
                 course_ID)), None, None)
 
-    person = get_create_student(request, course)
+    person = get_create_student(request, course, pr)
     if person:
         return person, course, pr
     else:
@@ -94,7 +94,7 @@ def recognise_LTI_LMS(request):
         return None
 
 
-def get_create_student(request, course):
+def get_create_student(request, course, pr):
     """
     Gets or creates the learner from the POST request.
     Also send the ``course``, for the case where the same user email is enrolled
@@ -102,63 +102,44 @@ def get_create_student(request, course):
     """
     newbie = False
     LTI_consumer = recognise_LTI_LMS(request)
-    if LTI_consumer == 'brightspace':
-        email = request.POST['lis_person_contact_email_primary']
-        display_name = request.POST['lis_person_name_full']
+    if LTI_consumer in ('brightspace', 'edx', 'coursera'):
+        email = request.POST.get('lis_person_contact_email_primary', '')
+        display_name = request.POST.get('lis_person_name_full', '')
         user_ID = request.POST.get('user_id', '')
-        role = request.POST['roles']
+        role = request.POST.get('roles', '')
         # You can also use: request.POST['ext_d2l_role']
         if 'Instructor' in role:
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
-        learner, newbie = Person.objects.get_or_create(email=email, role=role)
-
-    elif LTI_consumer == 'edx':
-        email = request.POST['lis_person_contact_email_primary']
-        user_ID = request.POST.get('user_id', '')
-        display_name = request.POST['lis_person_sourcedid']
-        if 'Instructor' in request.POST['roles']:
-            role = 'Admin'
-        elif 'Student' in request.POST['roles']:
-            role = 'Learn'
-
-        learner, newbie = Person.objects.get_or_create(email=email, role=role)
-
-    elif LTI_consumer == "coursera":
-        email = request.POST['lis_person_contact_email_primary']
-        display_name = request.POST['lis_person_name_full']
-        user_ID = request.POST.get('user_id', '')
-        role = request.POST['roles']
-        if 'Instructor' in role:
-            role = 'Admin'
-        elif 'Student' in role:
-            role = 'Learn'
-
-        learner, newbie = Person.objects.get_or_create(email=email, role=role)
+        learner, newbie = Person.objects.get_or_create(email=email,
+                                                       user_ID=user_ID,
+                                                       role=role)
 
     elif request.POST.get('learner_ID', '') or (settings.DEBUG and \
                                             request.GET.get('learner_ID','')):
 
         # Used to get the user when they are redirected outside the LMS.
+        # and most often, if a form is being filled in, and returned via POST.
         logger.debug('Getting user from POST field')
 
         learner_ID = request.POST.get('learner_ID', '') or \
                      request.GET.get('learner_ID','')
 
         learner = Person.objects.filter(user_ID=learner_ID)
-        if learner:
-            learner = learner[0]
+        if learner.count() == 1:
+            return learner[0]
+        elif learner.count() > 1:
+            # Find the learner in this course
+            # TODO still
+            return learner[0]
         else:
             learner = None
     else:
         return None
 
-
-
     if newbie:
         learner.display_name = display_name
-        #learner.first_name = first_name
         learner.save()
         logger.info('Created/saved new learner: %s' % learner.display_name)
 
