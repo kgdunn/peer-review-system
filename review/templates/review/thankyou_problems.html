@@ -1,0 +1,41 @@
+{% extends "review/base.html" %}
+{% block content %}
+<style>
+body {
+    font-size: 11pt;
+}
+.main-container {
+  float: left;
+  position: relative;
+  left: 50%;
+  padding-top:3em;
+}
+.fixer-container {
+  float: left;
+  position: relative;
+  left: -50%;
+}
+
+.clear {clear: both;}
+</style>
+
+
+<div class="main-container">
+  <div class="fixer-container">
+    {% if n_missing %}
+    <p>There were some missing answers in your review.
+    <p>Please <a href="/review/{{return_URI_code}}/">click here to go back</a> and add the {{n_missing}} missing entr{{ n_missing|pluralize:"y,ies" }}.
+{% else %}
+    Thank you. Your review has been successfully received.
+    <p>You may close this tab/window, and return back.
+{% endif %}
+  </div>
+</div>
+
+
+
+{% endblock %}
+{% block footer %}
+
+
+{% endblock %}

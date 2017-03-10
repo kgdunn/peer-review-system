@@ -550,6 +550,7 @@ def index(request):
     page_header, page_footer = page_header_footer.split('<!--SPLIT HERE-->')
     html.append(page_header)
 
+
     # All the work takes place here
     prior = None
     for phase in phases:
@@ -937,18 +938,17 @@ def submit_peer_review_feedback(request, ractual_code):
 
 
     # All done with storing the results. Did the user fill everything in?
-    if len(items) > 0:
-        return HttpResponse(('THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW. '
-            '<br>Please go back to add the {0} missing entries.').format(
-                                                                  len(items)))
-    else:
+    if len(items) == 0:
         # And once we have processed all options and all items, we can also:
         r_actual.submitted = True
         r_actual.status = 'C' # completed
         r_actual.save()
 
-        return HttpResponse(('Thank you. Your review has been successfully '
-            'received.<br>You may close this tab/window, and return back.'))
+
+    ctx = {'n_missing': len(items),
+           'return_URI_code': ractual_code,
+           }
+    return render(request, 'review/thankyou_problems.html', ctx)
 
 
 def reset_counts(request):
