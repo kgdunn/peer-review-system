@@ -45,9 +45,7 @@ def starting_point(request):
     Bootstrap code to run on every request.
 
     Returns a Person instance, the course, and Peer Review (pr) instances.
-
     """
-    person = get_create_student(request)
     course_ID = request.POST.get('context_id', None) or (settings.DEBUG and \
                              request.GET.get('context_id', None))
 
@@ -71,6 +69,7 @@ def starting_point(request):
         return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
                 course_ID)), None, None)
 
+    person = get_create_student(request, course)
     if person:
         return person, course, pr
     else:
@@ -95,9 +94,11 @@ def recognise_LTI_LMS(request):
         return None
 
 
-def get_create_student(request):
+def get_create_student(request, course):
     """
     Gets or creates the learner from the POST request.
+    Also send the ``course``, for the case where the same user email is enrolled
+    in two different systems (e.g. Brightspace and edX).
     """
     newbie = False
     LTI_consumer = recognise_LTI_LMS(request)
@@ -111,6 +112,7 @@ def get_create_student(request):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
+        learner, newbie = Person.objects.get_or_create(email=email, role=role)
 
     elif LTI_consumer == 'edx':
         email = request.POST['lis_person_contact_email_primary']
@@ -121,6 +123,8 @@ def get_create_student(request):
         elif 'Student' in request.POST['roles']:
             role = 'Learn'
 
+        learner, newbie = Person.objects.get_or_create(email=email, role=role)
+
     elif LTI_consumer == "coursera":
         email = request.POST['lis_person_contact_email_primary']
         display_name = request.POST['lis_person_name_full']
@@ -130,6 +134,8 @@ def get_create_student(request):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
+
+        learner, newbie = Person.objects.get_or_create(email=email, role=role)
 
     elif request.POST.get('learner_ID', '') or (settings.DEBUG and \
                                             request.GET.get('learner_ID','')):
@@ -148,7 +154,7 @@ def get_create_student(request):
     else:
         return None
 
-    learner, newbie = Person.objects.get_or_create(email=email, role=role)
+
 
     if newbie:
         learner.display_name = display_name
@@ -549,7 +555,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         pass
 
     return ctx_objects
-
 
 
 @csrf_exempt

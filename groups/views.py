@@ -24,36 +24,38 @@ logger = logging.getLogger(__name__)
 
 #---------
 
-def starting_point(request):
-    """
-    Bootstrap code to run on every request.
+# Commented this out: this is purely replicated code, and that shouldn't happen
 
-    Returns a Person instance, the course, and Peer Review (pr) instances.
+#def starting_point(request):
+    #"""
+    #Bootstrap code to run on every request.
 
-    """
-    person = get_create_student(request)
+    #Returns a Person instance, the course, and Peer Review (pr) instances.
 
-    course_ID = request.POST.get('context_id',
-                                    request.GET.get('context_id', None))
-    group_ID = request.POST.get('resource_link_id',
-                                    request.GET.get('resource_link_id', None))
+    #"""
+    #person = get_create_student(request)
 
-    try:
-        gID = Group_Formation_Process.objects.get(LTI_id=group_ID)
-    except Group_Formation_Process.DoesNotExist:
-        return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
-            group_ID)), None, None)
+    #course_ID = request.POST.get('context_id',
+                                    #request.GET.get('context_id', None))
+    #group_ID = request.POST.get('resource_link_id',
+                                    #request.GET.get('resource_link_id', None))
 
-    try:
-        course = Course.objects.get(label=course_ID)
-    except Course.DoesNotExist:
-        return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
-            course_ID)), None, None)
+    #try:
+        #gID = Group_Formation_Process.objects.get(LTI_id=group_ID)
+    #except Group_Formation_Process.DoesNotExist:
+        #return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
+            #group_ID)), None, None)
 
-    if person:
-        return person, course, gID
-    else:
-        return HttpResponse(("You are not registered in this course."))
+    #try:
+        #course = Course.objects.get(label=course_ID)
+    #except Course.DoesNotExist:
+        #return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
+            #course_ID)), None, None)
+
+    #if person:
+        #return person, course, gID
+    #else:
+        #return HttpResponse(("You are not registered in this course."))
 
 
 def randomly_enroll_function(gID):
@@ -189,7 +191,7 @@ def start_groups(request):
 
     # Continue with the main function
     logger.debug('POST = ' + str(request.POST))
-    person_or_error, course, gID = starting_point(request)
+    #person_or_error, course, gID = starting_point(request)
 
 
     if not(isinstance(person_or_error, Person)):

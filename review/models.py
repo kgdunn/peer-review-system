@@ -31,10 +31,10 @@ class Person(models.Model):
     is_active = models.BooleanField(default=True, help_text=('NOT USED'))
     email = models.EmailField(blank=False)
     student_number = models.CharField(max_length=15, blank=True, default='')
-    display_name = models.CharField(max_length=400, verbose_name='Full name',
-                                 blank=True)
-    user_ID = models.CharField(max_length=100, verbose_name=('User ID from '
-            'Brightspace'), blank=True)
+    display_name = models.CharField(max_length=400, verbose_name='Display name',
+                                   blank=True)
+    user_ID = models.CharField(max_length=100, blank=True,
+                                            verbose_name='User ID from LMS/LTI')
     role = models.CharField(max_length=5, choices=ROLES, default='Learn')
 
     def __str__(self):
