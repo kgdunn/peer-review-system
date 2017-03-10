@@ -684,20 +684,20 @@ def xhr_store(request, ractual_code):
 
     option = request.POST.get('option', None)
     if option is None or option=='option-NA':
-        return HttpResponse('Invalid')
+        return HttpResponse('')
 
     item_post = request.POST.get('item', None)
     if item_post.startswith('item-'):
         item_number = int(item_post.split('item-')[1])
     else:
-        return HttpResponse('Invalid')
+        return HttpResponse('')
 
 
     r_actual, learner = get_learner_details(ractual_code)
     r_item_actual = r_actual.ritemactual_set.filter(\
                                              ritem_template__order=item_number)
     if r_item_actual.count() == 0:
-        return HttpResponse('Invalid')
+        return HttpResponse('')
     else:
         r_item = r_item_actual[0]
 
@@ -712,7 +712,7 @@ def xhr_store(request, ractual_code):
             r_opt_template = r_options[0]
             comment = value
         else:
-            return HttpResponse('Invalid')
+            return HttpResponse('')
 
     if (item_template.option_type == 'Radio') or \
        (item_template.option_type == 'DropD'):
