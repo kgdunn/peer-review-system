@@ -262,8 +262,7 @@ class RubricTemplate(models.Model):
     title = models.CharField(max_length=300, verbose_name="Peer review rubric")
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    pr_process = models.OneToOneField(PR_process, on_delete=models.CASCADE,
-                                      primary_key=True)
+    pr_process = models.ForeignKey(PR_process, default=None, null=True, blank=True)
 
     # Make this the primary way to access the rubric (through a phase, not a PR)
     phase = models.ForeignKey(PRPhase, default=None, null=True, blank=True)

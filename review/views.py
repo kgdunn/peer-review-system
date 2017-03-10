@@ -226,47 +226,64 @@ def get_submission(learner, phase=None, pr_process=None):
         return None
 
 
-def get_next_submission_to_evaluate(pr, learner):
+def get_next_submission_to_evaluate(phase, learner):
     """
     Gets the single next peer review submission for the approapriate peer review
-    assignment (``pr``) for this ``learner``.
+    assignment phase (``phase``) for this ``learner``.
 
     Principle:
-    * see if there is already a submission allocated for this learner: return
+
+
     * get the submissions sorted from lowest to highest number of COMPELTED
       reviews, and then sort from lowest to highest number of peer reviews
       ASSIGNED (not completed). So at the top of the list will be submissions
       with the least completions and assigns:
 
       but exclude:
-        ** 1. submissions that are not complete (status='N')
-        ** 2. submissions that are peer reviewed already (status='F')
-        ** 3. a learner cannot evaluate their own submission
-        ** 4. a learner cannot evaluate a submission from within their own group
+        ** 0. invalid submissions (e.g. duplicates)
+        ** 1. find only submissions of the phase immediately prior to this one
+              (going only as far back in the order history as needed)
+        ** 2. submissions that are not complete (status='N')
+        ** 3. submissions that are peer reviewed already (status='F')
+        ** 4. a learner cannot evaluate their own submission
+        ** 5. a learner cannot evaluate a submission from within their own group
 
     """
-    r_template = pr.rubrictemplate  # one-to-one relationship used here
+    this_order_step = phase.order
+    prior_step = max(0, this_order_step-1)
 
-    r_actual = RubricActual.objects.filter(rubric_template__pr_process=pr)
+    # Exclusions 0 and 1:
+    while (prior_step>=0):
+        valid_subs_0_1 = Submission.objects.filter(is_valid=True,
+                                                   pr_process=phase.pr,
+                                                   phase__order=prior_step).\
+                        order_by('datetime_submitted').\
+                        order_by('number_reviews_completed')
 
-    valid_subs_0 = Submission.objects.all().order_by('datetime_submitted').\
-        order_by('number_reviews_completed')
+        if valid_subs_0_1.count() == 0:
+            prior_step = max(0, prior_step-1)
+        else:
+            break
 
-    # Exclusion 1 and 2
-    valid_subs_1_2 = valid_subs_0.exclude(status='N').exclude(status='F')
+    # Exclusion 2 and 3
+    valid_subs_2_3 = valid_subs_0_1.exclude(status='N').exclude(status='F')
 
-    # Exclusion 3
-    valid_subs_3 = valid_subs_1_2.exclude(submitted_by=learner)
+    # Exclusion 4: own submission
+    valid_subs_4 = valid_subs_2_3.exclude(submitted_by=learner)
 
-    # Exclusion 3
-    # TODO
-    valid_subs_4 = valid_subs_3
+    # Exclusion 5: groups
+    if phase.pr.uses_groups:
+        grp_info = get_group_information(learner, phase.pr.gf_process)
+        valid_subs_5 = valid_subs_4.exclude(group_submitted=\
+                                                     grp_info['group_instance'])
+    else:
+        valid_subs_5 = valid_subs_4
 
-    # Sort from lowest to highest
-    valid_subs = valid_subs_4.order_by('number_reviews_assigned')
+    # Sort all of these now, from lowest to highest
+    valid_subs = valid_subs_5.order_by('number_reviews_assigned')
 
-    # Only execute the database query now, getting the one with the lowest
-    # number of assigned reviews
+    # Execute the database query only now, getting the one with the submission
+    # with the lowest number of assigned reviews
     if valid_subs.count() == 0:
         return []
     else:
@@ -485,36 +502,31 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # the N ``RubricActual`` instances
 
         n_reviews = get_n_reviews(learner, peerreview_phase)
-        query = RubricActual.objects.filter(graded_by = learner,
-                rubric_template = self.pr.rubrictemplate).order_by('created')
+        # Which template are we using in this phase?
+        r_template = RubricTemplate.objects.get(phase=self)
+        query = RubricActual.objects.filter(graded_by=learner,
+                        rubric_template=r_template).order_by('created')
+        r_actuals = list(query)
 
         logger.debug('Need to create {0} reviews'.format(n_reviews))
 
-        if query.count() == n_reviews:
-            r_actuals = list(query)
-        else:
-
+        if query.count() != n_reviews:
             # We need to create and append the necessary reviews here
             r_actuals = list(query)
 
             for k in range(n_reviews - query.count()):
                 # Hit database to get the next submission to grade:
-                next_sub = get_next_submission_to_evaluate(self.pr, learner)
+                next_sub = get_next_submission_to_evaluate(self, learner)
                 if next_sub:
                     next_sub.number_reviews_assigned += 1
                     next_sub.save()
 
-                    template = None #<-- must change: was "pr.rubrictemplate"
-                    r_actual = get_create_actual_rubric(learner,
-                                                        template,
-                                                        next_sub)
-
-                    if new_rubric:
-                        create_items(r_actual)
+                    r_actual = get_create_actual_rubric(learner=learner,
+                                                        template=r_template,
+                                                        submission=next_sub)
 
                     r_actuals.append(r_actual)
-
-                    logger.debug('Created: ' + str(next_sub))
+                    logger.debug('Created r_actual: ' + str(r_actual))
 
         # Now we have the peer review ojects: ``r_actuals``
 
@@ -807,23 +819,37 @@ def review(request, ractual_code):
         return r_actual
 
 
-    show_feedback = False
+    # Should we show feedback, or not, within the rubric?
+    # ``r_actual.rubric_template.phase`` is current phase for the ``r_actual``
+    # Get the ``order`` number for the phase
+    # Search *forward*, and if that phase allows showing feedback, then allow it
+
     pr = r_actual.rubric_template.pr_process
+    phase = r_actual.rubric_template.phase
+    this_order_step = phase.order
+    next_step = max(0, this_order_step+1)
+    all_phases = PRPhase.objects.filter(pr=pr,
+                                is_active=True).order_by('order')
+
     now_time = datetime.datetime.utcnow()
-    phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
-    for phase in phases:
-        try:
-            feedback_phase = FeedbackPhase.objects.get(id=phase.id)
-        except FeedbackPhase.DoesNotExist:
-            continue
-
-        if (feedback_phase.start_dt.replace(tzinfo=None) <= now_time) \
-                      and (feedback_phase.end_dt.replace(tzinfo=None)>now_time):
-            show_feedback = True
-
+    show_feedback = False
     report = {}
-    if show_feedback:
-            report = get_peer_grading_data(learner, feedback_phase)
+    while (next_step <= all_phases.last().order):
+        next_phase = all_phases.filter(order=next_step)
+        next_step = next_step + 1
+        if (next_phase):
+            try:
+                feedback_phase = FeedbackPhase.objects.get(id=next_phase[0].id)
+            except FeedbackPhase.DoesNotExist:
+                continue
+
+            if (feedback_phase.start_dt.replace(tzinfo=None) <= now_time) \
+               and (feedback_phase.end_dt.replace(tzinfo=None)>now_time):
+                show_feedback = True
+
+            if show_feedback:
+                report = get_peer_grading_data(learner, feedback_phase)
+                break
 
     logger.debug('Getting review for {0}:'.format(learner))
 
@@ -851,8 +877,6 @@ def review(request, ractual_code):
     # The above code does not work for students with non-ascii characters in
     # their name.
     value = 0
-
-
     for item in r_item_actuals:
         item_template = item.ritem_template
 
@@ -927,10 +951,6 @@ def submit_peer_review_feedback(request, ractual_code):
                                                           .order_by('order')
         item_dict['item_obj'] = item
         item_dict['template'] = item_template
-
-
-        #items[item_template.order] = (item,
-        #       item_template.roptiontemplate_set.all().order_by('order'))
 
     # Stores the users selections as "ROptionActual" instances
     for key, value in request.POST.items():
@@ -1064,3 +1084,29 @@ def get_stats_comments(request):
 
 
     return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
+
+
+
+def copy_rubric():
+
+    # Copy the items first
+
+    # self_review template = sr_template (rubric)
+    # peer_review template = pr_template
+    sr_template = RubricTemplate.objects.all()[1]
+    pr_template = RubricTemplate.objects.all()[2]
+    items_to_copy = RItemTemplate.objects.filter(r_template=sr_template)
+    for item in items_to_copy:
+        original_item_id = item.id
+        item.r_template = pr_template
+        item.pk = None
+        item.save()
+
+        # Then make a copy of the options associated with this item
+        options = ROptionTemplate.objects.filter(rubric_item__id=original_item_id)
+        for option in options:
+            option.rubric_item = item
+            option.pk = None
+            option.save()
+
+
