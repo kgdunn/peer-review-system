@@ -785,6 +785,8 @@ def review(request, ractual_code):
     if show_feedback:
         report = get_peer_grading_data(learner, feedback_phase)
 
+    logger.debug('Getting review for {0}:'.format(learner))
+
     # Intentionally put the order_by here, to ensure that any errors in the
     # next part of the code (zip-ordering) are highlighted
     r_item_actuals = r_actual.ritemactual_set.all().order_by('-modified')
