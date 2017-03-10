@@ -103,6 +103,7 @@ def get_create_student(request, course, pr):
     """
     newbie = False
     LTI_consumer = recognise_LTI_LMS(request)
+    logger.debug('Detected user coming from: {0}'.format(LTI_consumer))
     if LTI_consumer in ('brightspace', 'edx', 'coursera'):
         email = request.POST.get('lis_person_contact_email_primary', '')
         display_name = request.POST.get('lis_person_name_full', '')
