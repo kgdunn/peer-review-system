@@ -578,6 +578,11 @@ def index(request):
                    'pr': pr}
     ctx_objects.update(csrf(request)) # add the csrf; used in forms
 
+    logger.debug('Person: {0}; course: {1}; pr: {2}; phases = {3}'.format(\
+                                                    learner,
+                                                    course,
+                                                    pr,
+                                                    phases))
 
     global_page = """{% extends "review/base.html" %}{% block content %}<hr>
     <!--SPLIT HERE-->\n{% endblock %}"""
