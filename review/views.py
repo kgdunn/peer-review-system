@@ -102,7 +102,6 @@ def get_create_student(request):
     newbie = False
     LTI_consumer = recognise_LTI_LMS(request)
     if LTI_consumer == 'brightspace':
-        first_name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         display_name = request.POST['lis_person_name_full']
         user_ID = request.POST.get('user_id', '')
@@ -114,7 +113,6 @@ def get_create_student(request):
             role = 'Learn'
 
     elif LTI_consumer == 'edx':
-        first_name = request.POST['lis_person_name_given']
         email = request.POST['lis_person_contact_email_primary']
         user_ID = request.POST.get('user_id', '')
         display_name = request.POST['lis_person_sourcedid']
@@ -123,6 +121,15 @@ def get_create_student(request):
         elif 'Student' in request.POST['roles']:
             role = 'Learn'
 
+    elif LTI_consumer == "coursera":
+        email = request.POST['lis_person_contact_email_primary']
+        display_name = request.POST['lis_person_name_full']
+        user_ID = request.POST.get('user_id', '')
+        role = request.POST['roles']
+        if 'Instructor' in role:
+            role = 'Admin'
+        elif 'Student' in role:
+            role = 'Learn'
 
     elif request.POST.get('learner_ID', '') or (settings.DEBUG and \
                                             request.GET.get('learner_ID','')):
@@ -145,7 +152,7 @@ def get_create_student(request):
 
     if newbie:
         learner.display_name = display_name
-        learner.first_name = first_name
+        #learner.first_name = first_name
         learner.save()
         logger.info('Created/saved new learner: %s' % learner.display_name)
 
