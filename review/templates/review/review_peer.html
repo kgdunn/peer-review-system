@@ -120,8 +120,7 @@ textarea
 </style>
 
 <div id="header">
-	<div id="review-realtime-feedback" style="float:right">
-	</div>
+	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
     <h2>Hello {{person.full_name}}</h2>
 	{% if show_feedback %}
 		Your report is shown below, with the review from {{report.n_reviews}} reviewers. If this is a self-review, then some of the comments and scores are your own. Your score is {{report.learner_average}}
@@ -233,28 +232,19 @@ textarea
 <script>
 
 $( "select" ).change(function (event) {
-
-	//$( "#header" ).text( str );
 	var postdata = {'csrfmiddlewaretoken': '{{ csrf_token }}',
-	                'option': event.target.value,
+					'option': event.target.value,
 					'item': event.target.id};
-
 	$.ajax({
 		method: "POST",
 		url: '{% url 'xhr_store' ractual_code=ractual_code %}',
 		data: postdata,
-		dataType: 'json',
 		cache: false,
-		success: function(result, textStatus, jqXHR ) {
-			var a = textStatus;
-		    $('#review-realtime-feedback').html(result);
-		},
-		error: function (response, desc, exception) {// custom error
-		}
-	}).done(function( msg ) {
-
-  });
-
+		dataType: 'html'
+	})
+	.always(function(html_response) {
+		$('#review-realtime-feedback').html(html_response);
+	});
 
 }).change();
 

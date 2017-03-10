@@ -744,7 +744,9 @@ def xhr_store(request, ractual_code):
                                                            item_number,
                                                            option))
 
-    return HttpResponse('Success')
+    now_time = datetime.datetime.now()
+    return HttpResponse('Your results were last saved at: {}'.format(
+                    now_time.strftime('%H:%M:%S')))
 
 
 @csrf_exempt
