@@ -120,6 +120,8 @@ textarea
 </style>
 
 <div id="header">
+	<div class="review-realtime">
+	</div>
     <h2>Hello {{person.full_name}}</h2>
 	{% if show_feedback %}
 		Your report is shown below, with the review from {{report.n_reviews}} reviewers. If this is a self-review, then some of the comments and scores are your own. Your score is {{report.learner_average}}
@@ -231,7 +233,6 @@ textarea
 <script>
 
 $( "select" ).change(function (event) {
-    var str = event.target.value + " " + event.target.id;
 
 	//$( "#header" ).text( str );
 	var postdata = {'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -248,7 +249,7 @@ $( "select" ).change(function (event) {
 		error: function (response, desc, exception) {// custom error
 		}
 	}).done(function( msg ) {
-	  alert( "Data Saved: " + msg );
+
   });
 
 
