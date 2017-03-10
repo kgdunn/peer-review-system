@@ -120,7 +120,7 @@ textarea
 </style>
 
 <div id="header">
-	<div class="review-realtime">
+	<div id="review-realtime-feedback" style="float:right">
 	</div>
     <h2>Hello {{person.full_name}}</h2>
 	{% if show_feedback %}
@@ -245,7 +245,10 @@ $( "select" ).change(function (event) {
 		data: postdata,
 		dataType: 'json',
 		cache: false,
-		success: function(result) {$('#XHRdiv').html(result);},
+		success: function(result, textStatus, jqXHR ) {
+			var a = textStatus;
+		    $('#review-realtime-feedback').html(result);
+		},
 		error: function (response, desc, exception) {// custom error
 		}
 	}).done(function( msg ) {
