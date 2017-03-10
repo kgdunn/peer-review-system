@@ -85,6 +85,9 @@ def recognise_LTI_LMS(request):
     Returns one of ('edx', 'brightspace', 'coursera', None). The last option
     is if nothing can be determined.
     """
+    if request.POST.get('learner_ID', ''):
+        # Used for form submissions internally.
+        return None
     if request.POST.get('resource_link_id', '').find('edx.org')>0:
         return 'edx'
     elif request.POST.get('ext_d2l_token_digest', None):
