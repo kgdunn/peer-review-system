@@ -295,7 +295,7 @@ def get_peer_grading_data(learner, phase):
 
     raw_scores = np.zeros((n_items, n_reviews)) * np.nan
     for idxr, completed_review in enumerate(reviews):
-        items = completed_review.ritemactual_set.filter(submitted=True)
+        items = completed_review.ritemactual_set.filter(submitted=True).order_by('id')
         overall_max_score = 0.0 # just compute this on the last completed_review
         for idxi, item in enumerate(items):
 
@@ -330,7 +330,7 @@ def get_peer_grading_data(learner, phase):
     # All the reviews for this submission have been processed.
     # Process scores here to calculate the average. Just use the last
     # completed review to iterate over, no
-    items = completed_review.ritemactual_set.filter(submitted=True)
+    items = completed_review.ritemactual_set.filter(submitted=True).order_by('id')
     for idxi, item in enumerate(items):
         ritem_template = item.ritem_template
         peer_data[ritem_template][2] = np.nanmean(raw_scores[idxi,:])
