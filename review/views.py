@@ -799,12 +799,16 @@ def review(request, ractual_code):
 
     # Small experiment: do rubrics from low to high (+order),  or
     # from high to low (-order), score better or worse?
-    hash_name = hashlib.md5(learner.full_name.encode())
-    digit = re.search("\d", hash_name.hexdigest())
-    if digit:
-        value = int(hash_name.hexdigest()[digit.start()])
-    else:
-        value = 0
+    #hash_name = hashlib.md5(learner.full_name.encode())
+    #digit = re.search("\d", hash_name.hexdigest())
+    #if digit:
+    #    value = int(hash_name.hexdigest()[digit.start()])
+    #else:
+    #    value = 0
+
+    # The above code does not work for students with non-ascii characters in
+    # their name.
+    value = 0
 
 
     for item in r_item_actuals:
