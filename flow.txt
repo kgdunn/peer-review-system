@@ -1,5 +1,10 @@
+Upload the 3 missing reports
+Strip student informaiton from
+* rM2c5LYN4hamS58B.pdf
+* tXF5RczpeFVgLFkU.pdf
+
+
 Popup text: https://codepen.io/imprakash/pen/GgNMXO
-File upload: the upload process should also create the directory, if not existing
 
 
 * Impersonate a student
@@ -10,6 +15,7 @@ File upload: the upload process should also create the directory, if not existin
 * CHeck that all PDF's open
 * Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
 * Completed submissions via an intermediate database table
+
     # And also mark the submission as having one extra submission:
     #r_actual.submission.number_reviews_completed += 1
     #r_actual.submission.status = 'G' # in progress
@@ -90,13 +96,7 @@ Dump the data to text file:
 Review process
 ==============
 in a responsive way that the rubric goes below the document
-rubric answers are saved as entered in realtime
-resume /save as draft/submit
-Cannot edit/resubmit after submission date
-If the page is reloaded, it shows the options from last time
 
-* Handle self-review still
-* Handle group upload, with email
 
 Use the LTI checker: http://ltiapps.net/test/tc.php
 https://github.com/Brightspace/sample-LTI-WHMIS-quiz
