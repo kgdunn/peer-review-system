@@ -1,15 +1,12 @@
-* Error on not filling out all fields
-* Give a link at "THERE WERE SOME MISSING ANSWERS IN YOUR REVIEW"
-* XHR for text fields?
-* Send XHR feedback back to the user
+* Impersonate a student
+* Show all reviews for Conny and team to evaluate
+
+
 * Log the XHR events with a model
 * CHeck that all PDF's open
 * Re-upload phased checked: PDF only, 10Mb, don't show PDF from prior phase
-* ""Your review has been successfully"" <-- better styling
-
 
 * Completed submissions via an intermediate database table
-
     # And also mark the submission as having one extra submission:
     #r_actual.submission.number_reviews_completed += 1
     #r_actual.submission.status = 'G' # in progress
@@ -26,22 +23,9 @@ TO DO
 ======
 
 * Send a grading breakdown to Conny
-* Add an "improvement" block in between every seection: mention sectino 2.1, 2.2 etc
-* Log the date/time XHR events
-* Auto-save XHR as you go is imperative
-* Error on not filling in all fields
 * Does it matter that there are duplicate "Enrolled" instances?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
-* Peer review is taking a long time to load
-
-
-Check submission:
-149 (doc -> PDF)
-3 submissions that were replaced should not show up
-Group 4 (submission issue POST) Koen Braker
-Group XXXX JOris Blok: names in PDF removed
-
 
 Groups
 --------
@@ -49,8 +33,6 @@ Open time
 Closing time
 Allow more than N enrollments
 Groups of different sizes
-
-
 Can be prefilled
 Allow self-removal and re-enrollment
 Longer term: waitlist
@@ -82,19 +64,11 @@ Make it clear that these reviews are all for 1 session (not N=3 sessions)
 Show the score they awarded in the peer review.
 
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-Allow resubmissions: ideally reload the prior submitted values
 Polling the server on a minute by minute basis for status update on the review
 After cut-off time show calculation of their grades
-
-Shows in the HTML if it has been successfully submitted.
-
 Show review as being completed in the browser
-
 Track review text and selections immediately in the database
 Strip out the PDF information.
-
-Link to return back more apparent.
-
 Be able to impersonate a student and see their feedback.
 Make it mandatory to fill in all fields.
 Be able to come back and edit your reviews.

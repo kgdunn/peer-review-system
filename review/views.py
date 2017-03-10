@@ -947,6 +947,10 @@ def submit_peer_review_feedback(request, ractual_code):
         r_actual.submitted = True
         r_actual.status = 'C' # completed
         r_actual.save()
+        logger.debug('ALL-DONE: {0}'.format(learner))
+    else:
+        logger.debug('MISSING[{0}]: {1}'.format(len(items),
+                                                learner))
 
 
     ctx = {'n_missing': len(items),
