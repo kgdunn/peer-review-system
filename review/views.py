@@ -308,7 +308,7 @@ def get_peer_grading_data(learner, phase):
             #   3. the average for this learner for this item
             #   4. the class average (not used at the moment)
             if idxr == 0:
-                peer_data[ritem_template] = [[], 0.0, idxi, np.NaN]
+                peer_data[ritem_template] = [[], 0.0, 0.0, idxi]
 
 
             for option in item.roptionactual_set.filter(submitted=True):
