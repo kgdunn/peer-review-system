@@ -193,7 +193,7 @@ textarea
 				    {% if item.ritem_template.option_type == 'LText' %}{% endif%}
 				    {% if item.ritem_template.option_type == 'DropD' %}
 					    <em>Peer scores</em>:
-					    {{item.results.0}} <!--; average = {{item.results.2|floatformat}}-->
+					    {{item.results.0}} average = {{item.results.2|floatformat}}
 					{% endif %}
 				{% else %}
 				    {%if item.ritem_template.option_type == 'DropD'%}
@@ -229,7 +229,7 @@ textarea
 {% endblock %}
 {% block footer %}
 
-<!-- 
+<!--
 {{report}}
 -->
 
