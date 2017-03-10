@@ -654,7 +654,14 @@ def upload_submission(request, learner, pr_process, phase):
                      generate_random_token(token_length=16) + '.' + extension)
 
     base_full_path = base_dir_for_file_uploads + 'uploads/{0}/'.format(pr_process.id)
-    os.makedirs(base_full_path, exist_ok=True)
+    try:
+        os.makedirs(base_full_path)
+    except OSError:
+        if not os.path.isdir(base_full_path):
+            debug.error('Cannot create directory for upload: {0}'.format(
+                                        base_full_path))
+            raise
+
     with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
         for chunk in request.FILES['file_upload'].chunks():
             dst.write(chunk)
