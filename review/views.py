@@ -274,7 +274,9 @@ def get_peer_grading_data(learner, phase):
                 'did_submit': False}
 
     # and only completed reviews
-    reviews = RubricActual.objects.filter(submission=submission, status='C')
+    # I am going to be a bit laxer: incomplete reviews are also ok
+    # i.e. remove the filter: "status='C' "
+    reviews = RubricActual.objects.filter(submission=submission)
 
     if reviews.count() == 0:
         # You must return here if there are no reviews. The rest of the
