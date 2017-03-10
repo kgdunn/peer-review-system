@@ -308,7 +308,7 @@ def get_peer_grading_data(learner, phase):
             #   3. the average for this learner for this item
             #   4. the class average (not used at the moment)
             if idxr == 0:
-                peer_data[ritem_template] = [[], 0.0, 0.0, np.NaN]
+                peer_data[ritem_template] = [[], 0.0, idxi, np.NaN]
 
 
             for option in item.roptionactual_set.filter(submitted=True):
@@ -783,7 +783,7 @@ def review(request, ractual_code):
 
     report = {}
     if show_feedback:
-        report = get_peer_grading_data(learner, feedback_phase)
+            report = get_peer_grading_data(learner, feedback_phase)
 
     logger.debug('Getting review for {0}:'.format(learner))
 
