@@ -826,8 +826,7 @@ def review(request, ractual_code):
 
     pr = r_actual.rubric_template.pr_process
     phase = r_actual.rubric_template.phase
-    this_order_step = phase.order
-    next_step = max(0, this_order_step+1)
+    next_step = max(0, phase.order+1)
     all_phases = PRPhase.objects.filter(pr=pr,
                                 is_active=True).order_by('order')
 

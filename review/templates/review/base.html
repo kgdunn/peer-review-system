@@ -1,6 +1,123 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
 <style>
+body {
+    font-size: 11pt;
+}
+
+/* Header styles */
+#header {
+    clear:both;
+    float:left;
+    width:100%;
+}
+#header {
+    border-bottom:1px solid #000;
+}
+#header p,
+#header h1,
+#header h2 {
+    padding:.4em 15px 0 15px;
+    margin:0;
+}
+
+/* 'widths' sub menu */
+#layoutdims {
+    clear:both;
+    background:#eee;
+    border-top:4px solid #000;
+    margin:0;
+    padding:6px 15px !important;
+    text-align:right;
+}
+/* column container */
+.colmask {
+    position:relative;	    /* This fixes the IE7 overflow hidden bug */
+    clear:both;
+    float:left;
+    width:100%;			    /* width of whole page */
+    overflow:hidden;		/* This chops off any overhanging divs */
+}
+/* common column settings */
+.colright,
+.colmid,
+.colleft {
+    float:left;
+    width:100%;
+    position:relative;
+}
+.col1,
+.col2,
+.col3 {
+    float:left;
+    position:relative;
+    padding:0 0 1em 0;
+    overflow:hidden;
+}
+/* 2 Column (right menu) settings */
+.rightmenu {
+    background:#eee;		/* right column background colour */
+}
+.rightmenu .colleft {
+    right:36%;			    /* right column width */
+    background:#fff;		/* left column background colour */
+}
+.rightmenu .col1 {
+    width:65%;			    /* 65-2-2: left column content width (left column width minus left and right padding) */
+    left:35%;			    /* 35+2(right column width) plus (left column left padding) */
+}
+.rightmenu .col2 {
+    width:35%;			    /* 35-2-2: right column content width (right column width minus left and right padding) */
+    left:35%;			    /* 35+(2+1)+1: (right column width) plus (left column left and right padding) plus (right column left padding) */
+    height:84%;
+    overflow : auto;
+}
+/* Footer styles */
+#footer {
+    clear:both;
+    float:left;
+    width:100%;
+    border-top:1px solid #000;
+}
+#footer p {
+    padding:10px;
+    margin:0;
+}
+
+.even{
+    background:#ccc;
+}
+.odd{
+    background:#ddd;
+}
+.submit_button{
+  display: table;
+  margin: auto;
+}
+p{
+margin: 0;
+
+}
+.clear {clear: both;}
+.radio_text {
+  display: block;
+  margin-top: -20px;
+  margin-left: 28px;
+}
+.radio_button{
+  margin-left: 5px;
+}
+textarea
+{
+  width:100%;
+}
+.textwrapper
+{
+  border:1px solid #999999;
+  margin:5px 0;
+  padding:3px;
+}
+
 .start_dt{
   float:right;
   margin:5px 0;
@@ -16,12 +133,12 @@
   width:20%;
 }
 </style>
+{% block header %}{% endblock %}
 
 {% block content %}{% endblock %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 {% block footer %} {% endblock %}
-<!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 <script>

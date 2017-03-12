@@ -1,124 +1,92 @@
 {% extends "review/base.html" %}
-{% block content %}
+{% block header %}
+
 <style>
-body {
-	font-size: 11pt;
+.box a:hover {
+    text-decoration: none;
 }
 
-/* Header styles */
-#header {
-    clear:both;
-    float:left;
-    width:100%;
+.button {
+  font-size: 1em;
+  padding: 2px;
+  color: #00f;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 15px;
 }
-#header {
-    border-bottom:1px solid #000;
-}
-#header p,
-#header h1,
-#header h2 {
-    padding:.4em 15px 0 15px;
-    margin:0;
-}
-
-/* 'widths' sub menu */
-#layoutdims {
-    clear:both;
-    background:#eee;
-    border-top:4px solid #000;
-    margin:0;
-    padding:6px 15px !important;
-    text-align:right;
-}
-/* column container */
-.colmask {
-    position:relative;	    /* This fixes the IE7 overflow hidden bug */
-    clear:both;
-    float:left;
-    width:100%;			    /* width of whole page */
-    overflow:hidden;		/* This chops off any overhanging divs */
-}
-/* common column settings */
-.colright,
-.colmid,
-.colleft {
-    float:left;
-    width:100%;
-    position:relative;
-}
-.col1,
-.col2,
-.col3 {
-    float:left;
-    position:relative;
-    padding:0 0 1em 0;
-    overflow:hidden;
-}
-/* 2 Column (right menu) settings */
-.rightmenu {
-    background:#eee;		/* right column background colour */
-}
-.rightmenu .colleft {
-    right:36%;			    /* right column width */
-    background:#fff;		/* left column background colour */
-}
-.rightmenu .col1 {
-    width:65%;			    /* 65-2-2: left column content width (left column width minus left and right padding) */
-    left:35%;			    /* 35+2(right column width) plus (left column left padding) */
-}
-.rightmenu .col2 {
-    width:35%;			    /* 35-2-2: right column content width (right column width minus left and right padding) */
-    left:35%;			    /* 35+(2+1)+1: (right column width) plus (left column left and right padding) plus (right column left padding) */
-	height:84%;
-	overflow : auto;
-}
-/* Footer styles */
-#footer {
-    clear:both;
-    float:left;
-    width:100%;
-    border-top:1px solid #000;
-}
-#footer p {
-    padding:10px;
-    margin:0;
+.box {
+  width: 50%;
+  margin: 0 auto;
+  padding: 2px;
+  border: 2px solid #fff;
+  border-radius: 25px;
+  text-align: center;
 }
 
-.even{
-	background:#ccc;
+.button:hover {
+  background: #FFFFFF;
+    margin: 0 auto;
 }
-.odd{
-	background:#ddd;
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.2);
+  visibility: hidden;
+  opacity: 0;
 }
-.submit_button{
-  display: table;
-  margin: auto;
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
 }
-p{
-margin: 0;
+.popup {
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 30%;
+  margin-right:100px;
+  float:right;
+}
+.popup h2 {
+	font-size:1.5em;
+  margin-top: 0;
+  color: #333;
+  font-family: sans-serif;
+}
+.popup .close {
+  position: absolute;
+  float:right;
+  top: 30px;
+  right: 110px;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+.popup .close:hover {
+  color: #FF0000;
+}
+.popup .content {
+  max-height: 70%;
+  overflow: auto;
+}
 
-}
-.clear {clear: both;}
-.radio_text {
-  display: block;
-  margin-top: -20px;
-  margin-left: 28px;
-}
-.radio_button{
-  margin-left: 5px;
-}
-textarea
-{
-  width:100%;
-}
-.textwrapper
-{
-  border:1px solid #999999;
-  margin:5px 0;
-  padding:3px;
+@media screen and (max-width: 700px){
+  .box{
+	width: 70%;
+  }
+  .popup{
+	width: 70%;
+  }
 }
 </style>
+{% endblock %}
 
+
+{% block content %}
 <div id="header">
 	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
     <h2>Hello {{person.display_name}}</h2>
