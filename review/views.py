@@ -289,23 +289,6 @@ def get_next_submission_to_evaluate(phase, learner):
     else:
         return valid_subs[0]
 
-def get_n_reviews(learner, phase):
-    """
-    How many reviews are required for this ``learner`` for this ``phase``?
-    """
-    # TODO:
-
-    # IF it is a self-review then there is only 1 review required
-
-    if learner.role == 'Learn':
-        n_reviews = phase.number_of_reviews_per_learner
-    else:
-        # Administrators/TAs can have unlimited number of reviews
-        n_reviews = Submission.objects.filter(pr_process=phase.pr,
-                                              phase=phase,
-                                              is_valid=True).count()
-
-    return n_reviews
 
 def get_peer_grading_data(learner, phase):
     """
@@ -490,8 +473,13 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         peerreview_phase = PeerEvaluationPhase.objects.get(id=self.id)
         ctx_objects['self'] = peerreview_phase
         allow_review = within_phase
-        if not(allow_review):
+
+        if not(allow_review) and learner.role == 'Learn':
             return ctx_objects
+
+        # Administrator roles can go further, even if we are not within the
+        # time range for peer-review. This is so admins can view, and even
+        # evaluate all students submissions.
 
 
         # Is this the first time the learner is here: create the
@@ -501,20 +489,44 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # If this is the second or subequent time here, simply return
         # the N ``RubricActual`` instances
 
-        n_reviews = get_n_reviews(learner, peerreview_phase)
+
+        if learner.role == 'Learn':
+            n_reviews = peerreview_phase.number_of_reviews_per_learner
+        else:
+            # Administrators/TAs can have unlimited number of reviews
+            n_reviews = 0
+            # Which was the submission phase, prior to this one. A good starting
+            # guess is ``prior``, and then we work backwards. If none is found,
+            # then return the ``0``.
+            phase = prior
+            while (phase.order >= 0):
+                try:
+                    phase = SubmissionPhase.objects.get(is_active=True,
+                                                        pr=self.pr,
+                                                        order=phase.order)
+                    n_reviews = Submission.objects.filter(pr_process=phase.pr,
+                                                    phase=phase,
+                                                    is_valid=True).count()
+                    break
+                except SubmissionPhase.DoesNotExist:
+                    phase = PRPhase.objects.get(is_active=True, pr=self.pr,
+                                    order=phase.order-1)
+
+
         # Which template are we using in this phase?
         r_template = RubricTemplate.objects.get(phase=self)
         query = RubricActual.objects.filter(graded_by=learner,
                         rubric_template=r_template).order_by('created')
+
+        # We need to create and append the necessary reviews here
         r_actuals = list(query)
 
         logger.debug('Need to create {0} reviews'.format(n_reviews))
 
         if query.count() != n_reviews:
-            # We need to create and append the necessary reviews here
-            r_actuals = list(query)
 
             for k in range(n_reviews - query.count()):
+
                 # Hit database to get the next submission to grade:
                 next_sub = get_next_submission_to_evaluate(self, learner)
                 if next_sub:

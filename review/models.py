@@ -1,20 +1,9 @@
 from django.db import models
-import datetime
-import json
-import os
 from django.utils.timezone import utc
 from django.utils.encoding import python_2_unicode_compatible
-
-
-# Django and Python imports
-try:
-    import simplejson as json
-except ImportError:
-    import json
-from collections import namedtuple
-
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+import os
 
 # Our imports
 from utils import generate_random_token
