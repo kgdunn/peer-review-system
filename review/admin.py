@@ -17,6 +17,7 @@ class PR_processAdmin(admin.ModelAdmin):
 class PRPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "is_active", "start_dt", "end_dt")
     ordering = ['pr', 'order']
+    list_filter = ['pr']
 
 class SubmissionPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt",
@@ -40,11 +41,13 @@ class SubmissionAdmin(admin.ModelAdmin):
                     "submitted_file_name", "group_submitted",
                     "number_reviews_assigned",
                     "number_reviews_completed", "datetime_submitted")
+    list_filter = ['pr_process', 'phase']
 
 class RItemTemplateAdmin(admin.ModelAdmin):
     list_display = ("r_template", "order", "max_score", "option_type",
-                    "criterion", "created", "modified",)
+                    "criterion",)
     ordering = ['-r_template', 'order']
+    list_filter = ['r_template']
 
 class RItemActualAdmin(admin.ModelAdmin):
     list_display = ("ritem_template", "submitted", "comment",
