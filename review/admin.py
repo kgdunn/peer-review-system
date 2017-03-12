@@ -41,7 +41,6 @@ class SubmissionAdmin(admin.ModelAdmin):
                     "submitted_file_name", "group_submitted",
                     "number_reviews_assigned",
                     "number_reviews_completed", "datetime_submitted")
-    list_filter = ['pr_process', 'phase']
 
 class RItemTemplateAdmin(admin.ModelAdmin):
     list_display = ("r_template", "order", "max_score", "option_type",
