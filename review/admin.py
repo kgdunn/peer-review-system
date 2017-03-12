@@ -62,7 +62,10 @@ class ROptionActualAdmin(admin.ModelAdmin):
 
 class ROptionTemplateAdmin(admin.ModelAdmin):
     list_display = ("rubric_item", "order", "score", "short_text",)
-    ordering = ['-rubric_item', 'order']
+    ordering = ['rubric_item', 'order']
+
+    list_filter = ['rubric_item__r_template',
+                   'rubric_item__r_template__pr_process', ]
 
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Course)

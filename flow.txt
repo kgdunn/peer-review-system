@@ -1,21 +1,11 @@
-Upload the 3 missing reports
-Strip student informaiton from
-* rM2c5LYN4hamS58B.pdf
-* tXF5RczpeFVgLFkU.pdf
+Upload the 2 missing reports: group 7 and 16: old submissions should be bumped?
 
 Check that peer feedback results are the correct ones
-Add all students to the master list for the Admin to provide instructor review
 How are you going to collate the grades?
 Add statistics for review duration
 * XHR of text feedback
-
-
-* Impersonate a student
-* Show all reviews for Conny and team to evaluate
 * Get start and end timings
-
 * Log the XHR events with a model
-* CHeck that all PDF's open
 
 * Completed submissions via an intermediate database table
 
