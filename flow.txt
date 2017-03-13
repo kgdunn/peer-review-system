@@ -1,5 +1,3 @@
-Upload the 2 missing reports: group 7 and 16: old submissions should be bumped?
-
 Check that peer feedback results are the correct ones
 How are you going to collate the grades?
 Add statistics for review duration

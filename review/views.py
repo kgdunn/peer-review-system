@@ -13,6 +13,7 @@ from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
 from .models import Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
+from stats.views import create_hit
 from utils import generate_random_token, send_email, get_IP_address
 
 
@@ -581,6 +582,10 @@ def index(request):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
+
+
+    create_hit(request, item=learner, event='login', user=learner,
+               other_info=str(request.POST))
 
     # Get all the possible phases
     phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
