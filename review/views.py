@@ -893,6 +893,7 @@ def review(request, ractual_code):
     # The above code does not work for students with non-ascii characters in
     # their name.
     value = 0
+    has_prior_answers = False
     for item in r_item_actuals:
         item_template = item.ritem_template
 
@@ -912,6 +913,7 @@ def review(request, ractual_code):
                                                         ritem_actual=item,
                                                         submitted=True)
             if prior_answer.count():
+                has_prior_answers = True
                 if item_template.option_type == 'DropD':
                     option.selected = True
                 elif item_template.option_type == 'LText':
@@ -926,6 +928,19 @@ def review(request, ractual_code):
         shuffle(item.results[0])
         if item_template.option_type == 'LText':
             item.results[0] = '\n'.join(item.results[0])
+
+    if has_prior_answers:
+        if show_feedback:
+            create_hit(request, item=r_actual, event='reviewing-feedback',
+                   user=learner, other_info='Reviewing feedback')
+        else:
+            create_hit(request, item=r_actual, event='continue-review-session',
+                   user=learner, other_info='Returning back')
+
+    else:
+        create_hit(request, item=r_actual, event='start-a-review-session',
+                   user=learner, other_info='Fresh start')
+
 
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
@@ -1024,13 +1039,19 @@ def submit_peer_review_feedback(request, ractual_code):
 
 
     # All done with storing the results. Did the user fill everything in?
+    request.POST.pop('csrfmiddlewaretoken', None) # we don't want this in stats
     if len(items) == 0:
         # And once we have processed all options and all items, we can also:
         r_actual.submitted = True
         r_actual.status = 'C' # completed
         r_actual.save()
         logger.debug('ALL-DONE: {0}'.format(learner))
+        create_hit(request, item=r_actual, event='ending-a-review-session',
+                   user=learner, other_info='COMPLETE ' + str(request.POST))
     else:
+        create_hit(request, item=r_actual, event='ending-a-review-session',
+                   user=learner, other_info='MISSING {0}'.format(len(items))\
+                                                     + str(request.POST)  )
         logger.debug('MISSING[{0}]: {1}'.format(len(items),
                                                 learner))
 

@@ -30,7 +30,7 @@ def create_hit(request, item=None, event='', user=None, other_info=None):
         pass
 
 
-    #event_type = (
+    #event = (
         #('login', 'login'),
         #('start-a-review-session',    'start-a-review-session'),
         #('ending-a-review-session',   'ending-a-review-session'),

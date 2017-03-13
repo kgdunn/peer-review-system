@@ -9,7 +9,9 @@ class Timer(models.Model):
     event_type = (
         ('login', 'login'),
         ('start-a-review-session',    'start-a-review-session'),
+        ('continue-review-session',   'continue-review-session'),
         ('ending-a-review-session',   'ending-a-review-session'),
+        ('reviewing-feedback',        'reviewing-feedback'),
                   )
     event = models.CharField(max_length=80, choices=event_type)
 
