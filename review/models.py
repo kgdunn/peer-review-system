@@ -258,6 +258,8 @@ class RubricTemplate(models.Model):
 
     general_instructions = models.TextField(default='')
 
+    maximum_score = models.FloatField(default=0.0)
+
     show_order = models.BooleanField(default=True,
             help_text=('Shows the order numbers. e.g "1. Assess ..."; else '
                        'it just shows: "Assess ..."'))
@@ -273,6 +275,16 @@ class RubricTemplate(models.Model):
 class RubricActual(models.Model):
     """
     The actual rubric: one instance per learner per submission.
+
+    A submission is allocated to a person for grading. This tracks that:
+    the status of it, the grade (only if completed and submitted); the
+    ``RubricActual`` instance is also used as a ForeignKey in each
+    ``RItemActual``. That way we can quickly pull the evaluated score of the
+    rubric from these items.
+
+    A few other handy statistics (score, and word_count) are tracked here,
+    to minimize frequent or expensive hits on the database.
+
     """
     STATUS = (('A', 'Assigned to grader'),
               ('P', 'Progressing...'),
@@ -280,13 +292,21 @@ class RubricActual(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    started = models.DateTimeField(verbose_name='When did user start grading?')
+    completed = models.DateTimeField(verbose_name='When did user end grading?')
     status = models.CharField(max_length=2, default='A', choices=STATUS)
     submitted = models.BooleanField(default=False,
         help_text='Has been completed reviewed AND submitted by peer grader.')
     graded_by = models.ForeignKey(Person)
     rubric_template = models.ForeignKey(RubricTemplate)
     submission = models.ForeignKey(Submission, null=True)
+
+    # This is used to access the rubric, when graded in an external tab
     unique_code = models.CharField(max_length=16, editable=False, blank=True)
+
+    # These are only valid once ``self.submitted=True``
+    score = models.FloatField(default=0.0)
+    word_count = models.PositiveIntegerField(default=0)
 
     def save(self, *args, **kwargs):
         if not(self.unique_code):
@@ -395,3 +415,4 @@ class ROptionActual(models.Model):
 
     def __str__(self):
         return u'%s' % (self.roption_template, )
+

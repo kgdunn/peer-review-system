@@ -9,10 +9,8 @@ Show progress of work done on a page (NN% completed)
 
 Check that peer feedback results are the correct ones
 How are you going to collate the grades?
-Add statistics for review duration
-* XHR of text feedback
-* Get start and end timings
-* Log the XHR events with a model
+
+* Log the XHR events with Statistics still
 
 * Completed submissions via an intermediate database table
 
@@ -62,12 +60,10 @@ Check for PDF
 
 To do next
 -----------
-
 Add the group name in the email to the students.
-Release as BSD license and open up
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
 After cut-off time show calculation of their grades
-Strip out the PDF information.
+
 
 During the run:
 ----
@@ -75,14 +71,11 @@ Watch the reviews coming in at: https://peer.connectmv.com/admin/review/roptiona
 Track linode stats
 Run htop
 Dump the data to text file:
-  ./manage.py dumpdata review  --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
-
+  ./manage.py dumpdata review stats --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
 
 
 Review process
 ==============
-
-
 Use the LTI checker: http://ltiapps.net/test/tc.php
 https://github.com/Brightspace/sample-LTI-WHMIS-quiz
 Send grades back:

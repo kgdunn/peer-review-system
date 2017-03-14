@@ -67,8 +67,8 @@ def starting_point(request):
 
     try:
         if ' ' in course_ID:
-            # For edX course ID's
-            course_ID = course_ID.replace(' ', '+')
+            course_ID = course_ID.replace(' ', '+') # For edX course ID's
+
         course = Course.objects.get(label=course_ID)
     except Course.DoesNotExist:
         return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
@@ -90,8 +90,7 @@ def recognise_LTI_LMS(request):
     is if nothing can be determined.
     """
     if request.POST.get('learner_ID', ''):
-        # Used for form submissions internally.
-        return None
+        return None   # Used for form submissions internally.
     if request.POST.get('resource_link_id', '').find('edx.org')>0:
         return 'edx'
     elif request.POST.get('ext_d2l_token_digest', None):
@@ -119,7 +118,7 @@ def get_create_student(request, course, pr):
                                  request.POST.get('lis_person_sourcedid', '')
         user_ID = request.POST.get('user_id', '')
         role = request.POST.get('roles', '')
-        # You can also use: request.POST['ext_d2l_role'] in Brigthspace
+        # You can also use: request.POST['ext_d2l_role'] in Brightspace
         if 'Instructor' in role:
             role = 'Admin'
         elif 'Student' in role:
@@ -143,7 +142,8 @@ def get_create_student(request, course, pr):
             return learner[0]
         elif learner.count() > 1:
             # Find the learner in this course
-            # TODO still
+            # TODO still. This is the case where the same email address is used
+            #             in more than 1 platform (e.g. Brightspace and edX)
             return learner[0]
         else:
             learner = None
@@ -311,8 +311,6 @@ def get_peer_grading_data(learner, phase):
                 'did_submit': False}
 
     # and only completed reviews
-    # I am going to be a bit laxer: incomplete reviews are also ok
-    # i.e. remove the filter: "status='C' "
     reviews = RubricActual.objects.filter(submission=submission, status='C' )
 
     if reviews.count() == 0:
@@ -447,7 +445,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         selfreview_phase = SelfEvaluationPhase.objects.get(id=self.id)
         ctx_objects['self'] = selfreview_phase
         allow_self_review = within_phase
-
 
 
         # Get the submission from the prior step. Note, this must be a
@@ -1165,5 +1162,3 @@ def copy_rubric():
             option.rubric_item = item
             option.pk = None
             option.save()
-
-
