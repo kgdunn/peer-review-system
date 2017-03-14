@@ -192,7 +192,7 @@ def get_create_actual_rubric(learner, template, submission):
                                         submitted = False)
             r_item_actual.save()
 
-    return r_actual
+    return r_actual, new_rubric
 
 
 def get_submission(learner, phase=None, pr_process=None):
@@ -233,10 +233,11 @@ def get_submission(learner, phase=None, pr_process=None):
         return None
 
 
-def get_next_submission_to_evaluate(phase, learner):
+def get_next_submission_to_evaluate(phase, learner, return_all=False):
     """
     Gets the single next peer review submission for the approapriate peer review
-    assignment phase (``phase``) for this ``learner``.
+    assignment phase (``phase``) for this ``learner``. Will ``return_all`` valid
+    submissions, if so requested.
 
     Principle:
 
@@ -293,6 +294,8 @@ def get_next_submission_to_evaluate(phase, learner):
     # with the lowest number of assigned reviews
     if valid_subs.count() == 0:
         return []
+    elif return_all:
+        return valid_subs
     else:
         return valid_subs[0]
 
@@ -456,10 +459,14 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         r_template = RubricTemplate.objects.get(pr_process=self.pr,
                                                 phase=self)
 
-        # Get/create the R_actual for the self-review
-        r_actual = get_create_actual_rubric(learner,
-                                            r_template,
-                                            ctx_objects['submission'])
+        # Get/create the R_actual for the self-review, only if there
+        # is an actual submission.
+        if ctx_objects['submission']:
+            r_actual, _ = get_create_actual_rubric(learner,
+                                                   r_template,
+                                                   ctx_objects['submission'])
+        else:
+            r_actual = None
 
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['own_submission'] = r_actual
@@ -495,28 +502,31 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # If this is the second or subequent time here, simply return
         # the N ``RubricActual`` instances
 
+        # Which was the submission phase, prior to this one. A good starting
+        # guess is ``prior``, and then we work backwards. If none is found,
+        # then return the ``0``.
+        phase = prior
+        while (phase.order >= 0):
+            try:
+                phase = SubmissionPhase.objects.get(is_active=True,
+                                                    pr=self.pr,
+                                                    order=phase.order)
+
+                break
+            except SubmissionPhase.DoesNotExist:
+                phase = PRPhase.objects.get(is_active=True, pr=self.pr,
+                                order=phase.order-1)
+
+
+        max_reviews = Submission.objects.filter(pr_process=phase.pr,
+                                                phase=phase,
+                                                is_valid=True).count()
 
         if learner.role == 'Learn':
             n_reviews = peerreview_phase.number_of_reviews_per_learner
         else:
             # Administrators/TAs can have unlimited number of reviews
-            n_reviews = 0
-            # Which was the submission phase, prior to this one. A good starting
-            # guess is ``prior``, and then we work backwards. If none is found,
-            # then return the ``0``.
-            phase = prior
-            while (phase.order >= 0):
-                try:
-                    phase = SubmissionPhase.objects.get(is_active=True,
-                                                        pr=self.pr,
-                                                        order=phase.order)
-                    n_reviews = Submission.objects.filter(pr_process=phase.pr,
-                                                    phase=phase,
-                                                    is_valid=True).count()
-                    break
-                except SubmissionPhase.DoesNotExist:
-                    phase = PRPhase.objects.get(is_active=True, pr=self.pr,
-                                    order=phase.order-1)
+            n_reviews = max_reviews
 
 
         # Which template are we using in this phase?
@@ -527,22 +537,25 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # We need to create and append the necessary reviews here
         r_actuals = list(query)
 
-        logger.debug('Need to create {0} reviews'.format(n_reviews))
+        logger.debug('Found {0} reviews; required: {1}'.format(len(r_actuals),
+                                                               n_reviews))
+        n_iter = 0
+        next_subs = get_next_submission_to_evaluate(self, learner,
+                                                    return_all=True)
+        while (len(r_actuals) != n_reviews) and (n_iter < len(next_subs)):
 
-        if query.count() != n_reviews:
 
-            for k in range(n_reviews - query.count()):
+            # Hit database to get the next submission to grade:
+            next_sub = next_subs[n_iter]
+            n_iter += 1
+            if next_sub:
+                r_actual, new = get_create_actual_rubric(learner=learner,
+                                                    template=r_template,
+                                                    submission=next_sub)
 
-                # Hit database to get the next submission to grade:
-                next_sub = get_next_submission_to_evaluate(self, learner)
-                if next_sub:
+                if new:
                     next_sub.number_reviews_assigned += 1
                     next_sub.save()
-
-                    r_actual = get_create_actual_rubric(learner=learner,
-                                                        template=r_template,
-                                                        submission=next_sub)
-
                     r_actuals.append(r_actual)
                     logger.debug('Created r_actual: ' + str(r_actual))
 
