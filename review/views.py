@@ -66,6 +66,9 @@ def starting_point(request):
             pr_ID)), None, None)
 
     try:
+        if ' ' in course_ID:
+            # For edX course ID's
+            course_ID = course_ID.replace(' ', '+')
         course = Course.objects.get(label=course_ID)
     except Course.DoesNotExist:
         return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
