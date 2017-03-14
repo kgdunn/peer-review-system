@@ -332,7 +332,9 @@ def get_peer_grading_data(learner, phase):
 
     raw_scores = np.zeros((n_items, n_reviews)) * np.nan
     for idxr, completed_review in enumerate(reviews):
-        items = completed_review.ritemactual_set.filter(submitted=True).order_by('id')
+        # The ``order_by`` is important for consistency
+        items = completed_review.ritemactual_set.filter(submitted=True)\
+                                                            .order_by('id')
         overall_max_score = 0.0 # just compute this on the last completed_review
         for idxi, item in enumerate(items):
 
@@ -576,9 +578,9 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(allow_report):
             return ctx_objects
 
-        report = get_peer_grading_data(learner, self)
-
         ctx_objects['allow_report'] = allow_report
+
+        #report = get_peer_grading_data(learner, self)
 
     except FeedbackPhase.DoesNotExist:
         pass
@@ -832,7 +834,7 @@ def xhr_store(request, ractual_code):
                                                            option))
 
     now_time = datetime.datetime.now()
-    return HttpResponse('Your results were last saved at: {}'.format(
+    return HttpResponse('Your change was saved [{}]'.format(
                     now_time.strftime('%H:%M:%S')))
 
 
