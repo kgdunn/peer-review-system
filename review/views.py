@@ -5,6 +5,7 @@ from django.template.context_processors import csrf
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
 from django.template import Context, Template
+from django.utils import timezone
 
 # Our imports
 from .models import Person, Course, PR_process
@@ -177,12 +178,19 @@ def get_create_actual_rubric(learner, template, submission):
     """
     # Create an ``rubric_actual`` instance:
     r_actual, new_rubric = RubricActual.objects.get_or_create(\
-                                    graded_by = learner,
-                                    rubric_template = template,
-                                    submission = submission)
+                        graded_by = learner,
+                        rubric_template = template,
+                        submission = submission,
+                        defaults={'started': timezone.now(),
+                                  'completed': timezone.now(),
+                                  'status': 'A',         # To be explicit
+                                  'submitted': False,
+                                  'score': 0.0,
+                                  'word_count': 0})
 
 
     if new_rubric:
+
         # Creates the items (rows) associated with an actual rubric
         for r_item in RItemTemplate.objects.filter(r_template=template)\
                                                            .order_by('order'):
@@ -826,6 +834,13 @@ def xhr_store(request, ractual_code):
     # Set the RItemActual.submitted = True for this ITEM
     r_item.submitted = True
     r_item.save()
+
+    if r_actual.status == 'A':
+        r_actual.status = 'P'
+        r_actual.started = datetime.datetime.utcnow()
+        r_actual.save()
+
+
     logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
                                                            item_number,
                                                            option))
