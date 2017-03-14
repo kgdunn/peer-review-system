@@ -429,9 +429,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             submission = upload_submission(request, learner, self.pr, sub_phase)
             ctx_objects['submission'] = submission
 
-
-        ctx_objects['allow_submit'] = allow_submit
-        ctx_objects['file_upload_form'] = file_upload_form
+        sub_phase.allow_submit = ctx_objects['allow_submit'] = allow_submit
+        sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
 
 
     except SubmissionPhase.DoesNotExist:

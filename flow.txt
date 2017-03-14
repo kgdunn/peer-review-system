@@ -2,6 +2,10 @@ Keep students informed on how many completed reviews have been done on their
 work.
 Instructor sees how many reviews each student has done, and the status of
 reviews.
+XHR fade out/fade in
+Grades and feedback phase programmed up.
+Show progress of work done on a page (NN% completed)
+
 
 Check that peer feedback results are the correct ones
 How are you going to collate the grades?
