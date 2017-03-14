@@ -1001,6 +1001,8 @@ def submit_peer_review_feedback(request, ractual_code):
         item_dict['template'] = item_template
 
     # Stores the users selections as "ROptionActual" instances
+    word_count = 0
+    score = 0.0
     for key, value in request.POST.items():
 
         # Process each item in the rubric, one at a time. Only ``item``
@@ -1015,6 +1017,7 @@ def submit_peer_review_feedback(request, ractual_code):
             if value:
                 r_opt_template = items[item_number]['options'][0]
                 comment = value
+                word_count += len(re.split('\s+', comment))
             else:
                 # We get for text feedback fields that they can be empty.
                 # In these cases we must continue as if they were not filled
@@ -1053,19 +1056,29 @@ def submit_peer_review_feedback(request, ractual_code):
 
         # Only right at the end: if all the above were successful:
         items.pop(item_number)
+        score += r_opt_template.score
 
 
     # All done with storing the results. Did the user fill everything in?
-    request.POST.pop('csrfmiddlewaretoken', None) # we don't want this in stats
+    if request.POST:
+        request.POST.pop('csrfmiddlewaretoken', None) # don't want this in stats
     if len(items) == 0:
         # And once we have processed all options and all items, we can also:
         r_actual.submitted = True
+        r_actual.completed = datetime.datetime.utcnow()
         r_actual.status = 'C' # completed
+        r_actual.word_count = word_count
+        r_actual.score = score
         r_actual.save()
         logger.debug('ALL-DONE: {0}'.format(learner))
         create_hit(request, item=r_actual, event='ending-a-review-session',
                    user=learner, other_info='COMPLETE ' + str(request.POST))
     else:
+        r_actual.submitted = False
+        r_actual.completed = r_actual.started
+        r_actual.status = 'P' # In progress
+        r_actual.word_count = word_count
+        r_actual.save()
         create_hit(request, item=r_actual, event='ending-a-review-session',
                    user=learner, other_info='MISSING {0}'.format(len(items))\
                                                      + str(request.POST)  )
