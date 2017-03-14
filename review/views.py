@@ -837,7 +837,7 @@ def xhr_store(request, ractual_code):
 
     if r_actual.status == 'A':
         r_actual.status = 'P'
-        r_actual.started = datetime.datetime.utcnow()
+        r_actual.started = timezone.now()
         r_actual.save()
 
 
