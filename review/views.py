@@ -111,9 +111,12 @@ def get_create_student(request, course, pr):
     if LTI_consumer in ('brightspace', 'edx', 'coursera'):
         email = request.POST.get('lis_person_contact_email_primary', '')
         display_name = request.POST.get('lis_person_name_full', '')
+        if LTI_consumer == 'edx':
+            display_name = display_name or \
+                                 request.POST.get('lis_person_sourcedid', '')
         user_ID = request.POST.get('user_id', '')
         role = request.POST.get('roles', '')
-        # You can also use: request.POST['ext_d2l_role']
+        # You can also use: request.POST['ext_d2l_role'] in Brigthspace
         if 'Instructor' in role:
             role = 'Admin'
         elif 'Student' in role:
