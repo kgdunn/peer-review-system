@@ -277,7 +277,7 @@ def get_next_submission_to_evaluate(phase, learner, return_all=False):
                         order_by('number_reviews_completed')
 
         if valid_subs_0_1.count() == 0:
-            prior_step = max(0, prior_step-1)
+            prior_step = max(-1, prior_step-1)
         else:
             break
 
