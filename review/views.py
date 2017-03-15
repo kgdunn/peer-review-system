@@ -443,6 +443,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             submission = upload_submission(request, learner, self.pr, sub_phase)
             ctx_objects['submission'] = submission
 
+        sub_phase.submission = ctx_objects['submission']
         sub_phase.allow_submit = ctx_objects['allow_submit'] = allow_submit
         sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
 
@@ -597,7 +598,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
     # Objects required for a grade report:
     #                                    overall_grade_text, grade_report_table
-
     try:
         gradereport_phase = GradeReportPhase.objects.get(id=self.id)
         ctx_objects['self'] = gradereport_phase
@@ -607,8 +607,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             return ctx_objects
 
         # Administrator roles can go further, even if we are not within the
-        # time range for peer-review. This is so admins can view, and even
-        # evaluate all students submissions.
+        # time range, they should be able to view the student progress.
 
         ctx_objects['allow_grades'] = allow_grades
         ctx_objects['self'].overall_grade_text = 'Calculate grades here stil;'
@@ -1201,8 +1200,6 @@ def get_stats_comments(request):
 
 
     return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
-
-
 
 def copy_rubric():
 
