@@ -156,7 +156,7 @@ class PRPhase(models.Model):
     def __str__(self):
         return '[{0}] {1}'.format(self.order, self.name)
 
-@python_2_unicode_compatible
+
 class SubmissionPhase(PRPhase):
     """
     All peer reviews have a submission phase, usually the first step.
@@ -169,43 +169,31 @@ class SubmissionPhase(PRPhase):
                 max_length=100,
                 help_text='Comma separated list, for example: pdf, docx, doc')
 
-    def __str__(self):
-        return '*' + super(SubmissionPhase, self).__str__()
-
-@python_2_unicode_compatible
 class SelfEvaluationPhase(PRPhase):
     """
     If a self-evaluation is required...
     """
-    def __str__(self):
-        return '*' + super(SelfEvaluationPhase, self).__str__()
+    pass
 
-
-@python_2_unicode_compatible
 class PeerEvaluationPhase(PRPhase):
     """
     If a peer-evaluation is required...
     """
     number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
         help_text='How many reviews must each learner complete?')
-    def __str__(self):
-        return '*' + super(PeerEvaluationPhase, self).__str__()
 
-@python_2_unicode_compatible
+
 class FeedbackPhase(PRPhase):
     """
     Text feedback is shown to the user
     """
-    def __str__(self):
-        return '*' + super(FeedbackPhase, self).__str__()
+    pass
 
-@python_2_unicode_compatible
 class GradeReportPhase(PRPhase):
     """
     Grade report shown to the user
     """
-    def __str__(self):
-        return '*' + super(GradeReportPhase, self).__str__()
+    pass
 
 @python_2_unicode_compatible
 class Submission(models.Model):
