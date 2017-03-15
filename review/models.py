@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.timezone import utc
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -139,13 +139,15 @@ class PRPhase(models.Model):
     name = models.CharField(max_length=50, default='... Phase ...')
     pr = models.ForeignKey(PR_process, verbose_name="Peer review")
     order = models.PositiveIntegerField(default=1)
-    start_dt = models.DateTimeField(
+    start_dt = models.DateTimeField(default=timezone.now,
                     verbose_name='Start of this phase',)
-    end_dt = models.DateTimeField(
+    end_dt = models.DateTimeField(default=timezone.now,
                     verbose_name='End of this phase', )
     is_active = models.BooleanField(default=True,
             help_text='An override, allowing you to stage/draft phases.')
-    instructions = models.TextField(default='', blank=True)
+    show_dates = models.BooleanField(default=True,
+            help_text='Shows the dates in the user view')
+    #instructions = models.TextField(default='', blank=True)
     templatetext = models.TextField(default='', blank=True,
                     help_text='The template rendered to the user')
 
@@ -189,6 +191,11 @@ class FeedbackPhase(PRPhase):
     """
     pass
 
+class GradeReportPhase(PRPhase):
+    """
+    Grade report shown to the user
+    """
+    pass
 
 @python_2_unicode_compatible
 class Submission(models.Model):
@@ -416,3 +423,34 @@ class ROptionActual(models.Model):
     def __str__(self):
         return u'%s' % (self.roption_template, )
 
+class GradeComponent(models.Model):
+    """
+    Each PR process will have 1 or more instances of this model. It tells
+    the  ``weight`` value that makes up the final grade. Each weight is
+    associated with a ``PRPhase``.
+    """
+    DETAIL = (('peer',       'peer'),
+              ('instructor', 'instructor'))
+
+    pr = models.ForeignKey(PR_process)
+    phase = models.ForeignKey(PRPhase)
+    order = models.PositiveSmallIntegerField(default=0.0,
+                    help_text="Used to order the display of grade items")
+    explanation = models.TextField(max_length=500,
+        help_text=('HTML is possible; used in the template. Can include '
+                   'template elements.'))
+    weight = models.FloatField(default = 0.0,
+                               help_text=('Values must be between 0.0 and 1.0.',
+                                          ' It is your responsibility to make '
+                                          'sure the total weights do not sum '
+                                          'to over 1.0 (i.e. 100%)'))
+    extra_detail = models.CharField(max_length=50, choices=DETAIL, blank=True,
+        help_text=('Extra information used to help distinguish a phase. For ',
+                   'example, the Peer-Evaluation phase is used for instructors '
+                   'as well as peers to evaluate. But the instructor(s) grades '
+                   'must get a higher weight. This is used to split the code.'))
+
+    def save(self, *args, **kwargs):
+        """ Override the model's saving function to do some checks """
+        self.weight = max(0.0, min(1.0, self.weight))
+        super(GradeComponent, self).save(*args, **kwargs)

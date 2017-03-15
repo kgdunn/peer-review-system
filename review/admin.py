@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import Person, Course, PR_process
-from .models import SubmissionPhase, SelfEvaluationPhase, PeerEvaluationPhase
-from .models import PRPhase, FeedbackPhase, Submission
+from .models import Person, Course, PR_process, PRPhase, Submission
+from .models import SubmissionPhase, SelfEvaluationPhase
+from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
+
 from .models import RItemActual, RItemTemplate
 from .models import ROptionActual, ROptionTemplate
 from .models import RubricActual, RubricTemplate
@@ -20,21 +21,21 @@ class PRPhaseAdmin(admin.ModelAdmin):
     list_filter = ['pr']
 
 class SubmissionPhaseAdmin(admin.ModelAdmin):
-    list_display = ("name", "pr", "order", "start_dt", "end_dt",
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active",
                     "max_file_upload_size_MB",
                     "accepted_file_types_comma_separated")
 
 class SelfEvaluationPhaseAdmin(admin.ModelAdmin):
-    list_display = ("name", "pr", "order", "start_dt", "end_dt",
-                    "instructions",)
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class PeerEvaluationPhaseAdmin(admin.ModelAdmin):
-    list_display = ("name", "pr", "order", "start_dt", "end_dt",
-                    "instructions",)
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class FeedbackPhaseAdmin(admin.ModelAdmin):
-    list_display = ("name", "pr", "order", "start_dt", "end_dt",
-                    "instructions",)
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
+
+class GradeReportPhaseAdmin(admin.ModelAdmin):
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
@@ -77,6 +78,8 @@ admin.site.register(SubmissionPhase, SubmissionPhaseAdmin)
 admin.site.register(SelfEvaluationPhase, SelfEvaluationPhaseAdmin)
 admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
+admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)
+
 
 admin.site.register(RItemActual, RItemActualAdmin)
 admin.site.register(RItemTemplate, RItemTemplateAdmin)
