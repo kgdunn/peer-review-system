@@ -673,7 +673,7 @@ def index(request):
     # All the work takes place here
     prior = None
     for phase in phases:
-
+        logger.debug('Phase ' + str(phase))
         # Start with no ``ctx_objects``, but then add to them, with each phase.
         # A later phase can use (modify even) the state of a variable.
         # The "self" variable is certainly altered every phase
