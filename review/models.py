@@ -125,6 +125,7 @@ def peerreview_directory_path(instance, filename):
 
 # Our models for the phases uses ideas from:
 # https://docs.djangoproject.com/en/1.10/topics/db/models/#model-inheritance
+@python_2_unicode_compatible
 class PRPhase(models.Model):
     """
     A peer review has multiple phases; e.g. file submission; self-evaluation,
@@ -155,7 +156,7 @@ class PRPhase(models.Model):
     def __str__(self):
         return '[{0}] {1}'.format(self.order, self.name)
 
-
+@python_2_unicode_compatible
 class SubmissionPhase(PRPhase):
     """
     All peer reviews have a submission phase, usually the first step.
@@ -168,13 +169,19 @@ class SubmissionPhase(PRPhase):
                 max_length=100,
                 help_text='Comma separated list, for example: pdf, docx, doc')
 
+    def __str__(self):
+        return '*' + super(SubmissionPhase, self).__str__()
+
+@python_2_unicode_compatible
 class SelfEvaluationPhase(PRPhase):
     """
     If a self-evaluation is required...
     """
-    pass
+    def __str__(self):
+        return '*' + super(SelfEvaluationPhase, self).__str__()
 
 
+@python_2_unicode_compatible
 class PeerEvaluationPhase(PRPhase):
     """
     If a peer-evaluation is required...
@@ -184,18 +191,21 @@ class PeerEvaluationPhase(PRPhase):
     def __str__(self):
         return '*' + super(PeerEvaluationPhase, self).__str__()
 
-
+@python_2_unicode_compatible
 class FeedbackPhase(PRPhase):
     """
     Text feedback is shown to the user
     """
-    pass
+    def __str__(self):
+        return '*' + super(FeedbackPhase, self).__str__()
 
+@python_2_unicode_compatible
 class GradeReportPhase(PRPhase):
     """
     Grade report shown to the user
     """
-    pass
+    def __str__(self):
+        return '*' + super(GradeReportPhase, self).__str__()
 
 @python_2_unicode_compatible
 class Submission(models.Model):
@@ -434,11 +444,12 @@ class GradeComponent(models.Model):
 
     pr = models.ForeignKey(PR_process)
     phase = models.ForeignKey(PRPhase)
-    order = models.PositiveSmallIntegerField(default=0.0,
+    order = models.PositiveSmallIntegerField(default=0,
                     help_text="Used to order the display of grade items")
     explanation = models.TextField(max_length=500,
         help_text=('HTML is possible; used in the template. Can include '
-                   'template elements.'))
+                   'template elements: {{self.grade_text}}, {{pr.___}}, '
+                   '{{self.n_peers}}, etc'))
     weight = models.FloatField(default = 0.0,
                                help_text=('Values must be between 0.0 and 1.0.',
                                           ' It is your responsibility to make '

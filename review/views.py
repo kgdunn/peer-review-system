@@ -10,7 +10,7 @@ from django.utils import timezone
 # Our imports
 from .models import Person, Course, PR_process
 from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
-                    PeerEvaluationPhase, FeedbackPhase
+                    PeerEvaluationPhase, FeedbackPhase, GradeReportPhase
 from .models import Submission
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
@@ -593,6 +593,36 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
     except FeedbackPhase.DoesNotExist:
         pass
 
+
+
+    # Objects required for a grade report:
+    #                                    overall_grade_text, grade_report_table
+
+    try:
+        gradereport_phase = GradeReportPhase.objects.get(id=self.id)
+        ctx_objects['self'] = gradereport_phase
+        allow_grades = within_phase
+
+        if not(allow_grades) and learner.role == 'Learn':
+            return ctx_objects
+
+        # Administrator roles can go further, even if we are not within the
+        # time range for peer-review. This is so admins can view, and even
+        # evaluate all students submissions.
+
+        ctx_objects['allow_grades'] = allow_grades
+        ctx_objects['self'].overall_grade_text = 'Calculate grades here stil;'
+        ctx_objects['self'].grade_report_table = """
+        <table style="pr-grading-table">
+            <tr><td>asd</td><td>def</td></tr>
+        </table>
+        """
+
+
+    except GradeReportPhase.DoesNotExist:
+        pass
+
+
     return ctx_objects
 
 
@@ -656,10 +686,6 @@ def index(request):
                                   now_time,
                                   prior)
 
-        # Prior element in the Peer Review chain for the next iteration.
-        # Note: the prior is NOT of type "PRPhase", it is the actual
-        #       prior phase instance.
-        prior = ctx_objects['self']
 
         # Render the HTML for this phase: it depends on the ``pr`` settings,
         # the date and time, and related objects specifically required for
@@ -669,6 +695,12 @@ def index(request):
 
         html.append(render_phase(phase, ctx_objects))
         html.append('<hr>\n')
+
+        # Prepare for the next iteration in this loop.
+        # Prior element in the Peer Review chain for the next iteration.
+        # Note: the prior is NOT of type "PRPhase", it is the actual
+        #       prior phase instance.
+        prior = ctx_objects['self']
 
     # end rendering
     html.append(page_footer)

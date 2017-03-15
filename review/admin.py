@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Person, Course, PR_process, PRPhase, Submission
 from .models import SubmissionPhase, SelfEvaluationPhase
 from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
-
+from .models import GradeComponent
 from .models import RItemActual, RItemTemplate
 from .models import ROptionActual, ROptionTemplate
 from .models import RubricActual, RubricTemplate
@@ -36,6 +36,11 @@ class FeedbackPhaseAdmin(admin.ModelAdmin):
 
 class GradeReportPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
+
+class GradeComponentAdmin(admin.ModelAdmin):
+    list_display = ("pr", "phase", "order", "explanation", "weight", "extra_detail")
+    ordering = ['pr', 'order', ]
+
 
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
@@ -80,6 +85,7 @@ admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)
 
+admin.site.register(GradeComponent, GradeComponentAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)
 admin.site.register(RItemTemplate, RItemTemplateAdmin)
