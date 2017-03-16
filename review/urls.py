@@ -14,6 +14,10 @@ urlpatterns = [
                 views.xhr_store,
                 name='xhr_store'),
 
+    url(r'^xhr_store_text/(?P<ractual_code>.+)/$',
+                views.xhr_store_text,
+                name='xhr_store_text'),
+
     url(r'^upload_submission$',
                 views.upload_submission,
                 name='upload_submission'),

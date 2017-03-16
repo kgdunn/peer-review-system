@@ -150,7 +150,7 @@
 								</div>
 							{% else %}
 							    <div class="textwrapper">
-									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" placeholder="{{option.criterion}}">{{option.prior_text}}</textarea>
+									<textarea class="pr-textarea" cols="2" rows="10" name="item-{{item.ritem_template.order}}" placeholder="{{option.criterion}}">{{option.prior_text}}</textarea>
 								</div>
 							{% endif %}
 
@@ -197,11 +197,7 @@
 {% endblock %}
 {% block footer %}
 
-<!--
-{{report}}
--->
-
-<script>
+<script language="javascript" type="text/javascript">
 
 $( "select" ).change(function (event) {
 	var postdata = {'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -220,5 +216,39 @@ $( "select" ).change(function (event) {
 
 }).change();
 
+
+$(document).ready(function() {
+	var timer = null;
+	$('.pr-textarea').on("keydown", function(event) {
+		if (timer){
+			window.clearTimeout(timer);
+		};
+		timer = window.setTimeout(function(event)
+		{
+			var postdata = {'csrfmiddlewaretoken': '{{ csrf_token }}'};
+			$('.pr-textarea').each(function() {
+				postdata[$(this).attr('name')] = $(this).val();
+			});
+
+			$.ajax(
+			{
+				type: "POST",
+				url: '{% url 'xhr_store_text' ractual_code=ractual_code %}',
+				data: postdata,
+				cache: false,
+				success: function(html_response) {$('#review-realtime-feedback').html(html_response);},
+				error: function (response, desc, exception) {// custom error
+				}
+			});
+		}, 500);
+	});
+});
+{# http://stackoverflow.com/questions/1620602/javascript-jquery-make-an-ajax-request-when-a-user-is-typing-in-a-textarea    http://stackoverflow.com/questions/10018437/jquery-ajax-autosave-for-textareas #}
+</script>
+
+
 </script>
 {% endblock %}
+
+
+

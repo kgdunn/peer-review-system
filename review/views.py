@@ -805,11 +805,84 @@ def upload_submission(request, learner, pr_process, phase):
 
 #@csrf_exempt
 @xframe_options_exempt
+def xhr_store_text(request, ractual_code):
+    """
+    Processes the XHR for text fields: it is slightly different than the
+    ``xhr_store`` function elsewhere in this file.
+    """
+    for item, comment in request.POST.items():
+        if not comment:
+            continue
+        if not item.startswith('item-'):
+            continue
+        else:
+            item_number = int(item.split('item-')[1])
+
+
+        r_actual, learner = get_learner_details(ractual_code)
+        r_item_actual = r_actual.ritemactual_set.filter(\
+                                            ritem_template__order=item_number)
+
+        if r_item_actual.count() == 0:
+            continue
+        else:
+            r_item = r_item_actual[0]
+
+        item_template = r_item.ritem_template
+        r_options = item_template.roptiontemplate_set.all().order_by('order')
+
+        r_opt_template = None
+        if item_template.option_type == 'LText':
+            r_opt_template = r_options[0]
+        else:
+            continue
+
+        # If necessary, prior submissions for the same option are adjusted
+        # as being .submitted=False (perhaps the user changed their mind)
+        prior_options_submitted = ROptionActual.objects.filter(ritem_actual\
+                                                                       =r_item)
+        if prior_options_submitted.count():
+            r_option_actual = prior_options_submitted[0]
+            if r_option_actual.comment != comment:
+                r_option_actual.comment = comment
+                r_option_actual.submitted = True
+                logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
+                                                item_number,
+                                                comment.replace('\n', '||')))
+                r_option_actual.save()
+        else:
+
+            # Then set the "submitted" field on each OPTION
+            ROptionActual.objects.get_or_create(roption_template=r_opt_template,
+                            # This is the way we bind it back to the user!
+                            ritem_actual=r_item,
+                            submitted=True,
+                            comment=comment)
+            logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
+                                                item_number,
+                                                comment.replace('\n', '||')))
+
+        # Set the RItemActual.submitted = True for this ITEM
+        r_item.submitted = True
+        r_item.save()
+
+        if r_actual.status == 'A':
+            r_actual.status = 'P'
+            r_actual.started = timezone.now()
+            r_actual.save()
+
+    # Return with something at the end
+    now_time = datetime.datetime.now()
+    return HttpResponse('Your change was saved [{}]'.format(
+                        now_time.strftime('%H:%M:%S')))
+
+
+#@csrf_exempt
+@xframe_options_exempt
 def xhr_store(request, ractual_code):
     """
     Stores, in real-time, the results from the peer review.
     """
-
     option = request.POST.get('option', None)
     if option is None or option=='option-NA':
         return HttpResponse('')
