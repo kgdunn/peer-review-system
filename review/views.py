@@ -813,6 +813,7 @@ def xhr_store_text(request, ractual_code):
     for item, comment in request.POST.items():
         if not comment:
             continue
+        comment = str(comment).strip()
         if not item.startswith('item-'):
             continue
         else:
@@ -846,9 +847,9 @@ def xhr_store_text(request, ractual_code):
             if r_option_actual.comment != comment:
                 r_option_actual.comment = comment
                 r_option_actual.submitted = True
-                logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
-                                                item_number,
-                                                comment.replace('\n', '||')))
+                logger.debug('XHR: [{0}]: item={1}; comment={2}'.format(learner,
+                                    item_number,
+                                    comment.replace('\n', '||')[0:50]))
                 r_option_actual.save()
         else:
 
@@ -858,9 +859,9 @@ def xhr_store_text(request, ractual_code):
                             ritem_actual=r_item,
                             submitted=True,
                             comment=comment)
-            logger.debug('XHR: [{0}]: item={1}; option={2}'.format(learner,
-                                                item_number,
-                                                comment.replace('\n', '||')))
+            logger.debug('XHR: [{0}]: item={1}; comment={2}'.format(learner,
+                                        item_number,
+                                        comment.replace('\n', '||')[0:50]))
 
         # Set the RItemActual.submitted = True for this ITEM
         r_item.submitted = True
