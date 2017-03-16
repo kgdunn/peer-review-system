@@ -813,7 +813,7 @@ def xhr_store_text(request, ractual_code):
     for item, comment in request.POST.items():
         if not comment:
             continue
-        comment = str(comment).strip()
+        comment = comment.encode('utf-8').strip()
         if not item.startswith('item-'):
             continue
         else:
