@@ -61,6 +61,8 @@ class RItemActualAdmin(admin.ModelAdmin):
 class RubricActualAdmin(admin.ModelAdmin):
     list_display = ("submission", "submitted", "status", "graded_by",
                     "unique_code", "created", "modified")
+    list_max_show_all = 500
+    list_per_page = 500
 
 class ROptionActualAdmin(admin.ModelAdmin):
     list_display = ("roption_template", "ritem_actual", "submitted",
