@@ -110,7 +110,6 @@ def get_create_student(request, course, pr):
     """
     newbie = False
     LTI_consumer = recognise_LTI_LMS(request)
-    logger.debug('Detected user coming from: {0}'.format(LTI_consumer))
     if LTI_consumer in ('brightspace', 'edx', 'coursera'):
         email = request.POST.get('lis_person_contact_email_primary', '')
         display_name = request.POST.get('lis_person_name_full', '')
@@ -346,20 +345,24 @@ def get_peer_grading_data(learner, phase):
 
             ritem_template = item.ritem_template
 
-            # Each key/value in the dictionary stores a list. The list has 4
+            # Each key/value in the dictionary stores a list. The list has 5
             # elements:
-            #   1. [list of raw scores],
+            #   1. [list of raw scores] {or comments from peers}
             #   2. the maximum for this item,
             #   3. the average for this learner for this item
             #   4. the class average (not used at the moment)
+            #   5. the comments from the instructor or TA (if any)
             if idxr == 0:
-                peer_data[ritem_template] = [[], 0.0, 0.0, idxi]
+                peer_data[ritem_template] = [[], 0.0, 0.0, idxi, []]
 
 
             for option in item.roptionactual_set.filter(submitted=True):
 
                 if ritem_template.option_type == 'LText':
-                    peer_data[ritem_template][0].append(option.comment)
+                    if completed_review.graded_by.role == 'Learn':
+                        peer_data[ritem_template][0].append(option.comment)
+                    else:
+                        peer_data[ritem_template][4].append(option.comment)
                 else:
                     score = option.roption_template.score
                     raw_scores[idxi, idxr] = score
@@ -647,6 +650,7 @@ def index(request):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
+    logger.debug('Learner entering: {0}'.format(learner))
 
 
     create_hit(request, item=learner, event='login', user=learner,
@@ -1109,22 +1113,27 @@ def review(request, ractual_code):
 
         # Store the peer- or self-review results in the item; to use in the
         # template to display the feedback.
-        item.results = report.get(item_template, [[], None, None, None])
+        item.results = report.get(item_template, [[], None, None, None, []])
 
         # Randomize the comments and numerical scores before returning.
         shuffle(item.results[0])
         if item_template.option_type == 'LText':
             item.results[0] = '\n'.join(item.results[0])
+            item.results[4] = '\n'.join(item.results[4])
+
 
     if has_prior_answers:
         if show_feedback:
+            logger.debug('Reviewing-feedback: {0}'.format(learner))
             create_hit(request, item=r_actual, event='reviewing-feedback',
                    user=learner, other_info='Reviewing feedback')
         else:
+            logger.debug('Continue-review: {0}'.format(learner))
             create_hit(request, item=r_actual, event='continue-review-session',
                    user=learner, other_info='Returning back')
 
     else:
+        logger.debug('Start-review: {0}'.format(learner))
         create_hit(request, item=r_actual, event='start-a-review-session',
                    user=learner, other_info='Fresh start')
 

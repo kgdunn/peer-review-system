@@ -155,10 +155,16 @@
 						<div  class="LText" style="display: block;" id="item-{{item.ritem_template.order}}">
 						    <label for="item-{{item.ritem_template.order}}" id="item-{{item.ritem_template.order}}"></label>
 						    {% if show_feedback %}
-							    The feedback you received was:
+							    The feedback you received from your peers was:
 						        <div class="textwrapper">
 									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.0}}</textarea>
 								</div>
+								{% if item.results.4%}
+								The feedback you received from your instructor/TA was:
+								<div class="textwrapper">
+									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.4}}</textarea>
+								</div>
+								{% endif %}
 							{% else %}
 							    <div class="textwrapper">
 									<textarea class="pr-textarea" cols="2" rows="10" name="item-{{item.ritem_template.order}}" placeholder="{{option.criterion}}">{{option.prior_text}}</textarea>
