@@ -154,7 +154,7 @@ class PRPhase(models.Model):
 
 
     def __str__(self):
-        return '[{0}] {1}'.format(self.order, self.name)
+        return '{{{0}}}[{1}] {2}'.format(self.pr, self.order, self.name)
 
 
 class SubmissionPhase(PRPhase):

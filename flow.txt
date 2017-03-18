@@ -1,18 +1,23 @@
-Keep students informed on how many completed reviews have been done on their
+* Rubric added for Bas
+* Question added for [ ] have you removed your personal information
+* Keep students informed on how many completed reviews have been done on their
 work.
-Instructor sees how many reviews each student has done, and the status of
+* Instructor sees how many reviews each student has done, and the status of
 reviews.
+* INstructor see the reviews provided by each student
+* Students don't grade if they have not submitted peer review'
+
+* How the correlation of the instructors matches up with the students.
+* Plot the grades correlations: average of peer review vs the instructors
+
 
 
 Grades and feedback phase programmed up.
 Show progress of work done on a page (NN% completed)
 Save the r_actual at every XHR, so the .modified field is updated.
-
 Show r_actual in group.ID order, or submission order
-
-
 Check that peer feedback results are the correct ones
-How are you going to collate the grades?
+
 
 * Create a "grading" instance model objects
 - specify the weight, and associated phase and PR process
@@ -41,7 +46,6 @@ How are you going to collate the grades?
 TO DO
 ======
 
-* Send a grading breakdown to Conny
 * Does it matter that there are duplicate "Enrolled" instances?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
