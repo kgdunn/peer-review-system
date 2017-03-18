@@ -454,3 +454,23 @@ class GradeComponent(models.Model):
         """ Override the model's saving function to do some checks """
         self.weight = max(0.0, min(1.0, self.weight))
         super(GradeComponent, self).save(*args, **kwargs)
+
+#class ReviewReport(models.Model):
+    #"""
+    #Used for peer-review reports back to the learner/group.
+    #"""
+    #created = models.DateTimeField(auto_now_add=True)
+    #last_viewed = models.DateTimeField(auto_now=True)
+    #learner = models.ForeignKey(Person, null=True, blank=True)
+    #group = models.ForeignKey('groups.Group', blank=True, null=True,
+        #default=None, help_text="If a group submission, links to group.")
+    #phase = models.ForeignKey(PRPhase)
+    #rubric_template = models.ForeignKey(RubricTemplate)
+    #submission = models.ForeignKey(Submission, null=True)
+
+    ## This is used to access the report in an external tab
+
+    #def save(self, *args, **kwargs):
+        #if not(self.unique_code):
+            #self.unique_code = generate_random_token(token_length=16)
+        #super(ReviewReport, self).save(*args, **kwargs)

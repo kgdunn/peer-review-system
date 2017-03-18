@@ -578,16 +578,15 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
     except PeerEvaluationPhase.DoesNotExist:
         pass
 
-    # Objects required for the feedback phase: quite a few!
+    # Objects required for the feedback phase:
     try:
         feedback_phase = FeedbackPhase.objects.get(id=self.id)
         ctx_objects['self'] = feedback_phase
 
         allow_report = within_phase
+        ctx_objects['allow_report'] = allow_report
         if not(allow_report):
             return ctx_objects
-
-        ctx_objects['allow_report'] = allow_report
 
         #report = get_peer_grading_data(learner, self)
 
@@ -632,7 +631,6 @@ def index(request):
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
-    logger.debug('POST = ' + str(request.POST))
     person_or_error, course, pr = starting_point(request)
 
     if not(isinstance(person_or_error, Person)):
@@ -655,12 +653,6 @@ def index(request):
                    'pr': pr}
     ctx_objects.update(csrf(request)) # add the csrf; used in forms
 
-    logger.debug('Person: {0}; course: {1}; pr: {2}; phases = {3}'.format(\
-                                                    learner,
-                                                    course,
-                                                    pr,
-                                                    phases))
-
     global_page = """{% extends "review/base.html" %}{% block content %}<hr>
     <!--SPLIT HERE-->\n{% endblock %}"""
     template_page = Template(global_page)
@@ -673,7 +665,6 @@ def index(request):
     # All the work takes place here
     prior = None
     for phase in phases:
-        logger.debug('Phase ' + str(phase))
         # Start with no ``ctx_objects``, but then add to them, with each phase.
         # A later phase can use (modify even) the state of a variable.
         # The "self" variable is certainly altered every phase
