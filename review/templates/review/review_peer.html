@@ -135,11 +135,18 @@
                         <label><span class="radio_button peeroption"><input type="radio" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"></span><span class="radio_text"><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}} </span></label>
                     </div>
 					{% endif %}
+					{% if item.ritem_template.option_type == 'Chcks' %}
+					    <div class="checkbox">
+                            <label><span class="checkbox peeroption"><input type="checkbox" name="item-{{item.ritem_template.order}}" value="option-{{option.order}}"
+							{%if option.selected%}checked{% endif %}></span><span class="checkbox_text">{{option.criterion|safe}}</span></label>
+                        </div>
+					{% endif %}
 					{% if item.ritem_template.option_type == 'DropD' %}
 					   {% if option.criterion %}
                            <ul><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}}</ul>
 					   {% endif %}
 					{% endif %}
+
 					{% if item.ritem_template.option_type == 'LText' %}
 						<div  class="LText" style="display: block;" id="item-{{item.ritem_template.order}}">
 						    <label for="item-{{item.ritem_template.order}}" id="item-{{item.ritem_template.order}}"></label>

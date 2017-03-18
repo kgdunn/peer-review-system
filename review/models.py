@@ -341,6 +341,7 @@ class RItemTemplate(models.Model):
 
     TYPE = (('Radio', 'Radio buttons (default)'),
             ('DropD', 'Dropdown of scores'),
+            ('Chcks', 'Checkbox options: multiple valid answers'), # no score
             ('LText', 'Long text [HTML Text area]'),
             ('SText', 'Short text [HTML input=text]'),)
     option_type = models.CharField(max_length=5, choices=TYPE, default='Radio')

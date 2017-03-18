@@ -1094,53 +1094,26 @@ def review(request, ractual_code):
            }
     return render(request, 'review/review_peer.html', ctx)
 
-@csrf_exempt
-@xframe_options_exempt
-def submit_peer_review_feedback(request, ractual_code):
+def process_POST_review(key, options, items):
     """
-    Learner is submitting the results of their evaluation.
+    Each ``key`` in ``request.POST`` has a list (usually with 1 element)
+    associated with it. This function processes that(those) element(s) in the
+    list.
+
+    The ``items`` dict, created in the calling function, contains the template
+    for each item and its associated options.
     """
-    # 1. Check that this is POST
-    # 2. Create OptionActuals
-    # 3. Calculate score for evaluations?
+    r_opt_template = None
+    item_number = int(key.split('item-')[1])
+    comment = ''
+    words = 0
+    for value in options:
 
-    r_actual, learner = get_learner_details(ractual_code)
-    r_item_actuals = r_actual.ritemactual_set.all()
-
-    items = {}
-    # Create the dictionary: one key per ITEM.
-    # The value associated with the key is a dictionary itself.
-    # items[1] = {'options': [....]  <-- list of the options associated
-    #             'item_obj': the item instance / object}
-    #
-
-    for item in r_item_actuals:
-        item_template = item.ritem_template
-        item_dict = {}
-        items[item_template.order] = item_dict
-        item_dict['options'] = item_template.roptiontemplate_set.all()\
-                                                          .order_by('order')
-        item_dict['item_obj'] = item
-        item_dict['template'] = item_template
-
-    # Stores the users selections as "ROptionActual" instances
-    word_count = 0
-    score = 0.0
-    for key, value in request.POST.items():
-
-        # Process each item in the rubric, one at a time. Only ``item``
-        # values returned in the form are considered.
-        if not(key.startswith('item-')):
-            continue
-
-        r_opt_template = None
-        item_number = int(key.split('item-')[1])
-        comment = ''
         if items[item_number]['template'].option_type == 'LText':
             if value:
                 r_opt_template = items[item_number]['options'][0]
                 comment = value
-                word_count += len(re.split('\s+', comment))
+                words += len(re.split('\s+', comment))
             else:
                 # We get for text feedback fields that they can be empty.
                 # In these cases we must continue as if they were not filled
@@ -1176,10 +1149,59 @@ def submit_peer_review_feedback(request, ractual_code):
         items[item_number]['item_obj'].submitted = True
         items[item_number]['item_obj'].save()
 
+    if r_opt_template:
+        return item_number, r_opt_template.score, words
+    else:
+        return item_number, 0.0, 0
+
+
+@csrf_exempt
+@xframe_options_exempt
+def submit_peer_review_feedback(request, ractual_code):
+    """
+    Learner is submitting the results of their evaluation.
+    """
+    # 1. Check that this is POST
+    # 2. Create OptionActuals
+    # 3. Calculate score for evaluations?
+
+    r_actual, learner = get_learner_details(ractual_code)
+    r_item_actuals = r_actual.ritemactual_set.all()
+
+    items = {}
+    # Create the dictionary: one key per ITEM.
+    # The value associated with the key is a dictionary itself.
+    # items[1] = {'options': [....]  <-- list of the options associated
+    #             'item_obj': the item instance / object}
+    #
+
+    for item in r_item_actuals:
+        item_template = item.ritem_template
+        item_dict = {}
+        items[item_template.order] = item_dict
+        item_dict['options'] = item_template.roptiontemplate_set.all()\
+                                                          .order_by('order')
+        item_dict['item_obj'] = item
+        item_dict['template'] = item_template
+
+    # Stores the users selections as "ROptionActual" instances
+    word_count = 0
+    total_score = 0.0
+    for key in request.POST.keys():
+
+        # Process each item in the rubric, one at a time. Only ``item``
+        # values returned in the form are considered.
+        if not(key.startswith('item-')):
+            continue
+
+        item_num, score, words = process_POST_review(key,
+                                              request.POST.getlist(key, None),
+                                              items)
 
         # Only right at the end: if all the above were successful:
-        items.pop(item_number)
-        score += r_opt_template.score
+        items.pop(item_num)
+        total_score += score
+        word_count += words
 
 
     # All done with storing the results. Did the user fill everything in?
@@ -1191,7 +1213,7 @@ def submit_peer_review_feedback(request, ractual_code):
         r_actual.completed = datetime.datetime.utcnow()
         r_actual.status = 'C' # completed
         r_actual.word_count = word_count
-        r_actual.score = score
+        r_actual.score = total_score
         r_actual.save()
         logger.debug('ALL-DONE: {0}'.format(learner))
         create_hit(request, item=r_actual, event='ending-a-review-session',
