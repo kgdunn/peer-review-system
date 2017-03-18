@@ -847,9 +847,9 @@ def xhr_store_text(request, ractual_code):
             if r_option_actual.comment != comment:
                 r_option_actual.comment = comment
                 r_option_actual.submitted = True
-                logger.debug('XHR: [{0}]: item={1}; comment={2}'.format(learner,
+                logger.debug('XHR: [{0}]: item={1}; comment='.format(learner,
                                     item_number,
-                                    comment.replace('\n', '||')[0:50]))
+                                    comment.replace(b'\n', b'||')[0:50]))
                 r_option_actual.save()
         else:
 
@@ -861,7 +861,7 @@ def xhr_store_text(request, ractual_code):
                             comment=comment)
             logger.debug('XHR: [{0}]: item={1}; comment={2}'.format(learner,
                                         item_number,
-                                        comment.replace('\n', '||')[0:50]))
+                                        comment.replace(b'\n', b'||')[0:50]))
 
         # Set the RItemActual.submitted = True for this ITEM
         r_item.submitted = True
@@ -1054,7 +1054,7 @@ def review(request, ractual_code):
                                                         submitted=True)
             if prior_answer.count():
                 has_prior_answers = True
-                if item_template.option_type == 'DropD':
+                if item_template.option_type in ('DropD', 'Chcks'):
                     option.selected = True
                 elif item_template.option_type == 'LText':
                     option.prior_text = prior_answer[0].comment
@@ -1107,6 +1107,12 @@ def process_POST_review(key, options, items):
     item_number = int(key.split('item-')[1])
     comment = ''
     words = 0
+    if items[item_number]['template'].option_type in ('Chcks'):
+        prior_options_submitted = ROptionActual.objects.filter(
+                                    ritem_actual=items[item_number]['item_obj'])
+
+        prior_options_submitted.delete()
+
     for value in options:
 
         if items[item_number]['template'].option_type == 'LText':
@@ -1120,8 +1126,8 @@ def process_POST_review(key, options, items):
                 # in.
                 continue
 
-        if (items[item_number]['template'].option_type == 'Radio') or \
-           (items[item_number]['template'].option_type == 'DropD'):
+        elif items[item_number]['template'].option_type in ('Radio', 'DropD',
+                                                             'Chcks'):
             selected = int(value.split('option-')[1])
 
             # in "selected-1": the '-1' part is critical
@@ -1130,12 +1136,19 @@ def process_POST_review(key, options, items):
             except (IndexError, AssertionError):
                 continue
 
-        # If necessary, prior submissions for the same option are adjusted
-        # as being .submitted=False (perhaps the user changed their mind)
-        prior_options_submitted = ROptionActual.objects.filter(
-                                ritem_actual=items[item_number]['item_obj'])
+        if items[item_number]['template'].option_type in ('Radio', 'DropD',
+                                                          'LText'):
+            # Checkboxes ('Chks') should NEVER DELETE, nor ALTER, the prior
+            # ``ROptionActual`` instances for this item type, as you might
+            # otherwise see for dropdowns, radio buttons, or text fields.
 
-        prior_options_submitted.update(submitted=False)
+            # If necessary, prior submissions for the same option are adjusted
+            # as being .submitted=False (perhaps the user changed their mind)
+            prior_options_submitted = ROptionActual.objects.filter(
+                                   ritem_actual=items[item_number]['item_obj'])
+
+            prior_options_submitted.update(submitted=False)
+
 
         # Then set the "submitted" field on each OPTION
         ROptionActual.objects.get_or_create(roption_template=r_opt_template,
@@ -1202,7 +1215,6 @@ def submit_peer_review_feedback(request, ractual_code):
         items.pop(item_num)
         total_score += score
         word_count += words
-
 
     # All done with storing the results. Did the user fill everything in?
     if request.POST:
