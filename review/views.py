@@ -11,7 +11,7 @@ from django.utils import timezone
 from .models import Person, Course, PR_process
 from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
                     PeerEvaluationPhase, FeedbackPhase, GradeReportPhase
-from .models import Submission
+from .models import Submission, ReviewReport
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from stats.views import create_hit
@@ -319,7 +319,7 @@ def get_peer_grading_data(learner, phase):
                 'did_submit': False}
 
     # and only completed reviews
-    reviews = RubricActual.objects.filter(submission=submission, status='C' )
+    reviews = RubricActual.objects.filter(submission=submission, status='C')
 
     if reviews.count() == 0:
         # You must return here if there are no reviews. The rest of the
@@ -588,7 +588,17 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(allow_report):
             return ctx_objects
 
-        #report = get_peer_grading_data(learner, self)
+        group = get_group_information(learner, ctx_objects['pr'].gf_process)
+        if not(ctx_objects['submission']):
+            report = None
+
+        if learner.role == 'Learn':
+            report, _ = ReviewReport.objects.get_or_create(learner = learner,
+                                           group = group['group_instance'],
+                                           phase = feedback_phase,
+                                           submission=ctx_objects['submission'])
+
+        ctx_objects['report'] = report
 
     except FeedbackPhase.DoesNotExist:
         pass
@@ -812,6 +822,8 @@ def xhr_store_text(request, ractual_code):
 
 
         r_actual, learner = get_learner_details(ractual_code)
+        if learner is None:
+            return HttpResponse('')
         r_item_actual = r_actual.ritemactual_set.filter(\
                                             ritem_template__order=item_number)
 
@@ -887,6 +899,9 @@ def xhr_store(request, ractual_code):
 
 
     r_actual, learner = get_learner_details(ractual_code)
+    if learner is None:
+        # This branch only happens with error conditions.
+        return HttpResponse('')
     r_item_actual = r_actual.ritemactual_set.filter(\
                                              ritem_template__order=item_number)
     if r_item_actual.count() == 0:
@@ -957,27 +972,58 @@ def review(request, ractual_code):
 
     1. Get the ``RubricActual`` instance
     2. Format the text for the user
-    3. Handle interactions and XHR saving
-    4. Capture submit signal
-    5. Process the storing and saving of the objects
+    3. Handle interactions and XHR saving.
+
+
+    The user coming here is either:
+    a) reviewing their own report (self-review)
+    b) reviewing a peer's report (peer-review)
+    c) self-review, but with their group's feedback (read-only mode)
+    d) peer-review, but with their peer's feedback (peer-review, read-only)
     """
+    self_review = True
     r_actual, learner = get_learner_details(ractual_code)
     if learner is None:
-        # This branch only happens with error conditions.
-        return r_actual
+
+        # Maybe this is peer-review feedback coming along?
+        review_report = ReviewReport.objects.filter(unique_code=ractual_code)
+        if review_report.count() == 0:
+            # This branch only happens with error conditions.
+            return HttpResponse(("You have an incorrect link. Either something "
+                                 "is broken in the peer review website, or you "
+                                 "removed/changed part of the link."))
+        review_report = review_report[0]
+        learner = review_report.learner
+        phase = review_report.phase
+        pr = phase.pr
+        if isinstance(r_actual, HttpResponse):
+            self_review = False
+            # In other words, this is a read-only review of the peer-feedback
+            r_actual = RubricActual.objects.filter(status='C',
+                                        submission=review_report.submission, )
+
+            # Just use one of the peer's rubric to construct the report
+            if r_actual.count() > 0:
+                r_actual = r_actual[0]
+            else:
+                # Shouldn't be able to reach this point. But it catches a bad
+                # template in the PRPhase for feedback.
+                return HttpResponse('No review available. Admin?')
 
 
-    # Should we show feedback, or not, within the rubric?
-    # ``r_actual.rubric_template.phase`` is current phase for the ``r_actual``
-    # Get the ``order`` number for the phase
-    # Search *forward*, and if that phase allows showing feedback, then allow it
+    else:
 
-    pr = r_actual.rubric_template.pr_process
-    phase = r_actual.rubric_template.phase
-    next_step = max(0, phase.order+1)
-    all_phases = PRPhase.objects.filter(pr=pr,
-                                is_active=True).order_by('order')
+        # Should we show feedback, or not, within the rubric?
+        # ``r_actual.rubric_template.phase`` is current phase for the
+        # ``r_actual``. Get the ``order`` number for the phase. Search
+        # *forward*, and if that phase allows showing feedback, then allow it.
 
+        pr = r_actual.rubric_template.pr_process
+        phase = r_actual.rubric_template.phase
+
+
+    next_step = max(0, phase.order) # actually start at the current phase
+    all_phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
     now_time = datetime.datetime.utcnow()
     show_feedback = False
     report = {}
@@ -995,7 +1041,17 @@ def review(request, ractual_code):
                 show_feedback = True
 
             if show_feedback:
+
+                # But wait, the ``learner`` could have kept a link to this
+                # peer-review r_actual, and is now trying to access their
+                # report.
+                group = get_group_information(learner, pr.gf_process)
+                if self_review and (r_actual.submission.group_submitted != \
+                                    group['group_instance']):
+                    return HttpResponse('This review has expired.')
+
                 report = get_peer_grading_data(learner, feedback_phase)
+
                 break
 
     logger.debug('Getting review for {0}:'.format(learner))
@@ -1072,16 +1128,14 @@ def review(request, ractual_code):
         create_hit(request, item=r_actual, event='start-a-review-session',
                    user=learner, other_info='Fresh start')
 
-
     ctx = {'ractual_code': ractual_code,
            'submission': r_actual.submission,
-           'person': r_actual.graded_by,
-           'r_actual': r_actual,
+           'person': learner,
            'r_item_actuals' : r_item_actuals,
            'rubric' : r_actual.rubric_template,
-           'person': learner,
            'show_feedback': show_feedback,
            'report': report,
+           'self_review': self_review,
            }
     return render(request, 'review/review_peer.html', ctx)
 
@@ -1170,6 +1224,10 @@ def submit_peer_review_feedback(request, ractual_code):
     # 3. Calculate score for evaluations?
 
     r_actual, learner = get_learner_details(ractual_code)
+    if learner is None:
+        # This branch only happens with error conditions.
+        return r_actual
+
     r_item_actuals = r_actual.ritemactual_set.all()
 
     items = {}

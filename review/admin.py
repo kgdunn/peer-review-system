@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Person, Course, PR_process, PRPhase, Submission
 from .models import SubmissionPhase, SelfEvaluationPhase
 from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
-from .models import GradeComponent
+from .models import GradeComponent, ReviewReport
 from .models import RItemActual, RItemTemplate
 from .models import ROptionActual, ROptionTemplate
 from .models import RubricActual, RubricTemplate
@@ -75,6 +75,12 @@ class ROptionTemplateAdmin(admin.ModelAdmin):
     list_filter = ['rubric_item__r_template',
                    'rubric_item__r_template__pr_process', ]
 
+class ReviewReportAdmin(admin.ModelAdmin):
+    list_display = ('learner', 'group', 'phase', 'submission', 'unique_code',
+                    'last_viewed', 'created')
+    ordering = ['created',]
+
+
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Course)
 admin.site.register(PR_process, PR_processAdmin)
@@ -87,6 +93,7 @@ admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)
 
+admin.site.register(ReviewReport, ReviewReportAdmin)
 admin.site.register(GradeComponent, GradeComponentAdmin)
 
 admin.site.register(RItemActual, RItemActualAdmin)

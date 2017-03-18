@@ -91,7 +91,10 @@
 	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
     <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
-		Your report is shown below, with the review from {{report.n_reviews}} reviewers. If this is a self-review, then some of the comments and scores are your own. Your score is {{report.learner_average}}
+		Your report is shown below, with the review from {{report.n_reviews}} reviewers.
+		{% if self_review %}As this is a self-review, some of the comments and scores are your own.{% else %}{# self_review #}
+		                   This is a peer-review, so the comments shown are from your reviewers.   {% endif %}{# self_review #}
+		Your score is {{report.learner_average}}
 	{% else %}
         <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the peer review carefully, in a new tab, to prevent loss of your review feedback.</span>
 	{% endif %}
