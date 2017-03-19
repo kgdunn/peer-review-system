@@ -1,10 +1,38 @@
+<style>
+table.pr-admin {
+    margin-left: 40px;
+}
+.pr-admin td {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.pr-admin-odd{
+    background-color: #eee;
+}
+.pr-admin-even{
+    background-color: #fff;
+}
+</style>
+
 <p><span style="color:red">You are an administrator in this course</span>: peer-reviews may be
 shown here, and can be started, <b>ahead of time</b>. Your reviews are added to the
 rest of the peer reviews.
+
+<table class="pr-admin">
+<tr><th>Group ID</th>
+    <th>Peer review link</th>
+    <th>Status</th>
+</tr>
+
 {% for item in r_actuals %}
-    <li>Review {{forloop.counter}}:  [Group ID={{item.submission.group_submitted.id}}]
-        Please <a href="/review/{{item.unique_code}}/" target="_blank">access this peer review here</a> (opens in a new tab)
-        {% if item.submitted %} -- <span style="color:darkgreen">You have already reviewed this. </span>
-                     {% else %} -- <span style="color:red">You still have some unfilled entries to complete.</span>
-        {%endif%}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+    <td>Group ID={{item.submission.group_submitted.id}}</td>
+    <td><a href="/review/{{item.unique_code}}/" target="_blank">Access peer review</a> </td>
+    <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed</span>
+        {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
+        {% else %}                  <span style="color:red">Not started*</span>
+                      {%endif%}</td>
 {% endfor %}{# for item in r_actuals  #}
+</table>
+
+<span style="color:red">Not started*</span>: it could be that a co-instructor is grading this review.
