@@ -1,7 +1,8 @@
-* Rubric added for Bas
-* Question added for [ ] have you removed your personal information
-
 * Prevent reviews outside the time window, even if you have the unique link
+
+Group number; Link to Inst review; Status; # allocated; # finished reviews
+
+
 
 
 * Keep students informed on how many completed reviews have been done on their

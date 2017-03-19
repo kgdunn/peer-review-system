@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.conf import settings
-from django.template import Context, Template
+from django.template import Context, Template, loader
 from django.utils import timezone
 
 # Our imports
@@ -500,6 +500,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         peerreview_phase = PeerEvaluationPhase.objects.get(id=self.id)
         ctx_objects['self'] = peerreview_phase
         allow_review = within_phase
+        ctx_objects['allow_review'] = allow_review
 
         if not(allow_review) and learner.role == 'Learn':
             return ctx_objects
@@ -574,12 +575,19 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                     logger.debug('Created r_actual: ' + str(r_actual))
 
         # Now we have the peer review ojects: ``r_actuals``
-
-        ctx_objects['allow_review'] = allow_review
         ctx_objects['r_actuals'] = r_actuals
+
+        content = loader.render_to_string('review/admin-peer-review-status.html',
+                                          context=ctx_objects,
+                                          request=request,
+                                          using=None)
+
+        ctx_objects['admin_overview'] = content
+
 
     except PeerEvaluationPhase.DoesNotExist:
         pass
+
 
     # Objects required for the feedback phase:
     try:
@@ -1052,7 +1060,9 @@ def review(request, ractual_code):
                 group = get_group_information(learner, pr.gf_process)
                 if self_review and (r_actual.submission.group_submitted != \
                                     group['group_instance']):
-                    return HttpResponse('This review has expired.')
+                    if learner.role == 'Learn':
+                        # This only counts for learners though.
+                        return HttpResponse('This review has expired.')
 
                 report = get_peer_grading_data(learner, feedback_phase)
 

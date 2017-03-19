@@ -1,0 +1,10 @@
+<p><span style="color:red">You are an administrator in this course</span>: peer-reviews may be
+shown here, and can be started, <b>ahead of time</b>. Your reviews are added to the
+rest of the peer reviews.
+{% for item in r_actuals %}
+    <li>Review {{forloop.counter}}:  [Group ID={{item.submission.group_submitted.id}}]
+        Please <a href="/review/{{item.unique_code}}/" target="_blank">access this peer review here</a> (opens in a new tab)
+        {% if item.submitted %} -- <span style="color:darkgreen">You have already reviewed this. </span>
+                     {% else %} -- <span style="color:red">You still have some unfilled entries to complete.</span>
+        {%endif%}
+{% endfor %}{# for item in r_actuals  #}
