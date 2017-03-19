@@ -2,9 +2,14 @@
 table.pr-admin {
     margin-left: 40px;
 }
-.pr-admin td {
+.pr-admin th {
+    text-align: center;
+}
+.pr-admin td, th {
     padding-left: 10px;
     padding-right: 10px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
 }
 .pr-admin-odd{
     background-color: #eee;
@@ -18,21 +23,37 @@ table.pr-admin {
 shown here, and can be started, <b>ahead of time</b>. Your reviews are added to the
 rest of the peer reviews.
 
-<table class="pr-admin">
+<table class="pr-admin" >
+<thead>
+<tr><th></th>
+    <th></th>
+    <th></th>
+    <th colspan="1">Instructors</th>
+    <th colspan="2">Students</th>
+</tr>
 <tr><th>Group ID</th>
     <th>Peer review link</th>
-    <th>Status</th>
+    <th>Your status</th>
+    <th>Reviews completed</th>
+    <th>Reviews completed</th>
+    <th>Reviews in progress</th>
 </tr>
-
+</thead>
+<tbody>
 {% for item in r_actuals %}
     <tr class="pr-admin-{% cycle 'odd' 'even' %}">
     <td>Group ID={{item.submission.group_submitted.id}}</td>
     <td><a href="/review/{{item.unique_code}}/" target="_blank">Access peer review</a> </td>
-    <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed</span>
+    <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed - <em>thank you</em></span>
         {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
         {% else %}                  <span style="color:red">Not started*</span>
                       {%endif%}</td>
+    <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
+    <!--<td style="text-align:center">{{item.summary_stats.admin_grader_inprogress}}</td>-->
+    <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
+    <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
 {% endfor %}{# for item in r_actuals  #}
+</tbody>
 </table>
 
 <span style="color:red">Not started*</span>: it could be that a co-instructor is grading this review.
