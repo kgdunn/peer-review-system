@@ -492,7 +492,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         # Get/create the R_actual for the self-review, only if there
         # is an actual submission.
-        if ctx_objects['submission']:
+        if ctx_objects['submission'] and within_phase:
             r_actual, _ = get_create_actual_rubric(learner,
                                                    r_template,
                                                    ctx_objects['submission'])
