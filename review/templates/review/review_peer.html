@@ -91,14 +91,16 @@
 	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
     <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
-		Your report is shown below, with the review from {{report.n_reviews}} reviewers.
-		{% if self_review %}As this is a self-review, some of the comments and scores are your own.{% else %}{# self_review #}
-		                   This is a peer-review, so the comments shown are from your reviewers.   {% endif %}{# self_review #}
-		Your score is {{report.learner_average}}
+		Your report is shown below, with the review from {{report.n_reviews}} reviewers
+		{% if self_review %}. As this is a self-review, some of the comments and scores are your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
+		{% else %} (including instructor/TA). <span style="color: orange">The scores include the instructor and peer scores (randomized).</span>
+				  Comments, and grades, from your peers are in random order (if you reload the page you will notice that the order changes).
+		{% endif %}{# self_review #}
+
 	{% else %}
-        <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the peer review carefully, in a new tab, to prevent loss of your review feedback.</span>
+        <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the peer review carefully, in a new tab, to prevent loss of your review feedback.</span> <br>If you do not see any document here then you should please <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>.
 	{% endif %}
-	<br>If you do not see any document here then you should please <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>, and then continue below.
+
 </div>
 
 <div class="colmask rightmenu">

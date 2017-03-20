@@ -152,7 +152,6 @@ class PRPhase(models.Model):
     templatetext = models.TextField(default='', blank=True,
                     help_text='The template rendered to the user')
 
-
     def __str__(self):
         return '{{{0}}}[{1}] {2}'.format(self.pr, self.order, self.name)
 
@@ -422,23 +421,25 @@ class ROptionActual(models.Model):
     def __str__(self):
         return u'%s' % (self.roption_template, )
 
+@python_2_unicode_compatible
 class GradeComponent(models.Model):
     """
     Each PR process will have 1 or more instances of this model. It tells
     the  ``weight`` value that makes up the final grade. Each weight is
     associated with a ``PRPhase``.
     """
-    DETAIL = (('peer',       'peer'),
-              ('instructor', 'instructor'))
+    DETAIL = (('Learn', 'Learn'),
+              ('Admin', 'Admin'))
 
     pr = models.ForeignKey(PR_process)
     phase = models.ForeignKey(PRPhase)
     order = models.PositiveSmallIntegerField(default=0,
                     help_text="Used to order the display of grade items")
+    name_in_table = models.TextField(max_length=100)
     explanation = models.TextField(max_length=500,
         help_text=('HTML is possible; used in the template. Can include '
-                   'template elements: {{self.grade_text}}, {{pr.___}}, '
-                   '{{self.n_peers}}, etc'))
+                   'template elements: {{grade_text}}, {{n_evals_completed}}, '
+                   '{{n_reviews}}, etc.'))
     weight = models.FloatField(default = 0.0,
                                help_text=('Values must be between 0.0 and 1.0.',
                                           ' It is your responsibility to make '
@@ -454,6 +455,12 @@ class GradeComponent(models.Model):
         """ Override the model's saving function to do some checks """
         self.weight = max(0.0, min(1.0, self.weight))
         super(GradeComponent, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return u'[{0}%] {1} [{2}]'.format(self.weight*100,
+                                          self.name_in_table,
+                                          self.phase, )
+
 
 @python_2_unicode_compatible
 class ReviewReport(models.Model):

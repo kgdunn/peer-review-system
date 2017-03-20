@@ -1,0 +1,61 @@
+<style>
+table.pr-grading {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+.pr-grading th {
+    text-align: center;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+.pr-grading td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+.pr-grading-odd{
+    background-color: #eee;
+}
+.pr-grading-even{
+    background-color: #fff;
+}
+.pr-grading-last-row{
+    font-size: 1.5em;
+    padding-bottom:5px;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+.centered{
+    text-align: center;
+}
+
+</style>
+
+<table class="pr-grading" >
+<thead>
+<tr><th>Component</th>
+    <th>Grade details</th>
+    <th>Grade achieved for this component (%)</th>
+    <th>Maximum weight for this component</th>
+    <th>Weight towards final grade</th>
+</tr>
+</thead>
+<tbody>
+{% for item in grade_components %}
+    <tr class="pr-grading-{% cycle 'odd' 'even' %}">
+      <td>{{item.name_in_table}}</td>
+      <td>{{item.grade_detail}}</td>
+      <td class="centered">{{item.grade_achieved|floatformat}}</td>
+      <td class="centered">{{item.max_weight|floatformat}}</td>
+      <td class="centered">{{item.component_weight|floatformat}}</td>
+    </tr>
+{% endfor %}{# for item in grade_component  #}
+<tr class="pr-grading-last-row pr-grading-{% cycle 'odd' 'even' %}">
+<td>TOTAL</td>
+<td></td>
+<td></td>
+<td style="text-align:right"><em><b>Overall grade</b></em></td>
+<td class="centered">{{overall_grade|floatformat}}%</td>
+</tbody>
+</table>

@@ -11,7 +11,7 @@ from django.utils import timezone
 from .models import Person, Course, PR_process
 from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
                     PeerEvaluationPhase, FeedbackPhase, GradeReportPhase
-from .models import Submission, ReviewReport
+from .models import Submission, ReviewReport, GradeComponent
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from stats.views import create_hit
@@ -308,26 +308,38 @@ def get_next_submission_to_evaluate(phase, learner, return_all=False):
         return valid_subs[0]
 
 
-def get_peer_grading_data(learner, phase):
+def get_peer_grading_data(learner, phase, role_filter=''):
     """
     Gets the grading data and associated feedback for this ``learner`` for the
     given ``phase`` in the peer review.
+
+    Filters for the role of the grader, can also be provided.
     """
     submission = get_submission(learner, phase)
+    peer_data = dict()
+    peer_data['n_reviews'] = 0
+    peer_data['overall_max_score'] = 0.0
+    peer_data['learner_total'] = 0.0
+    peer_data['did_submit'] = False
+
     if submission is None:
-        return {'n_reviews': 0,
-                'did_submit': False}
+        return peer_data
 
     # and only completed reviews
-    reviews = RubricActual.objects.filter(submission=submission, status='C')
+    if role_filter:
+        reviews = RubricActual.objects.filter(submission=submission,
+                                              status='C',
+                                              graded_by__role=role_filter)
+    else:
+        reviews = RubricActual.objects.filter(submission=submission, status='C')
 
     if reviews.count() == 0:
         # You must return here if there are no reviews. The rest of the
         # code is not otherwise valid.
-        return {'n_reviews': 0,
-                'did_submit': True}
+        peer_data['did_submit'] = True
+        return peer_data
 
-    peer_data = {'did_submit': True}
+    peer_data['did_submit'] = True
     peer_data['n_reviews'] = n_reviews = reviews.count() # completed! reviews
 
     n_items = reviews[0].rubric_template.ritemtemplate_set.count()
@@ -387,8 +399,12 @@ def get_peer_grading_data(learner, phase):
     peer_data['overall_max_score'] = overall_max_score
     # ignore NaNs: these will show up for items, such as comments
     peer_data['learner_total'] = np.nansum(np.nanmean(raw_scores, axis=1))
-    average = peer_data['learner_total'] / peer_data['overall_max_score'] * 100
-    peer_data['learner_average'] = ('{:0.0f} out of a maximum of {:0.0f} '
+    try:
+        average = peer_data['learner_total'] / \
+                                           peer_data['overall_max_score'] * 100
+    except ZeroDivisionError:
+        average = 0.0
+    peer_data['learner_average'] = ('{:0.1f} out of a maximum of {:0.0f} '
                                     'points; {:3.1f}%').format(
                     peer_data['learner_total'], peer_data['overall_max_score'],
                     average)
@@ -652,8 +668,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
 
 
-    # Objects required for a grade report:
-    #                                    overall_grade_text, grade_report_table
+    # Objects required for a grade report: grade_report_table
     try:
         gradereport_phase = GradeReportPhase.objects.get(id=self.id)
         ctx_objects['self'] = gradereport_phase
@@ -662,17 +677,26 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(allow_grades) and learner.role == 'Learn':
             return ctx_objects
 
-        # Administrator roles can go further, even if we are not within the
-        # time range, they should be able to view the student progress.
-
         ctx_objects['allow_grades'] = allow_grades
-        ctx_objects['self'].overall_grade_text = 'Calculate grades here stil;'
-        ctx_objects['self'].grade_report_table = """
-        <table style="pr-grading-table">
-            <tr><td>asd</td><td>def</td></tr>
-        </table>
-        """
+        grade_components = GradeComponent.objects.filter(pr=ctx_objects['pr']).\
+            order_by('order')
+        total_grade = 0.0
+        ctx_local = {}
+        for item in grade_components:
+            grade_achieved, grade_detail = get_grading_percentage(item, learner)
+            total_grade += item.weight * grade_achieved
+            item.grade_achieved = grade_achieved
+            item.component_weight = item.weight * grade_achieved
+            item.grade_detail = grade_detail
+            item.max_weight = item.weight * 100.0
 
+        ctx_local['grade_components'] = grade_components
+        ctx_local['overall_grade'] = total_grade
+        content = loader.render_to_string('review/peer-review-grades.html',
+                                          context=ctx_local,
+                                          request=request,
+                                          using=None)
+        ctx_objects['self'].grade_report_table = content
 
     except GradeReportPhase.DoesNotExist:
         pass
@@ -1411,7 +1435,68 @@ def get_stats_comments(request):
                 str(peer['comments']).encode('utf-8')))
 
 
-    return HttpResponse('All counts reset on {0} submissions.'.format(idx+1))
+
+def get_grading_percentage(item, learner):
+    """
+    Each ``item.phase`` has an associated grade. This function calculates
+    that grade, and returns it, and also the rendered row in the table.
+    """
+    grade = 0.0
+    grade_detail = item.explanation
+    ctx = {}
+    try:
+        if item.phase.feedbackphase:
+            report = get_peer_grading_data(learner,
+                                           item.phase,
+                                           item.extra_detail)
+            try:
+                learner_total = report.get('learner_total', 0.0)
+                overall_max_score = report.get('overall_max_score', 0.0)
+                grade =  learner_total / overall_max_score * 100
+            except ZeroDivisionError:
+                grade = 0.0
+            grade_text = '{:0.1f} out of a maximum of {:0.0f} points'.format(\
+                    learner_total, overall_max_score)
+            ctx['grade_text'] = grade_text
+            ctx['n_reviews'] = report['n_reviews']
+
+            grade_detail = Template(item.explanation).render(Context(ctx))
+
+    except PRPhase.DoesNotExist:
+        pass
+
+    try:
+        if item.phase.peerevaluationphase:
+            n_eval=item.phase.peerevaluationphase.number_of_reviews_per_learner
+            r_template = item.phase.rubrictemplate_set.all()
+            grade = 0.0
+            grade_detail = 'An error occured when calculationg this compoent.'
+            if r_template:
+                r_template = r_template[0]
+            else:
+                logger.warn('Invalid request: no rubric attached')
+                return grade, grade_detail
+
+            n_evals_completed = RubricActual.objects.filter(status='C',
+                                        graded_by=learner,
+                                        rubric_template=r_template).count()
+            ctx['n_evals_completed'] = n_evals_completed
+            try:
+                grade = n_evals_completed / n_eval * 100
+            except ZeroDivisionError:
+                grade = 0.0
+            grade_detail = Template(item.explanation).render(Context(ctx))
+
+    except PRPhase.DoesNotExist:
+        pass
+
+
+
+
+
+    return grade, grade_detail
+
+
 
 def copy_rubric():
 
