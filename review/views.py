@@ -580,23 +580,25 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             all_ra = RubricActual.objects.filter(rubric_template=r_template)
 
             # admin_grader_completed: bool (0 or 1 int)
+            # admin_grader_inprogress: bool
             # learner_grader_completed: int
-            # grader_inprogress: int
+            # learner_grader_inprogress: int
 
             for item in all_ra:
                 key = item.submission
                 if sub_stats.get(key, None) is None:
                     sub_stats[key] = defaultdict(int)
-
-                if item.status in ('P', 'A'):
-                    sub_stats[key]['grader_inprogress'] += 1
-
                 if item.graded_by.role == 'Admin':
+                    if not(sub_stats[key]['admin_grader_inprogress']):
+                        if item.status == 'P':
+                            sub_stats[key]['admin_grader_inprogress'] = 1
                     if not(sub_stats[key]['admin_grader_completed']):
                         if item.status == 'C':
                             sub_stats[key]['admin_grader_completed'] = 1
 
                 if item.graded_by.role == 'Learn':
+                    if item.status in ('P', 'A'):
+                        sub_stats[key]['learner_grader_inprogress'] += 1
                     if item.status == 'C':
                         sub_stats[key]['learner_grader_completed'] += 1
 
