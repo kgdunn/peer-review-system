@@ -28,15 +28,15 @@ rest of the peer reviews.
 <tr><th></th>
     <th></th>
     <th></th>
-    <th colspan="1">Instructors</th>
-    <th colspan="2">Students</th>
+    <th>Instructors</th>
+    <th>Students</th>
 </tr>
 <tr><th>Group ID</th>
     <th>Peer review link</th>
     <th>Your status</th>
     <th>Reviews completed</th>
+    <th>All reviews in progress</th>
     <th>Reviews completed</th>
-    <th>Reviews in progress</th>
 </tr>
 </thead>
 <tbody>
@@ -50,8 +50,9 @@ rest of the peer reviews.
                       {%endif%}</td>
     <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
     <!--<td style="text-align:center">{{item.summary_stats.admin_grader_inprogress}}</td>-->
+    <td style="text-align:center">{{item.summary_stats.grader_inprogress}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
-    <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
+
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
 </table>
