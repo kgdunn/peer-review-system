@@ -26,4 +26,6 @@ urlpatterns = [
                 views.submit_peer_review_feedback,
                 name='submit_peer_review_feedback'),
 
+    url(r'^get_stats_comments$', views.get_stats_comments)
+
 ]

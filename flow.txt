@@ -1,3 +1,9 @@
+* Statistics: getting review
+* Statistics: getting grades
+*
+
+
+
 * Prevent reviews outside the time window, even if you have the unique link
 * Keep students informed on how many completed reviews have been done on their
 work.
@@ -6,6 +12,8 @@ reviews.
 * INstructor see the reviews provided by each student
 * Students don't grade if they have not submitted peer review'
 
+* Show admin's grades as soon as they graded
+
 * How the correlation of the instructors matches up with the students.
 * Plot the grades correlations: average of peer review vs the instructors
 * D3JS histogram of the grades for the students
@@ -13,7 +21,14 @@ reviews.
 * Add XHR for checkbox items
 
 
+* Get on a per-item basis, the std dev for Conny to help to improve rubric.
+* Put the full rubric review in the Admin view for Conny
+* Calculate the colour coded correlation (coloured by instructor name)
+
+* Spreadsheet of the student comments (check in Apple Excel)
 * What was the effect of self-review? Did reports improve?
+
+* Send ZIP file of all practicum reports: self-review and peer-review
 
 Grades phase programmed up.
 Show progress of work done on a page (NN% completed)
@@ -21,13 +36,6 @@ Save the r_actual at every XHR, so the .modified field is updated.
 Show r_actual in group.ID order, or submission order
 Check that peer feedback results are the correct ones
 
-
-* Create a "grading" instance model objects
-- specify the weight, and associated phase and PR process
-- 60% = peers evaluation phase: calculation function for phases of this type
-- 26% = instructor valuation: (similar to prior, but based on instructor feedbac)
--  6% = self-review phase grade
--  8% = peer-review phase completed?
 
 
 * Log the XHR events with Statistics still

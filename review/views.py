@@ -1416,24 +1416,38 @@ def get_stats_comments(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
-    all_subs = Submission.objects.filter(pr_process=pr_process)
+    phase = PRPhase.objects.filter(pr=pr_process)[2]
+    all_subs = Submission.objects.filter(pr_process=pr_process,
+                                         is_valid=True,
+                                         phase=phase)
 
-    with open('results.tsv', 'wt') as statsfile:
-        statsfile.write('FullName\tEmail\tQuestion1Score\tQuestion2Score\tQuestion3Score\t Question4Score\tAverageOutOf12\tComments\n')
-        for idx, sub in enumerate(all_subs):
+    try:
 
-            # Function has changed
-            #peer = get_peer_grading_data(sub.submitted_by, pr_process)
-            statsfile.write('{}\t{}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{:4.2f}\t{}\n'.format(
-                sub.submitted_by.display_name,
-                sub.submitted_by.email,
-                peer[1]['avg_score'],
-                peer[2]['avg_score'],
-                peer[3]['avg_score'],
-                peer[4]['avg_score'],
-                peer['learner_avg'],
-                str(peer['comments']).encode('utf-8')))
+        statsfile = open('results.tsv', 'wt')
+        statsfile.write('Group name\tEmail\tSelf-review [6%]\tPeer Review[60%]\tInstructor review[26%]\tPeer review credit\tAverage grade\n')
+        for student in Person.objects.filter(role='Learn'):
+            print(student)
+            grade_components = GradeComponent.objects.filter(pr=pr_process).\
+                  order_by('order')
+            total_grade = 0.0
+            statsfile.write(student.enrolled_set.all()[0].group.name + '\t')
+            statsfile.write(student.email + '\t')
+            student_grade = {}
+            for item in grade_components:
 
+                grade_achieved, grade_detail = get_grading_percentage(item, student)
+                total_grade += item.weight * grade_achieved
+                student_grade[item.name_in_table] = grade_achieved
+                statsfile.write(str(grade_achieved) + '\t')
+
+            statsfile.write(str(total_grade)+'\n')
+        statsfile.close()
+    except:
+        statsfile.close()
+
+
+    # Iterate over all persons
+    # Get all comments they provided for their peer reviews
 
 
 def get_grading_percentage(item, learner):
@@ -1490,32 +1504,4 @@ def get_grading_percentage(item, learner):
     except PRPhase.DoesNotExist:
         pass
 
-
-
-
-
     return grade, grade_detail
-
-
-
-def copy_rubric():
-
-    # Copy the items first
-
-    # self_review template = sr_template (rubric)
-    # peer_review template = pr_template
-    sr_template = RubricTemplate.objects.all()[1]
-    pr_template = RubricTemplate.objects.all()[2]
-    items_to_copy = RItemTemplate.objects.filter(r_template=sr_template)
-    for item in items_to_copy:
-        original_item_id = item.id
-        item.r_template = pr_template
-        item.pk = None
-        item.save()
-
-        # Then make a copy of the options associated with this item
-        options = ROptionTemplate.objects.filter(rubric_item__id=original_item_id)
-        for option in options:
-            option.rubric_item = item
-            option.pk = None
-            option.save()
