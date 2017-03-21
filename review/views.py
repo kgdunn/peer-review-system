@@ -1082,9 +1082,7 @@ def review(request, ractual_code):
                 # template in the PRPhase for feedback.
                 return HttpResponse('No review available. Admin?')
 
-
     else:
-
         # Should we show feedback, or not, within the rubric?
         # ``r_actual.rubric_template.phase`` is current phase for the
         # ``r_actual``. Get the ``order`` number for the phase. Search
@@ -1092,7 +1090,6 @@ def review(request, ractual_code):
 
         pr = r_actual.rubric_template.pr_process
         phase = r_actual.rubric_template.phase
-
 
     next_step = max(0, phase.order) # actually start at the current phase
     all_phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
@@ -1423,38 +1420,67 @@ def get_stats_comments(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
-    phase = PRPhase.objects.filter(pr=pr_process)[2]
-    all_subs = Submission.objects.filter(pr_process=pr_process,
-                                         is_valid=True,
-                                         phase=phase)
+    phase = PRPhase.objects.filter(pr=pr_process)[4]
 
-    try:
+    import csv
+    statsfile = open('results.tsv', 'w')
+    writer = csv.writer(statsfile, delimiter='\t')
+    writerow = ['Group name','Email','Self-review [6%]','Peer Review[60%]',
+                 'Instructor review[26%]','Peer review credit[8%]',
+                 'Average grade','C1','C2','C3','C4','C5','C1','C2','C3',
+                 'C4','C5']
 
-        statsfile = open('results.tsv', 'wt')
-        statsfile.write('Group name\tEmail\tSelf-review [6%]\tPeer Review[60%]\tInstructor review[26%]\tPeer review credit\tAverage grade\n')
-        for student in Person.objects.filter(role='Learn'):
-            print(student)
-            grade_components = GradeComponent.objects.filter(pr=pr_process).\
-                  order_by('order')
-            total_grade = 0.0
-            statsfile.write(student.enrolled_set.all()[0].group.name + '\t')
-            statsfile.write(student.email + '\t')
-            student_grade = {}
-            for item in grade_components:
+    writer.writerow(writerow)
+    for student in Person.objects.filter(role='Learn'):
+        print(student)
+        rowwrite = []
 
-                grade_achieved, grade_detail = get_grading_percentage(item, student)
-                total_grade += item.weight * grade_achieved
-                student_grade[item.name_in_table] = grade_achieved
-                statsfile.write(str(grade_achieved) + '\t')
+        grade_components = GradeComponent.objects.filter(pr=pr_process).\
+              order_by('order')
+        total_grade = 0.0
+        rowwrite.append(student.enrolled_set.all()[0].group.name)
+        rowwrite.append(student.email)
+        student_grade = {}
+        for item in grade_components:
 
-            statsfile.write(str(total_grade)+'\n')
-        statsfile.close()
-    except:
-        statsfile.close()
+            grade_achieved, grade_detail = get_grading_percentage(item, student)
+            total_grade += item.weight * grade_achieved
+            student_grade[item.name_in_table] = grade_achieved
+            rowwrite.append(str(grade_achieved))
+
+        rowwrite.append(str(total_grade))
+
+        r_template = phase.rubrictemplate_set.all()
+        if r_template:
+            r_template = r_template[0]
+
+        evals_completed = RubricActual.objects.filter(status='C',
+                                                      graded_by=student,
+                                                rubric_template=r_template)
+        for r_actual in evals_completed:
+            for item in r_actual.ritemactual_set.filter(submitted=True)\
+                                                            .order_by('id'):
+                if item.ritem_template.option_type == 'LText':
+                    print(item)
+                    rowwrite.append(item.roptionactual_set.all()[0].comment\
+                            .encode('utf-8').replace(b'\t', b'').\
+                            replace(b'\r\n', b'|').replace(b'\n', b'|'))
+
+        writer.writerow(rowwrite)
+        print('------')
+
+
+
+
+    statsfile.close()
+
+
 
 
     # Iterate over all persons
     # Get all comments they provided for their peer reviews
+
+    return HttpResponse('The report is on the server to download.')
 
 
 def get_grading_percentage(item, learner):

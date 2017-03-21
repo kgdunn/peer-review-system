@@ -32,6 +32,7 @@ rest of the peer reviews.
     <th colspan="2">Students</th>
 </tr>
 <tr><th>Group ID</th>
+    <th>Group name</th>
     <th>Peer review link</th>
     <th>Your status</th>
     <th>Reviews completed</th>
@@ -43,13 +44,13 @@ rest of the peer reviews.
 {% for item in r_actuals %}
     <tr class="pr-admin-{% cycle 'odd' 'even' %}">
     <td>Group ID={{item.submission.group_submitted.id}}</td>
+    <td>{{item.submission.group_submitted.name}}</td>
     <td><a href="/review/{{item.unique_code}}/" target="_blank">Access peer review</a> </td>
     <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed - <em>thank you</em></span>
         {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
         {% else %}                  <span style="color:red">Not started*</span>
                       {%endif%}</td>
     <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
-    <!--<td style="text-align:center">{{item.summary_stats.admin_grader_inprogress}}</td>-->
     <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
     </tr>

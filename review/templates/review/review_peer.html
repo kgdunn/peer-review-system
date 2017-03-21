@@ -92,7 +92,7 @@
     <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
 		Your report is shown below, with the review from {{report.n_reviews}} reviewers
-		{% if self_review %}. As this is a self-review, some of the comments and scores are your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
+		{% if self_review %}. If this is a self-review, some of the comments and scores are your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
 		{% else %} (including instructor/TA). <span style="color: orange">The scores include the instructor and peer scores (randomized).</span>
 				  Comments, and grades, from your peers are in random order (if you reload the page you will notice that the order changes).
 		{% endif %}{# self_review #}

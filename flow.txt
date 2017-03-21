@@ -1,7 +1,11 @@
 * Statistics: getting review
 * Statistics: getting grades
-*
 
+* Spreadsheet of the student comments (check in Apple Excel)
+* What was the effect of self-review? Did reports improve?
+* Send ZIP file of all practicum reports: self-review and peer-review
+
+* Model to store grade reports in the database; with a flag to capture updates
 
 
 * Prevent reviews outside the time window, even if you have the unique link
@@ -10,7 +14,7 @@ work.
 * Instructor sees how many reviews each student has done, and the status of
 reviews.
 * INstructor see the reviews provided by each student
-* Students don't grade if they have not submitted peer review'
+* Students don't get a grade if they have not submitted peer review'
 
 * Show admin's grades as soon as they graded
 
@@ -25,10 +29,6 @@ reviews.
 * Put the full rubric review in the Admin view for Conny
 * Calculate the colour coded correlation (coloured by instructor name)
 
-* Spreadsheet of the student comments (check in Apple Excel)
-* What was the effect of self-review? Did reports improve?
-
-* Send ZIP file of all practicum reports: self-review and peer-review
 
 Grades phase programmed up.
 Show progress of work done on a page (NN% completed)
