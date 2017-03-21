@@ -1124,8 +1124,15 @@ def review(request, ractual_code):
                         # This only counts for learners though.
                         return HttpResponse('This review has expired.')
 
-                report = get_peer_grading_data(learner, feedback_phase)
 
+                if learner.role != 'Learn':
+                    # Note: this is not the best, but it allows the admin to
+                    # see the reports.
+                    learner = r_actual.submission.submitted_by
+
+                # Get the report for this group/learner
+
+                report = get_peer_grading_data(learner, feedback_phase)
                 break
 
     logger.debug('Getting review for {0}:'.format(learner))
