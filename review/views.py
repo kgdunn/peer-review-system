@@ -1191,7 +1191,7 @@ def review(request, ractual_code):
         # Randomize the comments and numerical scores before returning.
         shuffle(item.results[0])
         if item_template.option_type == 'LText':
-            item.results[0] = '\n'.join(item.results[0])
+            item.results[0] = '\n----------------------\n'.join(item.results[0])
             item.results[4] = '\n'.join(item.results[4])
 
 
