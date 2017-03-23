@@ -91,6 +91,9 @@ def recognise_LTI_LMS(request):
     Returns one of ('edx', 'brightspace', 'coursera', None). The last option
     is if nothing can be determined.
     """
+    if settings.DEBUG:
+        request.POST = request.GET # only on the development server
+
     if request.POST.get('learner_ID', ''):
         return None   # Used for form submissions internally.
     if request.POST.get('resource_link_id', '').find('edx.org')>0:

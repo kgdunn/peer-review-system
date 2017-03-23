@@ -181,10 +181,15 @@ class PeerEvaluationPhase(PRPhase):
     number_of_reviews_per_learner = models.PositiveIntegerField(default=3,
         help_text='How many reviews must each learner complete?')
 
-
 class FeedbackPhase(PRPhase):
     """
     Text feedback is shown to the user
+    """
+    pass
+
+class ViewAllSubmissionsPhase(PRPhase):
+    """
+    Sometimes we want students to see all submissions uploaded in the class.
     """
     pass
 

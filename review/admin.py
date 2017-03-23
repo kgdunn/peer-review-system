@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Person, Course, PR_process, PRPhase, Submission
 from .models import SubmissionPhase, SelfEvaluationPhase
+from .models import ViewAllSubmissionsPhase
 from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
 from .models import GradeComponent, ReviewReport
 from .models import RItemActual, RItemTemplate
@@ -34,13 +35,17 @@ class PeerEvaluationPhaseAdmin(admin.ModelAdmin):
 class FeedbackPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
+class ViewAllSubmissionsPhaseAdmin(admin.ModelAdmin):
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
+
+
+
 class GradeReportPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class GradeComponentAdmin(admin.ModelAdmin):
     list_display = ("pr", "phase", "order", "explanation", "weight", "extra_detail")
     ordering = ['pr', 'order', ]
-
 
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("submitted_by", "status", "is_valid", "file_upload",
@@ -92,6 +97,7 @@ admin.site.register(SelfEvaluationPhase, SelfEvaluationPhaseAdmin)
 admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)
+admin.site.register(ViewAllSubmissionsPhase, ViewAllSubmissionsPhaseAdmin)
 
 admin.site.register(ReviewReport, ReviewReportAdmin)
 admin.site.register(GradeComponent, GradeComponentAdmin)
