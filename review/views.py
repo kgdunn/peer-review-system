@@ -845,9 +845,10 @@ def upload_submission(request, learner, pr_process, phase):
                                       is_valid=True)
     if prior:
         for item in prior:
-            logger.debug('DELETE old submission: {0} with name "{1}"'.format(\
+            logger.debug('Set old submission False: {0} and name "{1}"'.format(\
                         str(item), item.submitted_file_name))
-            item.delete()
+            item.is_valid = False
+            item.save()
 
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
