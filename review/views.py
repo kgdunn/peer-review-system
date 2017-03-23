@@ -792,7 +792,6 @@ def get_learner_details(ractual_code):
     Returns: r_actual (an instance of ``RubricActual``)
              learner  (an instance of ``Person``)
     """
-    #logger.debug('Processing the review for r_actual={0}'.format(ractual_code))
     r_actual = RubricActual.objects.filter(unique_code=ractual_code)
     if r_actual.count() == 0:
         return HttpResponse(("You have an incorrect link. Either something "
@@ -1082,6 +1081,8 @@ def review(request, ractual_code):
             return HttpResponse(("You have an incorrect link. Either something "
                                  "is broken in the peer review website, or you "
                                  "removed/changed part of the link."))
+
+
         review_report = review_report[0]
         learner = review_report.learner
         phase = review_report.phase
@@ -1101,13 +1102,26 @@ def review(request, ractual_code):
                 return HttpResponse('No review available. Admin?')
 
     else:
-        # Should we show feedback, or not, within the rubric?
-        # ``r_actual.rubric_template.phase`` is current phase for the
-        # ``r_actual``. Get the ``order`` number for the phase. Search
-        # *forward*, and if that phase allows showing feedback, then allow it.
-
         pr = r_actual.rubric_template.pr_process
         phase = r_actual.rubric_template.phase
+
+        start_dt = r_actual.rubric_template.phase.start_dt
+        end_dt = r_actual.rubric_template.phase.end_dt
+        now_time = datetime.datetime.utcnow()
+        if end_dt.replace(tzinfo=None) < now_time:
+            logger.debug("Outdated ractual used: {0} by {1}".format(\
+                                            ractual_code, learner))
+            return HttpResponse(("You have used an outdated link. That review "
+                                 "cannot be completed at this time; if you "
+                                 "believe this to be an error, please contact "
+                                 "your course coordinator or TA."))
+
+
+
+    # Should we show feedback, or not, within the rubric?
+    # ``r_actual.rubric_template.phase`` is current phase for the
+    # ``r_actual``. Get the ``order`` number for the phase. Search
+    # *forward*, and if that phase allows showing feedback, then allow it.
 
     next_step = max(0, phase.order) # actually start at the current phase
     all_phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')

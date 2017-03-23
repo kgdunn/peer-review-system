@@ -6,14 +6,11 @@
 * See their progress in the peer/self review process: xx % completed
 * Push the grades back to Brightspace
 * Standard deviation of std. deviation to Conny
+* Show in the admin interface the avg time take on the rubric
 
 https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_in_brightspace
 
-Calculate time to grade, and show that in the admin table.
 
-* Show in the admin interface the avg time take on the rubric
-
-* Spreadsheet of the student comments (check in Apple Excel)
 * What was the effect of self-review? Did reports improve?
 * Send ZIP file of all practicum reports: self-review and peer-review
 
