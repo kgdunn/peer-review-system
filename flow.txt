@@ -11,9 +11,6 @@ https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_i
 
 Calculate time to grade, and show that in the admin table.
 
-* If students upload a second PDF, the first is currently not removed and
-  definitely not set to "is_valid=False". Do that second part.
-
 * Show in the admin interface the avg time take on the rubric
 
 * Spreadsheet of the student comments (check in Apple Excel)

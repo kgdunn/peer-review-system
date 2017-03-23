@@ -203,7 +203,7 @@ def get_create_actual_rubric(learner, template, submission):
     return r_actual, new_rubric
 
 
-def get_submission(learner, phase=None, pr_process=None):
+def get_submission(learner, phase=None, pr_process=None, search_earlier=False):
     """
     Gets the ``submission`` instance at the particular ``phase`` in the PR
     process.
@@ -218,22 +218,27 @@ def get_submission(learner, phase=None, pr_process=None):
 
 
     submission = None
+    subs = Submission.objects.filter(is_valid=True, pr_process=phase.pr)
     if phase.pr.uses_groups:
         # NOTE: an error condition can develop if a learner isn't
         #       allocated into a group, and you are using group submissions.
 
-        # NOTE: will only get submissions for a phase LTE (less than and equal)
-        #       to the current ``phase``.
-        subs = Submission.objects.filter(pr_process=phase.pr,
-                                         phase__order__lte=phase.order,
-                                         is_valid=True,
-                  group_submitted=grp_info['group_instance']).order_by(\
-                                             '-datetime_submitted')
+        if search_earlier:
+
+            # NOTE: will only get submissions for a phase LTE (less than and
+            #       equal) to the current ``phase``.
+
+            subs = subs.filter(phase__order__lte=phase.order,
+                               group_submitted=grp_info['group_instance'])\
+                                                .order_by('-datetime_submitted')
+        else:
+            # This will only get it in the exact phase required
+            subs = subs.filter(phase__order=phase.order,
+                               group_submitted=grp_info['group_instance'])\
+                                                            .order_by('-datetime_submitted')
     else:
         # Individual submission
-        subs = Submission.objects.filter(submitted_by=learner,
-                                         is_valid=True,
-                           pr_process=phase.pr).order_by('-datetime_submitted')
+        subs = subs.filter(submitted_by=learner).order_by('-datetime_submitted')
 
     if subs:
         return subs[0]
@@ -315,7 +320,7 @@ def get_peer_grading_data(learner, phase, role_filter=''):
 
     Filters for the role of the grader, can also be provided.
     """
-    submission = get_submission(learner, phase)
+    submission = get_submission(learner, phase, search_earlier=True)
     peer_data = dict()
     peer_data['n_reviews'] = 0
     peer_data['overall_max_score'] = 0.0
@@ -449,9 +454,10 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['self'] = sub_phase
         allow_submit = within_phase
 
-        submission = get_submission(learner, self)
-
-        ctx_objects['submission'] = submission
+        # Remove the prior submission from the dict, so that PRs that use
+        # multiple submission steps get the correct phase's submission
+        ctx_objects.pop('submission', None)
+        ctx_objects['submission'] = get_submission(learner, self)
 
         if not(within_phase):
             return ctx_objects
@@ -822,7 +828,7 @@ def upload_submission(request, learner, pr_process, phase):
         os.makedirs(base_full_path)
     except OSError:
         if not os.path.isdir(base_full_path):
-            debug.error('Cannot create directory for upload: {0}'.format(
+            logger.error('Cannot create directory for upload: {0}'.format(
                                         base_full_path))
             raise
 
@@ -832,6 +838,16 @@ def upload_submission(request, learner, pr_process, phase):
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
+
+    prior = Submission.objects.filter(status='S',
+                                      pr_process=pr_process,
+                                      phase=phase,
+                                      is_valid=True)
+    if prior:
+        for item in prior:
+            logger.debug('DELETE old submission: {0} with name "{1}"'.format(\
+                        str(item), item.submitted_file_name))
+            item.delete()
 
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
@@ -844,6 +860,8 @@ def upload_submission(request, learner, pr_process, phase):
                      ip_address=get_IP_address(request),
                     )
     sub.save()
+
+
 
     if group_members['group_name']:
         address = group_members['member_email_list']
