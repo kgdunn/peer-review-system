@@ -3,7 +3,6 @@
 
 * Renew HTTPs certificate
 
-Add lines between the individual reviewers
 * See their progress in the peer/self review process: xx % completed
 * Push the grades back to Brightspace
 * Standard deviation of std. deviation to Conny
@@ -37,8 +36,6 @@ reviews.
 * D3JS histogram of the grades for the students
 * Add a "header" section inbetween items. To divide sections up.
 * Add XHR for checkbox items
-
-
 * Get on a per-item basis, the std dev for Conny to help to improve rubric.
 * Calculate the colour coded correlation (coloured by instructor name)
 

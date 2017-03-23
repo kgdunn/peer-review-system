@@ -365,7 +365,7 @@ def get_peer_grading_data(learner, phase, role_filter=''):
             #   3. the average for this learner for this item
             #   4. the class average (not used at the moment)
             #   5. the comments from the instructor or TA (if any)
-            if idxr == 0:
+            if ritem_template not in peer_data:
                 peer_data[ritem_template] = [[], 0.0, 0.0, idxi, []]
 
 
