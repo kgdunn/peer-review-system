@@ -10,7 +10,8 @@ from django.utils import timezone
 # Our imports
 from .models import Person, Course, PR_process
 from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
-                    PeerEvaluationPhase, FeedbackPhase, GradeReportPhase
+                    PeerEvaluationPhase, FeedbackPhase, GradeReportPhase,\
+                    ViewAllSubmissionsPhase
 from .models import Submission, ReviewReport, GradeComponent
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
@@ -676,7 +677,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         pass
 
 
-
     # Objects required for a grade report: grade_report_table
     try:
         gradereport_phase = GradeReportPhase.objects.get(id=self.id)
@@ -711,6 +711,41 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         pass
 
 
+    try:
+        viewall_phase = ViewAllSubmissionsPhase.objects.get(id=self.id)
+        ctx_objects['self'] = viewall_phase
+        uploaded_items_exist = within_phase
+        ctx_objects['uploaded_items_exist'] = uploaded_items_exist
+        if not(uploaded_items_exist):
+            return ctx_objects
+
+        phase = prior
+        while (phase.order >= 0):
+            try:
+                phase = SubmissionPhase.objects.get(is_active=True,
+                                                    pr=self.pr,
+                                                    order=phase.order)
+
+                break
+            except SubmissionPhase.DoesNotExist:
+                phase = PRPhase.objects.get(is_active=True, pr=self.pr,
+                                order=phase.order-1)
+
+
+        uploaded_items = Submission.objects.filter(phase=phase,
+                                                 is_valid=True,
+                                                 )
+        if uploaded_items.count() == 0:
+            uploaded_items_exist = False
+        else:
+            uploaded_items_exist = True # for certainty
+        ctx_objects['uploaded_items'] = uploaded_items
+        ctx_objects['uploaded_items_exist'] = uploaded_items_exist
+
+    except ViewAllSubmissionsPhase.DoesNotExist:
+        pass
+
+    # This is the last step, no matter what
     return ctx_objects
 
 
