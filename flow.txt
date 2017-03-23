@@ -16,8 +16,6 @@ https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_i
 
 * Model to store grade reports in the database; with a flag to capture updates
 
-
-* Prevent reviews outside the time window, even if you have the unique link
 * Keep students informed on how many completed reviews have been done on their
 work.
 * Instructor sees how many reviews each student has done, and the status of

@@ -1262,12 +1262,16 @@ def process_POST_review(key, options, items):
 
     The ``items`` dict, created in the calling function, contains the template
     for each item and its associated options.
+
+    If unsuccessfully processed (because it is an empty ``option``), it will
+    return "False" as the 1st returned item.
     """
     r_opt_template = None
     item_number = int(key.split('item-')[1])
     comment = ''
+    did_succeed = False
     words = 0
-    if items[item_number]['template'].option_type in ('Chcks'):
+    if items[item_number]['template'].option_type in ('Chcks',):
         prior_options_submitted = ROptionActual.objects.filter(
                                     ritem_actual=items[item_number]['item_obj'])
 
@@ -1276,15 +1280,18 @@ def process_POST_review(key, options, items):
     for value in options:
 
         if items[item_number]['template'].option_type == 'LText':
+            r_opt_template = items[item_number]['options'][0]
             if value:
-                r_opt_template = items[item_number]['options'][0]
                 comment = value
                 words += len(re.split('\s+', comment))
+                did_succeed = True
             else:
                 # We get for text feedback fields that they can be empty.
                 # In these cases we must continue as if they were not filled
                 # in.
-                continue
+                #continue
+                pass  # <--- this is a better option, incase user wants to
+                      #      remove their comment entirely.
 
         elif items[item_number]['template'].option_type in ('Radio', 'DropD',
                                                              'Chcks'):
@@ -1293,6 +1300,7 @@ def process_POST_review(key, options, items):
             # in "selected-1": the '-1' part is critical
             try:
                 r_opt_template = items[item_number]['options'][selected-1]
+                did_succeed = True
             except (IndexError, AssertionError):
                 continue
 
@@ -1322,10 +1330,10 @@ def process_POST_review(key, options, items):
         items[item_number]['item_obj'].submitted = True
         items[item_number]['item_obj'].save()
 
-    if r_opt_template:
+    if did_succeed:
         return item_number, r_opt_template.score, words
     else:
-        return item_number, 0.0, 0
+        return did_succeed, 0.0, 0
 
 
 @csrf_exempt
@@ -1366,6 +1374,9 @@ def submit_peer_review_feedback(request, ractual_code):
     total_score = 0.0
     for key in request.POST.keys():
 
+        # Small glitch: a set of checkboxes, if all unselected, will not appear
+        # here, which means that that item will not be "unset".
+
         # Process each item in the rubric, one at a time. Only ``item``
         # values returned in the form are considered.
         if not(key.startswith('item-')):
@@ -1376,7 +1387,9 @@ def submit_peer_review_feedback(request, ractual_code):
                                               items)
 
         # Only right at the end: if all the above were successful:
-        items.pop(item_num)
+        if (item_num is not False): # explicitly check, because here 0 \= False
+            items.pop(item_num)  # this will NOT pop if "item_num=False"
+                                 # which happens if an empty item is processed
         total_score += score
         word_count += words
 
