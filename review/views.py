@@ -721,8 +721,7 @@ def index(request):
     logger.debug('Learner entering: {0}'.format(learner))
 
 
-    create_hit(request, item=learner, event='login', user=learner,
-               other_info=str(request.POST))
+    create_hit(request, item=learner, event='login', user=learner,)
 
     # Get all the possible phases
     phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
@@ -1469,17 +1468,7 @@ def get_stats_comments(request):
         writer.writerow(rowwrite)
         print('------')
 
-
-
-
     statsfile.close()
-
-
-
-
-    # Iterate over all persons
-    # Get all comments they provided for their peer reviews
-
     return HttpResponse('The report is on the server to download.')
 
 

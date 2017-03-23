@@ -1,6 +1,22 @@
 * Statistics: getting review
 * Statistics: getting grades
 
+* Renew HTTPs certificate
+
+Add lines between the individual reviewers
+* See their progress in the peer/self review process: xx % completed
+* Push the grades back to Brightspace
+* Standard deviation of std. deviation to Conny
+
+https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_in_brightspace
+
+Calculate time to grade, and show that in the admin table.
+
+* If students upload a second PDF, the first is currently not removed and
+  definitely not set to "is_valid=False". Do that second part.
+
+* Show in the admin interface the avg time take on the rubric
+
 * Spreadsheet of the student comments (check in Apple Excel)
 * What was the effect of self-review? Did reports improve?
 * Send ZIP file of all practicum reports: self-review and peer-review
@@ -13,24 +29,19 @@
 work.
 * Instructor sees how many reviews each student has done, and the status of
 reviews.
-* INstructor see the reviews provided by each student
 * Students don't get a grade if they have not submitted peer review'
 
 * Show admin's grades as soon as they graded
 
 * How the correlation of the instructors matches up with the students.
-* Plot the grades correlations: average of peer review vs the instructors
 * D3JS histogram of the grades for the students
 * Add a "header" section inbetween items. To divide sections up.
 * Add XHR for checkbox items
 
 
 * Get on a per-item basis, the std dev for Conny to help to improve rubric.
-* Put the full rubric review in the Admin view for Conny
 * Calculate the colour coded correlation (coloured by instructor name)
 
-
-Grades phase programmed up.
 Show progress of work done on a page (NN% completed)
 Save the r_actual at every XHR, so the .modified field is updated.
 Show r_actual in group.ID order, or submission order
