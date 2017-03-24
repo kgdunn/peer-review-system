@@ -3,12 +3,27 @@
 
 * Renew HTTPs certificate
 
+* Turn off submission email
+* Create a tmbnail from PDFo
+* Submission filename is forced into a template
+* Allow multiple uploads, but bundle them on the back-end into 1 PDF file
+* One dropdown: 4, 6, 8, 10
+* Feedback box
+* Student receives email when feedback is available
+* Just a warning: if you upload again; your feedback is overwritten
+*
+
+
+
+
 * See their progress in the peer/self review process: xx % completed
 * Push the grades back to Brightspace
 * Standard deviation of std. deviation to Conny
 * Show in the admin interface the avg time take on the rubric
 
 https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_in_brightspace
+
+* Return grade to edX?
 
 
 * What was the effect of self-review? Did reports improve?

@@ -1,0 +1,57 @@
+<style>
+table.pr-admin {
+    margin-left: 40px;
+}
+.pr-admin th {
+    text-align: center;
+}
+.pr-admin td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+.pr-admin-odd{
+    background-color: #eee;
+}
+.pr-admin-even{
+    background-color: #fff;
+}
+</style>
+
+<p><span style="color:red">You are an administrator in this course</span>: self-reviews are
+shown here, and can be previewed.
+
+<table class="pr-admin" >
+<thead>
+<tr><th></th>
+    <th></th>
+    <th></th>
+    <th colspan="1">Instructors</th>
+    <th colspan="2">Students</th>
+</tr>
+<tr>
+    <th>Graded by</th>
+    <th>Peer review link</th>
+    <th>Status</th>
+    <th>Number not started</th>
+    <th>Number in progress</th>
+    <th>Number completed</th>
+</tr>
+</thead>
+<tbody>
+{% for item in r_actuals %}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+    <td>{{item.graded_by.display_name}}</td>
+    <td><a href="/review/{{item.unique_code}}/" target="_blank">Access this review</a> </td>
+    <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed</span>
+        {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
+        {% else %}                  <span style="color:red">Not started*</span>
+        {%endif%}</td>
+    <td style="text-align:center">{{item.summary_stats.learner_grader_not_started}}</td>
+    <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
+    <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
+    </tr>
+{% endfor %}{# for item in r_actuals  #}
+</tbody>
+</table>

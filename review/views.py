@@ -511,12 +511,64 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['own_submission'] = r_actual
-
         # For this phase, we do require to return "late"; the ``own_submission``
         # is required for the phase following this: the own-submission review.
 
         if not(allow_self_review):
             return ctx_objects
+
+        # This section is only intended for instructors/admins to get an
+        # overview of the self-review process.
+        if learner.role != 'Learn':
+            # Which template are we using in this phase?
+            r_template = RubricTemplate.objects.get(phase=self)
+            query = RubricActual.objects.filter(\
+                                rubric_template=r_template).order_by('created')
+
+            # We need to create and append the necessary reviews here
+            r_actuals = list(query)
+
+            sub_stats = {}  # r_actual_stats
+            all_ra = RubricActual.objects.filter(rubric_template=r_template)
+            # learner_grader_completed: int
+            # learner_grader_inprogress: int
+
+            for item in all_ra:
+                key = item.submission
+                if sub_stats.get(key, None) is None:
+                    sub_stats[key] = defaultdict(int)
+
+                if item.graded_by.role == 'Learn':
+                    if item.status == 'P':
+                        sub_stats[key]['learner_grader_inprogress'] += 1
+
+                    elif item.status == 'A':
+                        sub_stats[key]['learner_grader_not_started'] += 1
+
+                    elif item.status == 'C':
+                        sub_stats[key]['learner_grader_completed'] += 1
+
+
+            # Now that we have statistics for each submission, associate it
+            # back to the r_actuals for the admins:
+
+            for item in r_actuals:
+                key = item.submission
+                item.summary_stats = sub_stats[key]
+
+
+
+            # Now we have the self review ojects: ``r_actuals``
+            ctx_objects['r_actuals'] = r_actuals
+            content = loader.render_to_string('review/admin-self-review-status.html',
+                                                  context=ctx_objects,
+                                                  request=request,
+                                                  using=None)
+            ctx_objects['admin_overview'] = content
+
+
+
+
 
     except SelfEvaluationPhase.DoesNotExist:
         pass
@@ -665,6 +717,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(ctx_objects['submission']):
             report = None
 
+        report = None
         if learner.role == 'Learn':
             report, _ = ReviewReport.objects.get_or_create(learner = learner,
                                            group = group['group_instance'],
