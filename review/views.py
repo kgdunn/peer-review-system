@@ -502,7 +502,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         # Get/create the R_actual for the self-review, only if there
         # is an actual submission.
-        if ctx_objects['submission'] and within_phase:
+        if ctx_objects['submission']:
             r_actual, _ = get_create_actual_rubric(learner,
                                                    r_template,
                                                    ctx_objects['submission'])
@@ -1199,13 +1199,13 @@ def review(request, ractual_code):
         start_dt = r_actual.rubric_template.phase.start_dt
         end_dt = r_actual.rubric_template.phase.end_dt
         now_time = datetime.datetime.utcnow()
-        if (end_dt.replace(tzinfo=None) < now_time) and learner.role == 'Learn':
-            logger.debug("Outdated ractual used: {0} by {1}".format(\
-                                            ractual_code, learner))
-            return HttpResponse(("You have used an outdated link. That review "
-                                 "cannot be completed at this time; if you "
-                                 "believe this to be an error, please contact "
-                                 "your course coordinator or TA."))
+        #if (end_dt.replace(tzinfo=None) < now_time) and learner.role == 'Learn':
+        #    logger.debug("Outdated ractual used: {0} by {1}".format(\
+        #                                    ractual_code, learner))
+        #    return HttpResponse(("You have used an outdated link. That review "
+        #                         "cannot be completed at this time; if you "
+        #                         "believe this to be an error, please contact "
+        #                         "your course coordinator or TA."))
 
 
 
