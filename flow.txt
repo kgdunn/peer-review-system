@@ -3,6 +3,16 @@
 
 * Renew HTTPs certificate
 
+
+* Peer-review copied over and tested
+
+* INstructor should see overview of the group's submissions in the submission / resubmission
+
+
+How to resolve POST errors: ""request data read error""
+
+Debug logs: show which PRProcess is being view/assessed etc
+
 * Turn off submission email
 * Create a tmbnail from PDFo
 * Submission filename is forced into a template
@@ -11,9 +21,9 @@
 * Feedback box
 * Student receives email when feedback is available
 * Just a warning: if you upload again; your feedback is overwritten
-*
+* During the upload/submission phase: admin sees which groups have/haven't uploaded
 
-
+* Students can see how my peers have graded their work.
 
 
 * See their progress in the peer/self review process: xx % completed

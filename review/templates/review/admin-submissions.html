@@ -1,0 +1,52 @@
+
+
+<style>
+table.pr-admin {
+    margin-left: 40px;
+}
+.pr-admin th {
+    text-align: center;
+}
+.pr-admin td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+.pr-admin-odd{
+    background-color: #eee;
+}
+.pr-admin-even{
+    background-color: #fff;
+}
+</style>
+
+<p>
+
+There are {{all_groups.count}} groups; of these {{no_submit.count}} have not
+yet submitted.
+
+<table class="pr-admin" >
+<thead>
+<tr><th>Group name</th>
+    <th>Submitted on</th>
+    <th>See submitted file</th>
+</tr>
+</thead>
+<tbody>
+{% for item in all_subs %}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+      <td>{{item.group_submitted.name}} </td>
+      <td>{{item.datetime_submitted|date:"D, d F"}} {{item.datetime_submitted|time:"H:i" }}</td>
+      <td><a href="/{{item.file_upload.url}}">Submission</a></td>
+    </tr>
+{% endfor %}{# for item in all_subs  #}
+{% for item in no_submit %}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+      <td>{{item.name}} </td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+{% endfor %}{# for item in all_subs  #}
+</tbody>
+</table>
