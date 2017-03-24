@@ -1183,7 +1183,6 @@ def review(request, ractual_code):
     2. Format the text for the user
     3. Handle interactions and XHR saving.
 
-
     The user coming here is either:
     a) reviewing their own report (self-review)
     b) reviewing a peer's report (peer-review)

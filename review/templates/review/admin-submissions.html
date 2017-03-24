@@ -38,7 +38,7 @@ yet submitted.
     <tr class="pr-admin-{% cycle 'odd' 'even' %}">
       <td>{{item.group_submitted.name}} </td>
       <td>{{item.datetime_submitted|date:"D, d F"}} {{item.datetime_submitted|time:"H:i" }}</td>
-      <td><a href="/{{item.file_upload.url}}">Submission</a></td>
+      <td><a href="/{{item.file_upload.url}}" target="_blank">Submission</a></td>
     </tr>
 {% endfor %}{# for item in all_subs  #}
 {% for item in no_submit %}
