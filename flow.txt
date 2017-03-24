@@ -1,13 +1,7 @@
 * Statistics: getting review
 * Statistics: getting grades
 
-* Renew HTTPs certificate
-
-
 * Peer-review copied over and tested
-
-* INstructor should see overview of the group's submissions in the submission / resubmission
-
 
 How to resolve POST errors: ""request data read error""
 

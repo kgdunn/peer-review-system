@@ -1005,10 +1005,11 @@ def upload_submission(request, learner, pr_process, phase):
                              pr_process.course.name,
                              extra_line)
 
-    logger.debug('Sending email: {0}'.format(address))
-    subject = phase.name + ' for peer review: successfully submitted'
-    out = send_email(address, subject, message)
-    logger.debug('Number of emails sent (should be 1): {0}'.format(out[0]))
+    if phase.send_email_on_success:
+        logger.debug('Sending email: {0}'.format(address))
+        subject = phase.name + ' for peer review: successfully submitted'
+        out = send_email(address, subject, message)
+        logger.debug('Number of emails sent (should be 1): {0}'.format(out[0]))
 
     return sub
 
