@@ -28,6 +28,11 @@ import numpy as np
 import json
 from random import shuffle
 from collections import defaultdict
+try:
+    import PIL as Image
+except ImportError:
+    import Image as Image
+
 
 # 3rd party imports
 import magic  # used to check if file uploads are of the required type
@@ -972,23 +977,22 @@ def upload_submission(request, learner, pr_process, phase):
                 for chunk in f_to_process.chunks():
                     dst.write(chunk)
 
-
-        # Now combined these N chunks into a PDF
-        from fpdf import FPDF
-        pdf = FPDF('L', 'mm', 'A4')
-        pdf.compress = False
-        pdf.set_font('Arial', '', 16)
-        for f_to_process in files:
-            pdf.add_page()
-            pdf.cell(w=10, h=10, txt=f_to_process.name, border=0)
-            pdf.image(staging_dir + f_to_process.name,
-                       x=20, y=20, w=500, h=250, type='', link='')
-
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib.units import cm
         composite_PDF = base_dir_for_file_uploads + 'uploads/{0}/{1}'.format(
                 pr_process.id, generate_random_token(token_length=16) + '.pdf')
 
-        pdf.output(composite_PDF, 'F')
-
+        c = canvas.Canvas(composite_PDF, pagesize=A4, )
+        c.setPageSize(landscape(A4))
+        for f_to_process in files:
+            c.setFont("Helvetica", 14)
+            c.drawString(10, 10, f_to_process.name)
+            c.drawImage(staging_dir + f_to_process.name,
+                        x=cm*1, y=cm*1, width=cm*25, height=18*cm, mask=None,
+                        preserveAspectRatio=True, anchor='c')
+            c.showPage()
+        c.save()
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
