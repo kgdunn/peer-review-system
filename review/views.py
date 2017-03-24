@@ -1199,7 +1199,7 @@ def review(request, ractual_code):
         start_dt = r_actual.rubric_template.phase.start_dt
         end_dt = r_actual.rubric_template.phase.end_dt
         now_time = datetime.datetime.utcnow()
-        if end_dt.replace(tzinfo=None) < now_time:
+        if (end_dt.replace(tzinfo=None) < now_time) and learner.role == 'Learn':
             logger.debug("Outdated ractual used: {0} by {1}".format(\
                                             ractual_code, learner))
             return HttpResponse(("You have used an outdated link. That review "

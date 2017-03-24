@@ -27,12 +27,11 @@ shown here, and can be previewed.
 <tr><th></th>
     <th></th>
     <th></th>
-    <th colspan="1">Instructors</th>
-    <th colspan="2">Students</th>
+    <th colspan="3">Students</th>
 </tr>
 <tr>
-    <th>Graded by</th>
-    <th>Peer review link</th>
+    <th>Studenty</th>
+    <th>Self review link</th>
     <th>Status</th>
     <th>Number not started</th>
     <th>Number in progress</th>
@@ -42,11 +41,11 @@ shown here, and can be previewed.
 <tbody>
 {% for item in r_actuals %}
     <tr class="pr-admin-{% cycle 'odd' 'even' %}">
-    <td>{{item.graded_by.display_name}}</td>
-    <td><a href="/review/{{item.unique_code}}/" target="_blank">Access this review</a> </td>
+    <td>[{{item.submission.group_submitted.name}}] {{item.graded_by.display_name}}</td>
+    <td><a href="/review/{{item.unique_code}}/" target="_blank">Open review</a> </td>
     <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed</span>
-        {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
-        {% else %}                  <span style="color:red">Not started*</span>
+        {% elif item.status == 'P'%}<span style="color:orange">In progress</span>
+        {% else %}                  <span style="color:red">Not started</span>
         {%endif%}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_not_started}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
