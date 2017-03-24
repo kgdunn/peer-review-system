@@ -22,7 +22,7 @@ table.pr-admin {
 </style>
 
 <p>
-
+{% if pr.uses_groups %}
 There are {{all_groups.count}} groups; of these {{no_submit.count}} have not
 yet submitted.
 
@@ -50,3 +50,4 @@ yet submitted.
 {% endfor %}{# for item in all_subs  #}
 </tbody>
 </table>
+{% endif %}{#pr.uses_groups#}

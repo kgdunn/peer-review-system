@@ -163,6 +163,10 @@ class SubmissionPhase(PRPhase):
     """
     #show_rubric_prior_to_submission = models.BooleanField(default=False,
             #help_text=('Can learners see the rubric before they submit?'))
+
+    #filename_template = models.CharField(max_length=200,
+    #                                     default='{{random}}.{{extension}}')
+    #n_file_uploads = models.PositiveSmallIntegerField(default=1)
     send_email_on_success = models.BooleanField(default=True)
     max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
     accepted_file_types_comma_separated = models.CharField(default='PDF',

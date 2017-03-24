@@ -464,6 +464,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['submission'] = get_submission(learner, self)
 
         if learner.role != 'Learn':
+            no_submit = dict()
+            all_groups = dict()
             all_subs = Submission.objects.filter(pr_process=self.pr,
                                                  phase=self, is_valid=True)
             if self.pr.uses_groups:
@@ -485,8 +487,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(within_phase):
             return ctx_objects
 
-        from . forms import UploadFF
-        file_upload_form = UploadFF()
+        #from . forms import UploadFileForm_multiple_file
+        #file_upload_form = UploadFileForm_multiple_file()
 
         if request.FILES:
             submission = upload_submission(request, learner, self.pr, sub_phase)
@@ -494,7 +496,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         sub_phase.submission = ctx_objects['submission']
         sub_phase.allow_submit = ctx_objects['allow_submit'] = allow_submit
-        sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
+        #sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
 
 
 
@@ -926,21 +928,18 @@ def upload_submission(request, learner, pr_process, phase):
     """
     Handles the upload of the user's submission.
     """
-
     # if within the date and time <-- that doesn't need to be checked.
     #                                 already done in the calling function
 
     #if the filesize is OK and    <-- not checked yet
 
     #if the file is of the correct type <-- we will come back to that later
+    files = request.FILES.getlist('file_upload', None)
+    if files is None:
+        return None
 
-
-    filename = request.FILES['file_upload'].name
-    extension = filename.split('.')[-1]
-    submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
-                     generate_random_token(token_length=16) + '.' + extension)
-
-    base_full_path = base_dir_for_file_uploads + 'uploads/{0}/'.format(pr_process.id)
+    base_full_path = base_dir_for_file_uploads + 'uploads/{0}/tmp'.format(
+                                                                pr_process.id)
     try:
         os.makedirs(base_full_path)
     except OSError:
@@ -949,9 +948,47 @@ def upload_submission(request, learner, pr_process, phase):
                                         base_full_path))
             raise
 
-    with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
-        for chunk in request.FILES['file_upload'].chunks():
-            dst.write(chunk)
+
+    if len(files) == 1:
+        filename = files[0].name
+        extension = filename.split('.')[-1]
+        submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+                    generate_random_token(token_length=16) + '.' + extension)
+
+        with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
+            for chunk in files[0].chunks():
+                dst.write(chunk)
+
+    else:
+        submitted_file_name = ''
+        staging_dir = base_dir_for_file_uploads + 'uploads/{0}/tmp/'.format(
+                                                                pr_process.id)
+        for f_to_process in files:
+            filename = f_to_process.name
+            extension = filename.split('.')[-1]
+            submitted_file_name += '.'.join(filename.split('.')[0:-1])
+
+            with open(staging_dir + filename, 'wb+') as dst:
+                for chunk in f_to_process.chunks():
+                    dst.write(chunk)
+
+
+        # Now combined these N chunks into a PDF
+        from fpdf import FPDF
+        pdf = FPDF('L', 'mm', 'A4')
+        pdf.compress = False
+        pdf.set_font('Arial', '', 16)
+        for f_to_process in files:
+            pdf.add_page()
+            pdf.cell(w=10, h=10, txt=f_to_process.name, border=0)
+            pdf.image(staging_dir + f_to_process.name,
+                       x=20, y=20, w=500, h=250, type='', link='')
+
+        composite_PDF = base_dir_for_file_uploads + 'uploads/{0}/{1}'.format(
+                pr_process.id, generate_random_token(token_length=16) + '.pdf')
+
+        pdf.output(composite_PDF, 'F')
+
 
 
     group_members = get_group_information(learner, pr_process.gf_process)

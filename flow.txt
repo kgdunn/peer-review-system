@@ -7,7 +7,7 @@ How to resolve POST errors: ""request data read error""
 
 Debug logs: show which PRProcess is being view/assessed etc
 
-* Turn off submission email
+
 * Create a tmbnail from PDFo
 * Submission filename is forced into a template
 * Allow multiple uploads, but bundle them on the back-end into 1 PDF file
