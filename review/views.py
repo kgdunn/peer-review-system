@@ -463,6 +463,25 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects.pop('submission', None)
         ctx_objects['submission'] = get_submission(learner, self)
 
+        if learner.role != 'Learn':
+            all_subs = Submission.objects.filter(pr_process=self.pr,
+                                                 phase=self, is_valid=True)
+            if self.pr.uses_groups:
+                all_groups = self.pr.gf_process.group_set.filter()
+                no_submit = all_groups
+                for item in all_subs:
+                    no_submit = no_submit.exclude(id=item.group_submitted_id)
+
+            ctx_objects['no_submit'] = no_submit
+            ctx_objects['all_groups'] = all_groups
+            ctx_objects['all_subs'] = all_subs
+            content = loader.render_to_string('review/admin-submissions.html',
+                                              context=ctx_objects,
+                                              request=request,
+                                              using=None)
+            ctx_objects['self'].admin_overview = content
+
+
         if not(within_phase):
             return ctx_objects
 
@@ -478,22 +497,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
 
 
-        all_subs = Submission.objects.filter(pr_process=self.pr,
-                                             phase=self, is_valid=True)
-        if self.pr.uses_groups:
-            all_groups = self.pr.gf_process.group_set.filter()
-            no_submit = all_groups
-            for item in all_subs:
-                no_submit = no_submit.exclude(id=item.group_submitted_id)
 
-        ctx_objects['no_submit'] = no_submit
-        ctx_objects['all_groups'] = all_groups
-        ctx_objects['all_subs'] = all_subs
-        content = loader.render_to_string('review/admin-submissions.html',
-                                              context=ctx_objects,
-                                              request=request,
-                                              using=None)
-        ctx_objects['self'].admin_overview = content
 
 
     except SubmissionPhase.DoesNotExist:
