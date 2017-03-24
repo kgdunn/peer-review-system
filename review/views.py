@@ -929,7 +929,9 @@ def upload_submission(request, learner, pr_process, phase):
 
     group_members = get_group_information(learner, pr_process.gf_process)
 
+    # Has this group submitted this before?
     prior = Submission.objects.filter(status='S',
+                                      group_submitted=group_members['group_instance'],
                                       pr_process=pr_process,
                                       phase=phase,
                                       is_valid=True)
