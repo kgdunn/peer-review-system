@@ -965,13 +965,13 @@ def upload_submission(request, learner, pr_process, phase):
                 dst.write(chunk)
 
     else:
-        submitted_file_name = ''
+        joint_file_name = ''
         staging_dir = base_dir_for_file_uploads + 'uploads/{0}/tmp/'.format(
                                                                 pr_process.id)
         for f_to_process in files:
             filename = f_to_process.name
             extension = filename.split('.')[-1]
-            submitted_file_name += '.'.join(filename.split('.')[0:-1])
+            joint_file_name += '.'.join(filename.split('.')[0:-1])
 
             with open(staging_dir + filename, 'wb+') as dst:
                 for chunk in f_to_process.chunks():
@@ -983,16 +983,25 @@ def upload_submission(request, learner, pr_process, phase):
         composite_PDF = base_dir_for_file_uploads + 'uploads/{0}/{1}'.format(
                 pr_process.id, generate_random_token(token_length=16) + '.pdf')
 
-        c = canvas.Canvas(composite_PDF, pagesize=A4, )
-        c.setPageSize(landscape(A4))
-        for f_to_process in files:
-            c.setFont("Helvetica", 14)
-            c.drawString(10, 10, f_to_process.name)
-            c.drawImage(staging_dir + f_to_process.name,
-                        x=cm*1, y=cm*1, width=cm*25, height=18*cm, mask=None,
-                        preserveAspectRatio=True, anchor='c')
-            c.showPage()
-        c.save()
+        try:
+
+            c = canvas.Canvas(composite_PDF, pagesize=A4, )
+            c.setPageSize(landscape(A4))
+            for f_to_process in files:
+                c.setFont("Helvetica", 14)
+                c.drawString(10, 10, f_to_process.name)
+                c.drawImage(staging_dir + f_to_process.name,
+                            x=cm*1, y=cm*1,
+                            width=cm*(29.7-2), height=cm*(21-2), mask=None,
+                            preserveAspectRatio=True, anchor='c')
+                c.showPage()
+            c.save()
+        except IOError:
+            # TODO: raise error message
+            pass
+
+        submitted_file_name = composite_PDF.split(base_dir_for_file_uploads)[1]
+        filename = joint_file_name[0:255]
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
