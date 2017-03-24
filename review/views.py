@@ -511,11 +511,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         ctx_objects['allow_self_review'] = allow_self_review
         ctx_objects['own_submission'] = r_actual
-        # For this phase, we do require to return "late"; the ``own_submission``
-        # is required for the phase following this: the own-submission review.
 
-        if not(allow_self_review):
-            return ctx_objects
 
         # This section is only intended for instructors/admins to get an
         # overview of the self-review process.
@@ -567,7 +563,12 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             ctx_objects['admin_overview'] = content
 
 
-
+        # For this phase, we do require to return "late"; the ``own_submission``
+        # is required for the phase following this: the own-submission review.
+        # This must come right here at the end, so the instructor can still
+        # se the "admin-self-review-status" page
+        if not(allow_self_review):
+            return ctx_objects
 
 
     except SelfEvaluationPhase.DoesNotExist:
