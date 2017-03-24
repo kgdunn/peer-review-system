@@ -582,12 +582,11 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         allow_review = within_phase
         ctx_objects['allow_review'] = allow_review
 
+        ctx_objects.pop('r_actuals', None)
+        # TODO: allow admins to go further here, but only AFTER the start time,
+        #       not before
         if not(allow_review):
             return ctx_objects
-
-
-    # TODO: allow admins to go further here, but only AFTER the start time,
-    #       not before
 
 
         # Administrator roles can go further, even if we are not within the
