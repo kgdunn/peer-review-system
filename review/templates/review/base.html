@@ -153,7 +153,7 @@ ul.polaroids a {
     display: inline;
     float: left;
     margin: 0 0 27px 30px;
-    width: auto;
+    width: 30%;
     padding: 10px 10px 15px;
     text-align: center;
     font-family: sans-serif;
@@ -162,9 +162,9 @@ ul.polaroids a {
     font-size: 1em;
     -webkit-box-shadow: 0 3px 6px rgba(0,0,0,.25);
     -moz-box-shadow: 0 3px 6px rgba(0,0,0,.25);
-    -webkit-transform: rotate(-1deg);
+    <!---webkit-transform: rotate(-1deg);-->
     -webkit-transition: -webkit-transform .15s linear;
-    -moz-transform: rotate(-2deg);
+    <!---moz-transform: rotate(-2deg);-->
 }
 ul.polaroids li {
     padding-left: 0;
@@ -184,8 +184,8 @@ ul.polaroids a:after {
     content: attr(title);
 }
 ul.polaroids li:nth-child(even) a {
-    -webkit-transform: rotate(2deg);
-    -moz-transform: rotate(2deg);
+    <!---webkit-transform: rotate(2deg);-->
+    <!---moz-transform: rotate(2deg);-->
 }
 ul.polaroids li:nth-child(3n) a {
     -webkit-transform: none;
@@ -194,10 +194,10 @@ ul.polaroids li:nth-child(3n) a {
     -moz-transform: none;
 }
 ul.polaroids li:nth-child(5n) a {
-    -webkit-transform: rotate(5deg);
+    <!---webkit-transform: rotate(5deg);-->
     position: relative;
     right: 5px;
-    -moz-transform: rotate(5deg);
+    <!---moz-transform: rotate(5deg);-->
 }
 ul.polaroids li:nth-child(8n) a {
     position: relative;
