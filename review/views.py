@@ -826,7 +826,13 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             uploaded_items_exist = False
         else:
             uploaded_items_exist = True # for certainty
+
         ctx_objects['uploaded_items'] = uploaded_items
+        content = loader.render_to_string('review/view-all-submissions.html',
+                                          context=ctx_objects,
+                                          request=request,
+                                          using=None)
+        ctx_objects['self'].show_all_uploads = content
         ctx_objects['uploaded_items_exist'] = uploaded_items_exist
 
     except ViewAllSubmissionsPhase.DoesNotExist:
@@ -959,8 +965,8 @@ def upload_submission(request, learner, pr_process, phase):
         extension = filename.split('.')[-1]
         submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
                     generate_random_token(token_length=16) + '.' + extension)
-
-        with open(base_dir_for_file_uploads + submitted_file_name, 'wb+') as dst:
+        full_path = base_dir_for_file_uploads + submitted_file_name
+        with open(full_path, 'wb+') as dst:
             for chunk in files[0].chunks():
                 dst.write(chunk)
 
@@ -980,12 +986,12 @@ def upload_submission(request, learner, pr_process, phase):
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import A4, landscape
         from reportlab.lib.units import cm
-        composite_PDF = base_dir_for_file_uploads + 'uploads/{0}/{1}'.format(
+        full_path = base_dir_for_file_uploads + 'uploads/{0}/{1}'.format(
                 pr_process.id, generate_random_token(token_length=16) + '.pdf')
 
         try:
 
-            c = canvas.Canvas(composite_PDF, pagesize=A4, )
+            c = canvas.Canvas(full_path, pagesize=A4, )
             c.setPageSize(landscape(A4))
             for f_to_process in files:
                 c.setFont("Helvetica", 14)
@@ -1000,7 +1006,7 @@ def upload_submission(request, learner, pr_process, phase):
             # TODO: raise error message
             pass
 
-        submitted_file_name = composite_PDF.split(base_dir_for_file_uploads)[1]
+        submitted_file_name = full_path.split(base_dir_for_file_uploads)[1]
         filename = joint_file_name[0:255]
 
 
@@ -1008,10 +1014,10 @@ def upload_submission(request, learner, pr_process, phase):
 
     # Has this group submitted this before?
     prior = Submission.objects.filter(status='S',
-                                      group_submitted=group_members['group_instance'],
-                                      pr_process=pr_process,
-                                      phase=phase,
-                                      is_valid=True)
+                                group_submitted=group_members['group_instance'],
+                                pr_process=pr_process,
+                                phase=phase,
+                                is_valid=True)
     if prior:
         for item in prior:
             logger.debug('Set old submission False: {0} and name "{1}"'.format(\
@@ -1030,6 +1036,15 @@ def upload_submission(request, learner, pr_process, phase):
                      ip_address=get_IP_address(request),
                     )
     sub.save()
+    
+    # Make the thumbnail of the PDF -> PNG
+    from wand.image import Image  
+    imageFromPdf = Image(filename=full_path)  
+    image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
+    image.composite(imageFromPdf.sequence[0], top=0, left=0)
+    image.format = "png"  
+    image.save(filename=full_path.lower().replace('.pdf', '.png'))  
+   
 
 
 
@@ -1574,6 +1589,11 @@ def submit_peer_review_feedback(request, ractual_code):
         r_actual.word_count = word_count
         r_actual.score = total_score
         r_actual.save()
+        
+        # Also mark the Submission as having one extra completed review:
+        r_actual.submission.number_reviews_completed += 1
+        r_actual.submission.save()
+                
         logger.debug('ALL-DONE: {0}'.format(learner))
         create_hit(request, item=r_actual, event='ending-a-review-session',
                    user=learner, other_info='COMPLETE ' + str(request.POST))
