@@ -17,10 +17,24 @@ table.pr-admin {
 .pr-admin-even{
     background-color: #fff;
 }
+.clicker {
+    background-color: lightblue;
+    outline:none;
+    cursor:pointer;
+}
+
+.hidden-admin-div-wrapper{
+    display:none;
+}
+
+.clicker:focus + .hidden-admin-div-wrapper{
+    display:block;
+}
+
 </style>
 
-<p><span style="color:red">You are an administrator in this course</span>: self-reviews are
-shown here, and can be previewed.
+<p><div class="clicker" tabindex="1">Instructor/TA view: Click on this text to reveal details about the self-review progress.</div>
+<div class="hidden-admin-div-wrapper">
 
 <table class="pr-admin" >
 <thead>
@@ -54,3 +68,5 @@ shown here, and can be previewed.
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
 </table>
+
+</div> <!--hidden-admin-div-wrapper-->

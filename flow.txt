@@ -63,16 +63,42 @@ Check that peer feedback results are the correct ones
 
 * Completed submissions via an intermediate database table
 
-    # And also mark the submission as having one extra submission:
-    #r_actual.submission.number_reviews_completed += 1
-    #r_actual.submission.status = 'G' # in progress
-    #r_actual.submission.save()
+# And also mark the submission as having one extra submission:
+#r_actual.submission.number_reviews_completed += 1
+#r_actual.submission.status = 'G' # in progress
+#r_actual.submission.save()
 
-    # Reviews to still complete by this learner:
-    #n_graded_already = RubricActual.objects.filter(graded_by=learner,
-    #                                               status='C').count()
-    #phase = r_actual.rubric_template.phase
-    #n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
+# Reviews to still complete by this learner:
+#n_graded_already = RubricActual.objects.filter(graded_by=learner,
+#                                               status='C').count()
+#phase = r_actual.rubric_template.phase
+#n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
+
+Copy rubric over (in the shell)
+----------------
+from review.models import PR_process, RubricTemplate, RItemTemplate
+src_template = RubricTemplate.objects.get(title='Repair practicum self-review')
+dst_template = RubricTemplate.objects.get(title='Repair practicum peer-review')
+src_items = RItemTemplate.objects.filter(r_template=src_template)
+for item in src_items:
+    # First get the associated options
+    options = item.roptiontemplate_set.all()
+    
+    # Then copy the parent template to the new one
+    item.pk = None
+    item.r_template = dst_template
+    item.save()
+    
+    # Then re-parent the options to the newly created/saved item
+    for opt in options:
+        opt.pk = None
+        opt.rubric_item = item
+        opt.save()
+   
+    
+    
+
+  
 
 
 TO DO
@@ -119,7 +145,7 @@ Watch the reviews coming in at: https://peer.connectmv.com/admin/review/roptiona
 Track linode stats
 Run htop
 Dump the data to text file:
-  ./manage.py dumpdata review stats --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
+  ./manage.py dumpdata review stats groups --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
 
 
 Review process

@@ -17,11 +17,25 @@ table.pr-admin {
 .pr-admin-even{
     background-color: #fff;
 }
+
+.clicker {
+    background-color: lightblue;
+    outline:none;
+    cursor:pointer;
+}
+
+.hidden-admin-div-wrapper{
+    display:none;
+}
+
+.clicker:focus + .hidden-admin-div-wrapper{
+    display:block;
+}
+
 </style>
 
-<p><span style="color:red">You are an administrator in this course</span>: peer-reviews may be
-shown here, and can be started, <b>ahead of time</b>. Your reviews are added to the
-rest of the peer reviews.
+<p><div class="clicker" tabindex="1">Instructor/TA view: Click here to see details about the peer-review.</div>
+<div class="hidden-admin-div-wrapper">
 
 <table class="pr-admin" >
 <thead>
@@ -48,7 +62,7 @@ rest of the peer reviews.
     <td><a href="/review/{{item.unique_code}}/" target="_blank">Access peer review</a> </td>
     <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed - <em>thank you</em></span>
         {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
-        {% else %}                  <span style="color:red">Not started*</span>
+        {% else %}                  <span style="color:red">Not started</span>
                       {%endif%}</td>
     <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
@@ -57,3 +71,5 @@ rest of the peer reviews.
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
 </table>
+
+</div> <!--hidden-admin-div-wrapper-->

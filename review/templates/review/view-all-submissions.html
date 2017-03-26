@@ -1,0 +1,7 @@
+<ul class="polaroids large-block-grid-4 small-block-grid-2">
+   {% for submission in uploaded_items %}
+      <li><a href="/{{submission.file_upload.url}}" title="{{submission.submitted_by.display_name}}" data-ajax="false" class="ui-link" target="_blank">
+      <img class="front-image" alt="View the work of {{submission.submitted_by.display_name}}" src="/{{submission.file_upload.url}}"></a></li>
+
+   {% endfor %} {# for item in  uploaded_items#}
+</ul>
