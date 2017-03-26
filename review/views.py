@@ -1061,6 +1061,8 @@ def upload_submission(request, learner, pr_process, phase):
         thumbnail_name = thumbnail_dir + os.sep + \
                                     filename.replace('.'+extension, '.png')
         image.save(filename=thumbnail_name)     
+        thumbnail_name = 'uploads/{0}/tmp/{1}'.format(pr_process.id, 
+                                        filename.replace('.'+extension, '.png'))
     except Exception as exp:
         logger.error('Exception for thumbnail: ' + str(exp))
         thumbnail_name = None       
