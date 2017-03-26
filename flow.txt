@@ -1,12 +1,8 @@
 * Statistics: getting review
 * Statistics: getting grades
 
-* Peer-review copied over and tested
-
 How to resolve POST errors: ""request data read error""
-
 Debug logs: show which PRProcess is being view/assessed etc
-
 
 * Raise error messages: incorrect filetypes, cannot create PDF, etc
 
@@ -39,8 +35,7 @@ https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_i
 
 * Keep students informed on how many completed reviews have been done on their
 work.
-* Instructor sees how many reviews each student has done, and the status of
-reviews.
+
 * Students don't get a grade if they have not submitted peer review'
 
 * Show admin's grades as soon as they graded

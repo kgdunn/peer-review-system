@@ -472,7 +472,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             no_submit = dict()
             all_groups = dict()
             all_subs = Submission.objects.filter(pr_process=self.pr,
-                                                 phase=self, is_valid=True)
+                                                 phase=self, is_valid=True).\
+                                 order_by('datetime_submitted')
             if self.pr.uses_groups:
                 all_groups = self.pr.gf_process.group_set.filter()
                 no_submit = all_groups
