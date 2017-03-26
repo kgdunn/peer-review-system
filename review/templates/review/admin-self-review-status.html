@@ -1,25 +1,7 @@
-<style>
-table.pr-admin {
-    margin-left: 40px;
-}
-.pr-admin th {
-    text-align: center;
-}
-.pr-admin td, th {
-    padding-left: 10px;
-    padding-right: 10px;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
-}
-.pr-admin-odd{
-    background-color: #eee;
-}
-.pr-admin-even{
-    background-color: #fff;
-}
-</style>
+<div class="accordion" >
 
-
+<h3>Click here to show/hide the extra information for instructors and TAs</h3>
+<div class="extra-information">
 <table class="pr-admin" >
 <thead>
 <tr><th></th>
@@ -52,3 +34,6 @@ table.pr-admin {
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
 </table>
+</div> <!--extra information-->
+
+</div> <!--accordion-->

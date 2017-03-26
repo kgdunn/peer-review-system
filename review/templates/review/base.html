@@ -253,9 +253,76 @@ h3.polaroid-overlay span {
     float: left;
 }
 
+/* Admin view tables*/
+table.pr-admin {
+    margin-left: 40px;
+}
+.pr-admin th {
+    text-align: center;
+}
+.pr-admin td, th {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+.pr-admin-odd{
+    background-color: #eee;
+}
+.pr-admin-even{
+    background-color: #fff;
+}
+
+.ui-accordion .ui-accordion-header {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    margin: 2px 0 0 0;
+    padding: .5em .5em .5em .7em;
+    font-size: 100%;
+    background: #009fff;
+}
+.ui-accordion .ui-accordion-content {
+    padding: 1em 2.2em;
+    border-top: 0;
+    overflow: auto;
+}
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active,
+a.ui-button:active,
+.ui-button:active,
+.ui-button.ui-state-active:hover {
+    border: 1px solid #003eff;
+    background: #00fff;
+    font-weight: normal;
+    color: #ffffff;
+}
+.ui-icon-background,
+.ui-state-active .ui-icon-background {
+    border: #007fff;
+    background-color: #ffffff;
+}
+.ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+    color: #ffffff;
+    text-decoration: none;
+}
 </style>
 <link href="https://fonts.googleapis.com/css?family=Lato|Raleway" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+$( function() {
+  $( ".accordion" ).accordion({
+    collapsible: true
+  });
+  $( ".accordion" ).accordion( "option", "collapsible", true ).accordion( "option", "active", false );
+} );
+</script>
+  
 {% block header %}{% endblock %}
 
 {% block content %}{% endblock %}

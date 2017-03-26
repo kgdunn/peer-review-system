@@ -1,26 +1,7 @@
+<div class="accordion">
 
-
-<style>
-table.pr-admin {
-    margin-left: 40px;
-}
-.pr-admin th {
-    text-align: center;
-}
-.pr-admin td, th {
-    padding-left: 10px;
-    padding-right: 10px;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
-}
-.pr-admin-odd{
-    background-color: #eee;
-}
-.pr-admin-even{
-    background-color: #fff;
-}
-
-</style>
+<h3>Click here to show/hide the extra information for instructors and TAs</h3>
+<div class="extra-information">
 <p>
 {% if pr.uses_groups %}
 <span style="color: orange">There are {{all_groups.count}} groups; of these {{ no_submit.count}} ha{{ no_submit.count|pluralize:"s,ve" }} not yet submitted.</span>
@@ -50,4 +31,6 @@ table.pr-admin {
 </tbody>
 </table>
 {% endif %}{#pr.uses_groups#}
+</div> <!--extra information-->
 
+</div> <!--accordion-->
