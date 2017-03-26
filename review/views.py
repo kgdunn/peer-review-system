@@ -972,16 +972,16 @@ def upload_submission(request, learner, pr_process, phase):
     if files is None:
         return None
 
-    base_full_path = base_dir_for_file_uploads + 'uploads/{0}/tmp'.format(
+    thumbnail_dir = base_dir_for_file_uploads + 'uploads/{0}/tmp/'.format(
                                                                 pr_process.id)
+    
     try:
-        os.makedirs(base_full_path)
+        os.makedirs(thumbnail_dir)
     except OSError:
-        if not os.path.isdir(base_full_path):
+        if not os.path.isdir(thumbnail_dir):
             logger.error('Cannot create directory for upload: {0}'.format(
-                                        base_full_path))
+                                        thumbnail_dir))
             raise
-
 
     if len(files) == 1:
         filename = files[0].name
@@ -995,14 +995,13 @@ def upload_submission(request, learner, pr_process, phase):
 
     else:
         joint_file_name = ''
-        staging_dir = base_dir_for_file_uploads + 'uploads/{0}/tmp/'.format(
-                                                                pr_process.id)
+        logger.debug('Processing uploads: ' + str(files))
         for f_to_process in files:
             filename = f_to_process.name
             extension = filename.split('.')[-1].lower()
             joint_file_name += '.'.join(filename.split('.')[0:-1])
 
-            with open(staging_dir + filename, 'wb+') as dst:
+            with open(thumbnail_dir + filename, 'wb+') as dst:
                 for chunk in f_to_process.chunks():
                     dst.write(chunk)
 
@@ -1013,24 +1012,28 @@ def upload_submission(request, learner, pr_process, phase):
                 pr_process.id, generate_random_token(token_length=16) + '.pdf')
 
         try:
-
             c = canvas.Canvas(full_path, pagesize=A4, )
             c.setPageSize(landscape(A4))
             for f_to_process in files:
                 c.setFont("Helvetica", 14)
                 c.drawString(10, 10, f_to_process.name)
-                c.drawImage(staging_dir + f_to_process.name,
+                c.drawImage(thumbnail_dir + f_to_process.name,
                             x=cm*1, y=cm*1,
                             width=cm*(29.7-2), height=cm*(21-2), mask=None,
                             preserveAspectRatio=True, anchor='c')
                 c.showPage()
             c.save()
-        except IOError:
+        except IOError as exp:
+            logger.error('Exception: ' + str(exp))
             # TODO: raise error message
-            pass
+        
+        for f_to_process in files:
+            filename = f_to_process.name
+            # Delete: thumbnail_dir + filename
+                  
 
         submitted_file_name = full_path.split(base_dir_for_file_uploads)[1]
-        filename = joint_file_name[0:255]
+        filename = joint_file_name[0:251] + '.pdf'
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
@@ -1050,13 +1053,18 @@ def upload_submission(request, learner, pr_process, phase):
             
     # Make the thumbnail of the PDF -> PNG
     from wand.image import Image  
-    imageFromPdf = Image(filename=full_path)  
-    image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
-    image.composite(imageFromPdf.sequence[0], top=0, left=0)
-    image.format = "png"  
-    thumbnail_name = full_path.replace('.'+extension, '.png')
-    image.save(filename=thumbnail_name)     
-
+    try:
+        imageFromPdf = Image(filename=full_path)  
+        image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
+        image.composite(imageFromPdf.sequence[0], top=0, left=0)
+        image.format = "png"  
+        thumbnail_name = thumbnail_dir + os.sep + \
+                                    filename.replace('.'+extension, '.png')
+        image.save(filename=thumbnail_name)     
+    except Exception as exp:
+        logger.error('Exception for thumbnail: ' + str(exp))
+        thumbnail_name = None       
+    
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
                      status='S',
