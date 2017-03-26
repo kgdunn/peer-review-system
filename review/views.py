@@ -442,6 +442,10 @@ def render_phase(phase, ctx_objects):
     context = Context(ctx_objects)
     return template.render(context)
 
+
+# intentional late import: for ``index``
+from groups.views import get_group_information
+
 def get_related(self, request, learner, ctx_objects, now_time, prior):
     """
     Gets all the necessary objects used to render the template for an object
@@ -649,12 +653,31 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         max_reviews = Submission.objects.filter(pr_process=phase.pr,
                                                 phase=phase,
                                                 is_valid=True).count()
-
+        peers_grading = 0 
+        peers_complete = 0
         if learner.role == 'Learn':
             n_reviews = peerreview_phase.number_of_reviews_per_learner
+            group = get_group_information(learner, ctx_objects['pr'].gf_process)
+            my_sub = Submission.objects.filter(group_submitted=\
+                                                    group['group_instance'],
+                                                    is_valid=True,
+                                                    phase=phase)
+            
+            if my_sub.count():
+                my_sub = my_sub[0]
+                peers_grading = RubricActual.objects.filter(submission=my_sub)\
+                                    .filter(graded_by__role='Learn').count()
+                peers_complete = RubricActual.objects.filter(submission=my_sub,
+                                                             status='C')\
+                                    .filter(graded_by__role='Learn').count()
+                extra_info = ('Your report has been allocated to {0} peers; it '
+                              'has been completely graded by {1} so far.').\
+                             format(peers_grading, peers_complete)
         else:
             # Administrators/TAs can have unlimited number of reviews
             n_reviews = max_reviews
+            
+        ctx_objects['self'].extra_info = extra_info
 
 
         # Which template are we using in this phase?
@@ -933,8 +956,7 @@ def get_learner_details(ractual_code):
     return r_actual, learner
 
 
-# intentional late import: for ``index``
-from groups.views import get_group_information
+
 def upload_submission(request, learner, pr_process, phase):
     """
     Handles the upload of the user's submission.
