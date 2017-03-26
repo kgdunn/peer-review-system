@@ -1047,6 +1047,15 @@ def upload_submission(request, learner, pr_process, phase):
                         str(item), item.submitted_file_name))
             item.is_valid = False
             item.save()
+            
+    # Make the thumbnail of the PDF -> PNG
+    from wand.image import Image  
+    imageFromPdf = Image(filename=full_path)  
+    image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
+    image.composite(imageFromPdf.sequence[0], top=0, left=0)
+    image.format = "png"  
+    thumbnail_name = full_path.replace('.'+extension, '.png')
+    image.save(filename=thumbnail_name)     
 
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
@@ -1055,21 +1064,12 @@ def upload_submission(request, learner, pr_process, phase):
                      phase=phase,
                      is_valid=True,
                      file_upload=submitted_file_name,
+                     thumbnail=thumbnail_name,
                      submitted_file_name=filename,
                      ip_address=get_IP_address(request),
                     )
     sub.save()
     
-    # Make the thumbnail of the PDF -> PNG
-    from wand.image import Image  
-    imageFromPdf = Image(filename=full_path)  
-    image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
-    image.composite(imageFromPdf.sequence[0], top=0, left=0)
-    image.format = "png"  
-    image.save(filename=full_path.replace('.'+extension, '.png'))  
-   
-
-
 
     if group_members['group_name']:
         address = group_members['member_email_list']
