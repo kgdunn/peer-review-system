@@ -17,24 +17,8 @@ table.pr-admin {
 .pr-admin-even{
     background-color: #fff;
 }
-.clicker {
-    background-color: lightblue;
-    outline:none;
-    cursor:pointer;
-}
-
-.hidden-admin-div-wrapper{
-    display:none;
-}
-
-.clicker:focus + .hidden-admin-div-wrapper{
-    display:block;
-}
-
 </style>
 
-<p><div class="clicker" tabindex="1">Instructor/TA view: Click on this text to reveal details about the self-review progress.</div>
-<div class="hidden-admin-div-wrapper">
 
 <table class="pr-admin" >
 <thead>
@@ -68,5 +52,3 @@ table.pr-admin {
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
 </table>
-
-</div> <!--hidden-admin-div-wrapper-->

@@ -20,25 +20,7 @@ table.pr-admin {
     background-color: #fff;
 }
 
-.clicker {
-    background-color: lightblue;
-    outline:none;
-    cursor:pointer;
-}
-
-.hidden-admin-div-wrapper{
-    display:none;
-}
-
-.clicker:focus + .hidden-admin-div-wrapper{
-    display:block;
-}
-
 </style>
-
-<p><div class="clicker" tabindex="1">Instructor/TA view: Click on this text to see details about the submission progress.</div>
-<div class="hidden-admin-div-wrapper">
-
 <p>
 {% if pr.uses_groups %}
 <span style="color: orange">There are {{all_groups.count}} groups; of these {{ no_submit.count}} ha{{ no_submit.count|pluralize:"s,ve" }} not yet submitted.</span>
@@ -69,6 +51,3 @@ table.pr-admin {
 </table>
 {% endif %}{#pr.uses_groups#}
 
-
-
-</div> <!--hidden-admin-div-wrapper-->

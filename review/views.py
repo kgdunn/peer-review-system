@@ -612,16 +612,15 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['allow_review'] = allow_review
 
         ctx_objects.pop('r_actuals', None)
-        # TODO: allow admins to go further here, but only AFTER the start time,
-        #       not before
+        
         if not(allow_review):
-            return ctx_objects
-
-
-        # Administrator roles can go further, even if we are not within the
-        # time range for peer-review. This is so admins can view, and even
-        # evaluate all students submissions.
-
+            # Administrator roles can go further, even if we are not within the
+            # time range for peer-review. This is so admins can view, and even
+            # evaluate all students submissions.            
+            if learner.role != 'Learn':
+                pass
+            else:
+                return ctx_objects
 
         # Is this the first time the learner is here: create the
         # N = self.number_of_reviews_per_learner rubrics for the learner
