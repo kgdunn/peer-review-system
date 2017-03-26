@@ -112,12 +112,17 @@ class PR_process(models.Model):
         return self.title
 
 
-def peerreview_directory_path(instance, filename):
+def peerreview_directory_path(instance, filename, randomize=True):
     """
     The file will be uploaded to MEDIA_ROOT/uploads/nnn/<filename>
     """
-    extension = filename.split('.')[-1]
-    filename = generate_random_token(token_length=16) + '.' + extension
+    if '.' not in filename:
+        filename = filename + '.'
+    extension = filename.split('.')[-1].lower()
+    if randomize:
+        filename = generate_random_token(token_length=16) + '.' + extension
+    else:
+        filename = ''.join(filename.split('.')[0:-1]) + '.' + extension
     return '{0}{1}{2}{1}{3}'.format('uploads',
                                     os.sep,
                                     instance.pr_process.id,
@@ -232,6 +237,8 @@ class Submission(models.Model):
         help_text=('Valid if: it was submitted on time, or if this is the most '
                    'recent submission (there might be older ones).'))
     file_upload = models.FileField(upload_to=peerreview_directory_path)
+    thumbnail = models.FileField(upload_to=peerreview_directory_path, 
+                                 blank=True, null=True)
     submitted_file_name = models.CharField(max_length=255, default='')
 
     number_reviews_assigned = models.PositiveSmallIntegerField(default=0,

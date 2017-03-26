@@ -37,6 +37,7 @@ except ImportError:
 # 3rd party imports
 import magic  # used to check if file uploads are of the required type
 
+
 # Logging
 import logging
 logger = logging.getLogger(__name__)
@@ -497,8 +498,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(within_phase):
             return ctx_objects
 
-        #from . forms import UploadFileForm_multiple_file
-        #file_upload_form = UploadFileForm_multiple_file()
+        from . forms import UploadFileForm_multiple_file
+        file_upload_form = UploadFileForm_multiple_file()
 
         if request.FILES:
             submission = upload_submission(request, learner, self.pr, sub_phase)
@@ -506,7 +507,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         sub_phase.submission = ctx_objects['submission']
         sub_phase.allow_submit = ctx_objects['allow_submit'] = allow_submit
-        #sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
+        sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
 
 
 
@@ -984,7 +985,7 @@ def upload_submission(request, learner, pr_process, phase):
 
     if len(files) == 1:
         filename = files[0].name
-        extension = filename.split('.')[-1]
+        extension = filename.split('.')[-1].lower()
         submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
                     generate_random_token(token_length=16) + '.' + extension)
         full_path = base_dir_for_file_uploads + submitted_file_name
@@ -998,7 +999,7 @@ def upload_submission(request, learner, pr_process, phase):
                                                                 pr_process.id)
         for f_to_process in files:
             filename = f_to_process.name
-            extension = filename.split('.')[-1]
+            extension = filename.split('.')[-1].lower()
             joint_file_name += '.'.join(filename.split('.')[0:-1])
 
             with open(staging_dir + filename, 'wb+') as dst:
@@ -1065,7 +1066,7 @@ def upload_submission(request, learner, pr_process, phase):
     image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
     image.composite(imageFromPdf.sequence[0], top=0, left=0)
     image.format = "png"  
-    image.save(filename=full_path.lower().replace('.pdf', '.png'))  
+    image.save(filename=full_path.replace('.'+extension, '.png'))  
    
 
 
