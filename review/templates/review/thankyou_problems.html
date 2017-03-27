@@ -34,9 +34,8 @@ body {
     <p>
     <br><br>The average review has {{median_words|floatformat}} words. Your review had {{word_count}} word{{word_count|pluralize:",s"}}*.
     <br>* We value <em>quality</em>, over <em>quantity</em>, however a low word count is associated with relatively less-helpful feedback.
-    {% if person.role != 'Learn'%}
-      <br><hr>Your are an admin/TA/instructor: <b>you gave this report a score of {{total_score|floatformat}} points</b> (out of a maximum of {{max_score|floatformat}}).
-    {% endif %}
+    <br><hr><b>You gave this report a score of {{total_score|floatformat}} points</b> out of {{max_score|floatformat}}, or {{percentage|floatformat}}%
+    
 {% endif %}
   </div>
 </div>

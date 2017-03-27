@@ -1657,8 +1657,10 @@ def submit_peer_review_feedback(request, ractual_code):
                                                      + str(request.POST)  )
         logger.debug('MISSING[{0}]: {1}'.format(len(items),
                                                 learner))
-
-
+    try:
+        percentage = total_score/r_actual.rubric_template.maximum_score*100
+    except ZeroDivisionError:
+        percentage = 0.0
     ctx = {'n_missing': len(items),
            'return_URI_code': ractual_code,
            'median_words': median_words,
@@ -1666,6 +1668,7 @@ def submit_peer_review_feedback(request, ractual_code):
            'person': learner,
            'total_score': total_score,
            'max_score': r_actual.rubric_template.maximum_score,
+           'percentage': percentage
            }
     return render(request, 'review/thankyou_problems.html', ctx)
 
