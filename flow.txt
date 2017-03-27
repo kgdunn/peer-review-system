@@ -9,6 +9,15 @@ Debug logs: show which PRProcess is being view/assessed etc
 * Seems like it sets other's work as is_valid=False
 * Thumbnailing is wrong
 
+Upload
+=-------
+Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
+Size limit
+Strip out the PDF information
+Check for PDF
+>>> import magic
+>>> magic.from_file("testdata/test.pdf")
+
 
 * Raise error messages: incorrect filetypes, cannot create PDF, etc
 * Create a tmbnail from PDF
@@ -141,28 +150,11 @@ IMport names from CSV
 Show description of groups
 Log for administrator
 
-Upload
-=-------
-Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
-Size limit
-Strip out the PDF information
-Check for PDF
->>> import magic
->>> magic.from_file("testdata/test.pdf")
 
 
 To do next
 ------
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-
-
-During the run:
-----
-Watch the reviews coming in at: https://peer.connectmv.com/admin/review/roptionactual/
-Track linode stats
-Run htop
-Dump the data to text file:
-  ./manage.py dumpdata review stats groups --format=json --indent=2 > backup-`date '+%Y-%m-%d-%H-%M-%S'`.json
 
 
 Review process
