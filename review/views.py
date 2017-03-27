@@ -656,6 +656,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                                                 is_valid=True).count()
         peers_grading = 0 
         peers_complete = 0
+        extra_info = ''
         if learner.role == 'Learn':
             n_reviews = peerreview_phase.number_of_reviews_per_learner
             group = get_group_information(learner, ctx_objects['pr'].gf_process)

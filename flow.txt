@@ -6,6 +6,9 @@ How to resolve POST errors: ""request data read error""
 Debug logs: show which PRProcess is being view/assessed etc
 ----
 
+* Seems like it sets other's work as is_valid=False
+* Thumbnailing is wrong
+
 
 * Raise error messages: incorrect filetypes, cannot create PDF, etc
 * Create a tmbnail from PDF
