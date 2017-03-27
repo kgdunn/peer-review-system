@@ -96,13 +96,33 @@ for item in src_items:
    
     
     
+To create a new rubric
+-----------
+0. Create a course, with the LTI connection
+1. Create the new LTI link item in Brightspace. It will reveal the "resource_link_id"
+2. Use that code, to create a new PR_Process: give it a name, attach it to an
+   existing course, select group formation process.
 
+3. Create a a new "RubricTemplate" instance, associated with this PR_Process.
+   Fill in the maximum score; 
+4. Create one or more phases (submission phase, etc). Remember to create these
+   directly from the source model. i.e. create a SubmissionPhase, and not a
+   PRPhase of the submission type
+   
+5. When you create the self-review (or peer-review phase), you need to link it to
+   the appropriate RubricTemplate, created above. Create the phase, but it will
+   crash in the browser, until you go the create RubricTemplate, and mention
+   the phase to which it is attached. Now it will succeed in the browser.
+   
+6. For either the self- or peer-review you need item(s), and each item has 1
+   or more associated options. Enter these, as RItemTemplate's and 
+   ROptionTemplate's based on the instructor's rubric.
   
 
 
 TO DO
 ======
-
+* Group email: make an HTML template. Allow the template to be in the PR_Process?
 * Does it matter that there are duplicate "Enrolled" instances?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
@@ -132,10 +152,8 @@ Check for PDF
 
 
 To do next
------------
-Add the group name in the email to the students.
+------
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-After cut-off time show calculation of their grades
 
 
 During the run:

@@ -74,7 +74,7 @@ class ROptionActualAdmin(admin.ModelAdmin):
                     "comment", "created", "modified")
 
 class ROptionTemplateAdmin(admin.ModelAdmin):
-    list_display = ("rubric_item", "order", "score", "short_text",)
+    list_display = ("rubric_item", "order", "score", )
     ordering = ['rubric_item', 'order']
 
     list_filter = ['rubric_item__r_template',

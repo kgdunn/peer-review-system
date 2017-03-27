@@ -398,8 +398,6 @@ class ROptionTemplate(models.Model):
     """
     rubric_item = models.ForeignKey(RItemTemplate)
     score = models.FloatField(help_text='Usually: 1, 2, 3, 4, etc points')
-    short_text = models.CharField(max_length=50, default='', blank=True,
-            help_text='This text is in the drop down')
     criterion = models.TextField(help_text='A prompt/criterion to the peers',
                                  blank=True)
     order = models.IntegerField()
