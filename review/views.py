@@ -1640,9 +1640,12 @@ def submit_peer_review_feedback(request, ractual_code):
         
         
                 
-        logger.debug('ALL-DONE: {0}'.format(learner))
+        logger.debug('ALL-DONE: {0}. Median={1} vs Actual={2}; Score={3}'\
+                     .format(learner, median_words, word_count, total_score))
         create_hit(request, item=r_actual, event='ending-a-review-session',
-                   user=learner, other_info='COMPLETE ' + str(request.POST))
+                   user=learner, other_info=('COMPLETE; Median={0} vs '
+                     'Actual={1}; Score={2}||').format(median_words, word_count, 
+                                    total_score) + str(request.POST))
     else:
         r_actual.submitted = False
         r_actual.completed = r_actual.started
