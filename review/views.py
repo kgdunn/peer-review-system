@@ -672,9 +672,16 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                 peers_complete = RubricActual.objects.filter(submission=my_sub,
                                                              status='C')\
                                     .filter(graded_by__role='Learn').count()
-                extra_info = ('Your report has been allocated to {0} peers; it '
-                              'has been completely graded by {1} so far.').\
-                             format(peers_grading, peers_complete)
+                extra_info = 'Your report has been allocated to '
+                if peers_grading > 1:
+                    extra_info += '{0} peers;'.format(peers_grading)
+                elif peers_grading == 1:
+                    extra_info += '1 peer;'
+                else:
+                    extra_info += '0 peers;'
+                
+                extra_info += ' it has been completely graded by {0} so far.'.\
+                             format(peers_complete)
         else:
             # Administrators/TAs can have unlimited number of reviews
             n_reviews = max_reviews
