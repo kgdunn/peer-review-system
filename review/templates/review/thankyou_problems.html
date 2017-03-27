@@ -23,11 +23,20 @@ body {
 <div class="main-container">
   <div class="fixer-container">
     {% if n_missing %}
-    <p>There were some missing answers in your review.
+    <p>There were some missing answers in your review. Further, the average review has {{median_words|floatformat}} words. Your review had {{word_count}} word{{word_count|pluralize:",s"}}*.
     <p>Please <a href="/review/{{return_URI_code}}/">click here to go back</a> and add the {{n_missing}} missing entr{{ n_missing|pluralize:"y,ies" }}.
+    <br><br><br>* We value <em>quality</em>, over <em>quantity</em>, however a low word count is associated with relatively less-helpful feedback.
 {% else %}
-    Thank you. Your review has been successfully received.
+    <p>Thank you. Your review has been successfully received. 
     <p>You may close this tab/window, and return back.
+    <br>
+    <p>Should you wish to update your review, you can always do so from the main course page, or by <a href="/review/{{return_URI_code}}/">using this link</a>.
+    <p>
+    <br><br>The average review has {{median_words|floatformat}} words. Your review had {{word_count}} word{{word_count|pluralize:",s"}}*.
+    <br>* We value <em>quality</em>, over <em>quantity</em>, however a low word count is associated with relatively less-helpful feedback.
+    {% if person.role != 'Learn'%}
+      <br><hr>Your are an admin/TA/instructor: <b>you gave this report a score of {{total_score|floatformat}} points</b> (out of a maximum of {{max_score|floatformat}}).
+    {% endif %}
 {% endif %}
   </div>
 </div>

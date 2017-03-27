@@ -1618,6 +1618,11 @@ def submit_peer_review_feedback(request, ractual_code):
         word_count += words
 
     # All done with storing the results. Did the user fill everything in?
+    
+    words = [r.word_count for r in RubricActual.objects.filter(status='C')]
+    words = np.array(words)
+    median_words = np.median(words[words!=0])
+    
     if request.POST:
         request.POST.pop('csrfmiddlewaretoken', None) # don't want this in stats
     if len(items) == 0:
@@ -1632,6 +1637,8 @@ def submit_peer_review_feedback(request, ractual_code):
         # Also mark the Submission as having one extra completed review:
         r_actual.submission.number_reviews_completed += 1
         r_actual.submission.save()
+        
+        
                 
         logger.debug('ALL-DONE: {0}'.format(learner))
         create_hit(request, item=r_actual, event='ending-a-review-session',
@@ -1651,6 +1658,11 @@ def submit_peer_review_feedback(request, ractual_code):
 
     ctx = {'n_missing': len(items),
            'return_URI_code': ractual_code,
+           'median_words': median_words,
+           'word_count': word_count,
+           'person': learner,
+           'total_score': total_score,
+           'max_score': r_actual.rubric_template.maximum_score,
            }
     return render(request, 'review/thankyou_problems.html', ctx)
 
