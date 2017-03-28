@@ -2,12 +2,18 @@
 * Statistics: getting review
 * Statistics: getting grades
 
+Check: is it true that if you add a new Item, that existing RActuals are not 
+       updated?
+
+
 How to resolve POST errors: ""request data read error""
 Debug logs: show which PRProcess is being view/assessed etc
 ----
 
 * Seems like it sets other's work as is_valid=False
 * Thumbnailing is wrong
+
+
 
 Upload
 =-------
@@ -34,6 +40,8 @@ brew install imagemagick@6
 ln -s /usr/local/Cellar/imagemagick\@6/6.9.8-3/lib/libMagickWand-6.Q16.dylib /usr/local/lib/libMagickWand.dylib
 
 ----
+* Statistics: time from first opening, to first click of a piece of feedback/score
+
 * See their progress in the peer/self review process: xx % completed
 * Push the grades back to Brightspace
 * Standard deviation of std. deviation to Conny

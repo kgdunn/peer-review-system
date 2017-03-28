@@ -265,12 +265,14 @@ def get_next_submission_to_evaluate(phase, learner, return_all=False):
     Principle:
 
 
-    * get the submissions sorted from lowest to highest number of COMPELTED
-      reviews, and then sort from lowest to highest number of peer reviews
-      ASSIGNED (not completed). So at the top of the list will be submissions
-      with the least completions and assigns:
+    * Get the submissions sorted from lowest to highest number of ASSIGNED
+      reviews. NOTE: for peer-reviews in a MOOC we would normally sort by
+      lowest to highest number of completions. But in a campus course we have
+      a reasonable expectation that all peer reviews that are assigned will 
+      also be completed. However, something to consider is to sort from
+      lowest to highest the difference: (assigned minus completed).
 
-      but exclude:
+      Then exclude:
         ** 0. invalid submissions (e.g. duplicates)
         ** 1. find only submissions of the phase immediately prior to this one
               (going only as far back in the order history as needed)
@@ -289,7 +291,7 @@ def get_next_submission_to_evaluate(phase, learner, return_all=False):
                                                    pr_process=phase.pr,
                                                    phase__order=prior_step).\
                         order_by('datetime_submitted').\
-                        order_by('number_reviews_completed')
+                        order_by('number_reviews_assigned')
 
         if valid_subs_0_1.count() == 0:
             prior_step = max(-1, prior_step-1)
