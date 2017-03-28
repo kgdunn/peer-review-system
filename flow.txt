@@ -1,10 +1,7 @@
-
 * Statistics: getting review
 * Statistics: getting grades
-
 Check: is it true that if you add a new Item, that existing RActuals are not 
        updated?
-
 
 How to resolve POST errors: ""request data read error""
 Debug logs: show which PRProcess is being view/assessed etc

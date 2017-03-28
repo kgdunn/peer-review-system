@@ -45,7 +45,7 @@ table.pr-grading {
 {% for item in grade_components %}
     <tr class="pr-grading-{% cycle 'odd' 'even' %}">
       <td>{{item.name_in_table}}</td>
-      <td>{{item.grade_detail}}</td>
+      <td>{{item.grade_detail|safe}}</td>
       <td class="centered">{{item.grade_achieved|floatformat}}</td>
       <td class="centered">{{item.max_weight|floatformat}}</td>
       <td class="centered">{{item.component_weight|floatformat}}</td>

@@ -456,6 +456,12 @@ class GradeComponent(models.Model):
         help_text=('HTML is possible; used in the template. Can include '
                    'template elements: {{grade_text}}, {{n_evals_completed}}, '
                    '{{n_reviews}}, etc.'))
+    display = models.BooleanField(default=True, help_text=('If False, it will '
+            'not be shown; useful to show the grades currently achieved, even '
+            'if the peer review process is not completely over.'))
+    mandatory = models.BooleanField(default=False, help_text=('If this is '
+            'True, and the learners get a zero for this component, the '
+            'entire grade is zero. It creates an if-else type grading.'))
     weight = models.FloatField(default = 0.0,
                                help_text=('Values must be between 0.0 and 1.0.',
                                           ' It is your responsibility to make '

@@ -676,13 +676,13 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                                     .filter(graded_by__role='Learn').count()
                 extra_info = 'Your report has been allocated to '
                 if peers_grading > 1:
-                    extra_info += '{0} peers;'.format(peers_grading)
+                    extra_info += '{0} peers so far;'.format(peers_grading)
                 elif peers_grading == 1:
-                    extra_info += '1 peer;'
+                    extra_info += '1 peer so far;'
                 else:
-                    extra_info += '0 peers;'
+                    extra_info += '0 peer so far;'
                 
-                extra_info += ' it has been completely graded by {0} so far.'.\
+                extra_info += ' it has been completely graded by {0}.'.\
                              format(peers_complete)
         else:
             # Administrators/TAs can have unlimited number of reviews
@@ -811,14 +811,29 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         grade_components = GradeComponent.objects.filter(pr=ctx_objects['pr']).\
             order_by('order')
         total_grade = 0.0
+        all_zero = False
         ctx_local = {}
         for item in grade_components:
-            grade_achieved, grade_detail = get_grading_percentage(item, learner)
+            if item.display:
+                grade_achieved, grade_detail = get_grading_percentage(item,
+                                                                      learner)
+                if item.mandatory:
+                    if grade_achieved == 0:
+                        all_zero = True                
+            else:
+                grade_achieved = 0.0
+                grade_detail = '<em>Not available yet</em>'
+                
+            
+                
             total_grade += item.weight * grade_achieved
             item.grade_achieved = grade_achieved
             item.component_weight = item.weight * grade_achieved
             item.grade_detail = grade_detail
             item.max_weight = item.weight * 100.0
+            
+        if all_zero:
+            total_grade = 0.0
 
         ctx_local['grade_components'] = grade_components
         ctx_local['overall_grade'] = total_grade
