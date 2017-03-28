@@ -23,11 +23,11 @@ body {
 <div class="main-container">
   <div class="fixer-container">
     {% if n_missing %}
-    <p>There were some missing answers in your review. Further, the average review has {{median_words|floatformat}} words. Your review had {{word_count}} word{{word_count|pluralize:",s"}}*.
+    <p><span style="color:red"><b>There are missing items in your review, and it is therefore incomplete.</b></span> Further, the average review has {{median_words|floatformat}} words. Your review had {{word_count}} word{{word_count|pluralize:",s"}}*.
     <p>Please <a href="/review/{{return_URI_code}}/">click here to go back</a> and add the {{n_missing}} missing entr{{ n_missing|pluralize:"y,ies" }}.
     <br><br><br>* We value <em>quality</em>, over <em>quantity</em>, however a low word count is associated with relatively less-helpful feedback.
 {% else %}
-    <p>Thank you. Your review has been successfully received. 
+    <p>Thank you. <span style="color:darkgreen"><b>Your review has been successfully received.</b></span>
     <p>You may close this tab/window, and return back.
     <br>
     <p>Should you wish to update your review, you can always do so from the main course page, or by <a href="/review/{{return_URI_code}}/">using this link</a>.

@@ -13,8 +13,6 @@ Debug logs: show which PRProcess is being view/assessed etc
 * Seems like it sets other's work as is_valid=False
 * Thumbnailing is wrong
 
-
-
 Upload
 =-------
 Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
