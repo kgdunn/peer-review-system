@@ -16,6 +16,7 @@
     <th>Reviews completed</th>
     <th>Reviews completed</th>
     <th>Reviews in progress</th>
+    <th>Total allocated</th>
 </tr>
 </thead>
 <tbody>
@@ -30,6 +31,7 @@
     <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_completed}}</td>
     <td style="text-align:center">{{item.summary_stats.learner_grader_inprogress}}</td>
+    <td style="text-align:center">{{item.submission.number_reviews_assigned}}</td>
     </tr>
 {% endfor %}{# for item in r_actuals  #}
 </tbody>
