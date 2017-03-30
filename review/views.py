@@ -1208,7 +1208,7 @@ def xhr_store_text(request, ractual_code):
 
     # Return with something at the end
     now_time = datetime.datetime.now()
-    return HttpResponse('Your change was saved [{}]'.format(
+    return HttpResponse('Last saved at {}'.format(
                         now_time.strftime('%H:%M:%S')))
 
 
