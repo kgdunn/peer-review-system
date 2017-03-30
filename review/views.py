@@ -1122,8 +1122,8 @@ def upload_submission(request, learner, pr_process, phase):
                'You may submit multiple times, up to the deadline. Only the '
                'most recent submission is kept. {3}\n'
                '\n--\n'
-               'This is an automated message from the Peer Review system. '
-               'Please do not reply to this email address.\n')
+               'This is an automated message. Please do not reply to this '
+               'email address.\n')
     message = message.format(first_line, pr_process.LTI_title,
                              pr_process.course.name,
                              extra_line)

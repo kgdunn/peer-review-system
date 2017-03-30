@@ -6,6 +6,8 @@ Check: is it true that if you add a new Item, that existing RActuals are not
 How to resolve POST errors: ""request data read error""
 Debug logs: show which PRProcess is being view/assessed etc
 ----
+Use this for tables: http://olifolkerd.github.io/tabulator/examples/
+----
 
 * Seems like it sets other's work as is_valid=False
 * Thumbnailing is wrong
@@ -13,6 +15,7 @@ Debug logs: show which PRProcess is being view/assessed etc
 Upload
 =-------
 Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
+http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously
 Size limit
 Strip out the PDF information
 Check for PDF
