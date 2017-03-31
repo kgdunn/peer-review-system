@@ -1,5 +1,11 @@
 * Statistics: getting review
 * Statistics: getting grades
+
+* Close off peer-reviews tonight
+* PDF magick checker
+* Why do the RActuals get assigned for phase 2?
+
+
 Check: is it true that if you add a new Item, that existing RActuals are not 
        updated?
 

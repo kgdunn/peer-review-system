@@ -538,8 +538,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                                                 phase=self)
 
         # Get/create the R_actual for the self-review, only if there
-        # is an actual submission.
-        if ctx_objects['submission']:
+        # is an actual submission; and only if within the phase.
+        if ctx_objects['submission'] and within_phase:
             r_actual, _ = get_create_actual_rubric(learner,
                                                    r_template,
                                                    ctx_objects['submission'])
@@ -603,7 +603,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # For this phase, we do require to return "late"; the ``own_submission``
         # is required for the phase following this: the own-submission review.
         # This must come right here at the end, so the instructor can still
-        # se the "admin-self-review-status" page
+        # see the "admin-self-review-status" page
         if not(allow_self_review):
             return ctx_objects
 
