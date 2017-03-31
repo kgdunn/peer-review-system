@@ -500,8 +500,8 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(within_phase):
             return ctx_objects
 
-        from . forms import UploadFileForm_multiple_file
-        file_upload_form = UploadFileForm_multiple_file()
+        from . forms import UploadFileForm_one_file
+        file_upload_form = UploadFileForm_one_file()
 
         if request.FILES:
             submission = upload_submission(request, learner, self.pr, sub_phase)

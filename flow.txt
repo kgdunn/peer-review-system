@@ -12,6 +12,35 @@ Use this for tables: http://olifolkerd.github.io/tabulator/examples/
 * Seems like it sets other's work as is_valid=False
 * Thumbnailing is wrong
 
+
+TO DO
+======
+* Group email: make an HTML template. Allow the template to be in the PR_Process?
+* Don't allow non-PDF for upload
+* Return error messages for non-PDF; too large files
+
+Groups
+--------
+Open time
+Closing time
+Allow more than N enrollments
+Groups of different sizes
+Can be prefilled
+Allow self-removal and re-enrollment
+Longer term: waitlist
+Export to CSV
+IMport names from CSV
+Show description of groups
+Log for administrator
+
+
+
+To do next
+------
+Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
+
+
+
 Upload
 =-------
 Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
@@ -72,22 +101,6 @@ Show r_actual in group.ID order, or submission order
 Check that peer feedback results are the correct ones
 
 
-
-* Log the XHR events with Statistics still
-
-* Completed submissions via an intermediate database table
-
-# And also mark the submission as having one extra submission:
-#r_actual.submission.number_reviews_completed += 1
-#r_actual.submission.status = 'G' # in progress
-#r_actual.submission.save()
-
-# Reviews to still complete by this learner:
-#n_graded_already = RubricActual.objects.filter(graded_by=learner,
-#                                               status='C').count()
-#phase = r_actual.rubric_template.phase
-#n_to_do = max(0, get_n_reviews(learner, phase) - n_graded_already)
-
 Copy rubric over (in the shell)
 ----------------
 from review.models import PR_process, RubricTemplate, RItemTemplate
@@ -133,34 +146,6 @@ To create a new rubric
    or more associated options. Enter these, as RItemTemplate's and 
    ROptionTemplate's based on the instructor's rubric.
   
-
-
-TO DO
-======
-* Group email: make an HTML template. Allow the template to be in the PR_Process?
-* Does it matter that there are duplicate "Enrolled" instances?
-* Don't allow non-PDF for upload
-* Return error messages for non-PDF; too large files
-
-Groups
---------
-Open time
-Closing time
-Allow more than N enrollments
-Groups of different sizes
-Can be prefilled
-Allow self-removal and re-enrollment
-Longer term: waitlist
-Export to CSV
-IMport names from CSV
-Show description of groups
-Log for administrator
-
-
-
-To do next
-------
-Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
 
 
 Review process
