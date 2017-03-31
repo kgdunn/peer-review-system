@@ -894,7 +894,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
-
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
