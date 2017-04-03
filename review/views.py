@@ -1013,9 +1013,9 @@ def upload_submission(request, learner, pr_process, phase):
     if len(files) == 1:
         filename = files[0].name
         extension = filename.split('.')[-1].lower()
-        submitted_file_name = 'uploads/{0}/{1}'.format(pr_process.id,
+        submitted_file_name_django = 'uploads/{0}/{1}'.format(pr_process.id,
                     generate_random_token(token_length=16) + '.' + extension)
-        full_path = base_dir_for_file_uploads + submitted_file_name
+        full_path = base_dir_for_file_uploads + submitted_file_name_django
         with open(full_path, 'wb+') as dst:
             for chunk in files[0].chunks():
                 dst.write(chunk)
@@ -1058,9 +1058,11 @@ def upload_submission(request, learner, pr_process, phase):
             filename = f_to_process.name
             # Delete: thumbnail_dir + filename
                   
-
-        submitted_file_name = full_path.split(base_dir_for_file_uploads)[1]
-        filename = joint_file_name[0:251] + '.pdf'
+            
+        submitted_file_name_django = full_path.split(base_dir_for_file_uploads)[1]
+        extension = 'pdf'
+        filename = joint_file_name[0:251] + '.' + extension
+        
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
@@ -1097,14 +1099,19 @@ def upload_submission(request, learner, pr_process, phase):
         image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
         image.composite(imageFromPdf.sequence[0], top=0, left=0)
         image.format = "png"  
-        thumbnail_name = thumbnail_dir + os.sep + \
-                                    filename.replace('.'+extension, '.png')
-        image.save(filename=thumbnail_name)     
-        thumbnail_name = 'uploads/{0}/tmp/{1}'.format(pr_process.id, 
-                                        filename.replace('.'+extension, '.png'))
+        thumbnail_filename = submitted_file_name_django.split('uploads/{0}/'.format(pr_process.id))[1]
+        thumbnail_full_name = thumbnail_dir + \
+                                    thumbnail_filename.replace('.'+extension, 
+                                                               '.png')
+        thumbnail_file_name_django = 'uploads/{0}/tmp/{1}'.format(pr_process.id,
+                thumbnail_filename.replace('.'+extension, '.png'))
+        
+        
+        image.save(filename=thumbnail_full_name)     
+
     except Exception as exp:
         logger.error('Exception for thumbnail: ' + str(exp))
-        thumbnail_name = None       
+        thumbnail_file_name_django = None       
     
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
@@ -1112,8 +1119,8 @@ def upload_submission(request, learner, pr_process, phase):
                      pr_process=pr_process,
                      phase=phase,
                      is_valid=True,
-                     file_upload=submitted_file_name,
-                     thumbnail=thumbnail_name,
+                     file_upload=submitted_file_name_django,
+                     thumbnail=thumbnail_file_name_django,
                      submitted_file_name=filename,
                      ip_address=get_IP_address(request),
                     )
