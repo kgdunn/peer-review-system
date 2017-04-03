@@ -134,6 +134,7 @@ def get_create_student(request, course, pr):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
+        logger.debug('role={0}; userID={1}'.format(role, user_ID))
         learner, newbie = Person.objects.get_or_create(email=email,
                                                        user_ID=user_ID,
                                                        role=role)
@@ -897,6 +898,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 @csrf_exempt
 @xframe_options_exempt
 def index(request):
+    logger.debug(str(request.POST))
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
