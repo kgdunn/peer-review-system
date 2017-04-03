@@ -42,9 +42,9 @@ import magic  # used to check if file uploads are of the required type
 import logging
 logger = logging.getLogger(__name__)
 
-# Move this to localsettings.py, but it is good enough here, for now.
-base_dir_for_file_uploads = '/var/www/peer/documents/'
-
+# This is where the uploads from users will land. This must lie within 
+# the webserver's domain to serve.
+base_dir_for_file_uploads = settings.MEDIA_ROOT
 
 # Alternative LTI methods
 # Look at https://github.com/Harvard-University-iCommons/django-auth-lti
@@ -500,8 +500,11 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         if not(within_phase):
             return ctx_objects
 
-        from . forms import UploadFileForm_one_file
-        file_upload_form = UploadFileForm_one_file()
+        from . forms import UploadFileForm_one_file, UploadFileForm_multiple_file
+        if sub_phase.allow_multiple_files:
+            file_upload_form = UploadFileForm_multiple_file()
+        else:
+            file_upload_form = UploadFileForm_one_file()
 
         if request.FILES:
             submission = upload_submission(request, learner, self.pr, sub_phase)
@@ -1017,7 +1020,7 @@ def upload_submission(request, learner, pr_process, phase):
             for chunk in files[0].chunks():
                 dst.write(chunk)
 
-    else:
+    elif phase.allow_multiple_files:
         joint_file_name = ''
         logger.debug('Processing uploads: ' + str(files))
         for f_to_process in files:
@@ -1062,12 +1065,24 @@ def upload_submission(request, learner, pr_process, phase):
 
     group_members = get_group_information(learner, pr_process.gf_process)
 
-    # Has this group submitted this before?
-    prior = Submission.objects.filter(status='S',
+    
+    if (group_members['group_instance'] is None) and (pr_process.uses_groups\
+                                                                       ==False):
+        # Uses individual submissions:
+        prior = Submission.objects.filter(status='S',
+                                submitted_by=learner,
+                                pr_process=pr_process,
+                                phase=phase,
+                                is_valid=True)        
+        
+    else:
+        # Has this group submitted this before?
+        prior = Submission.objects.filter(status='S',
                                 group_submitted=group_members['group_instance'],
                                 pr_process=pr_process,
                                 phase=phase,
                                 is_valid=True)
+        
     if prior:
         for item in prior:
             logger.debug('Set old submission False: {0} and name "{1}"'.format(\
@@ -1135,8 +1150,6 @@ def upload_submission(request, learner, pr_process, phase):
 
     return sub
 
-
-#@csrf_exempt
 @xframe_options_exempt
 def xhr_store_text(request, ractual_code):
     """
@@ -1211,7 +1224,6 @@ def xhr_store_text(request, ractual_code):
                         now_time.strftime('%H:%M:%S')))
 
 
-#@csrf_exempt
 @xframe_options_exempt
 def xhr_store(request, ractual_code):
     """

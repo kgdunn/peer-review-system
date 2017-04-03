@@ -21,6 +21,7 @@ def create_hit(request, item=None, event='', user=None, other_info=None):
                          ua_string=ua_string,
                          item_name=item._meta.model_name,
                          item_pk=item.pk,
+                         referrer=referrer,
                          other_info=other_info,
                          user=user,
                          event=event)

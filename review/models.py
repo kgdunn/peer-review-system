@@ -172,6 +172,10 @@ class SubmissionPhase(PRPhase):
     #filename_template = models.CharField(max_length=200,
     #                                     default='{{random}}.{{extension}}')
     #n_file_uploads = models.PositiveSmallIntegerField(default=1)
+    
+    allow_multiple_files = models.BooleanField(default=False, 
+        help_text='If True, and ONLY for image files: will combine them.')
+    
     send_email_on_success = models.BooleanField(default=True)
     max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
     accepted_file_types_comma_separated = models.CharField(default='PDF',
@@ -250,7 +254,7 @@ class Submission(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime_submitted = models.DateTimeField(auto_now_add=True,
         verbose_name="Date and time the learner/group submitted.")
-
+    
     def __str__(self):
         return '[{0}][assign={1}][cmptd={2}]: {3}'.format(self.pr_process,
                                         self.number_reviews_assigned,
