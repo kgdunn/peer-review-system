@@ -134,7 +134,11 @@ def get_create_student(request, course, pr):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
-        logger.debug('role={0}; userID={1}'.format(role, user_ID))
+            
+        # Branch here for exceptional case of edX
+        if LTI_consumer == 'edx' and 'Administrator' in role:
+            role = 'Admin'
+            
         learner, newbie = Person.objects.get_or_create(email=email,
                                                        user_ID=user_ID,
                                                        role=role)
