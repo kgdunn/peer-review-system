@@ -464,10 +464,17 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
     some phases (like the evaluation phase), need to know the prior phase
     (usually the submission phase).
     """
-    within_phase = False
+    within_phase = post_phase = pre_phase = False
     if (self.start_dt.replace(tzinfo=None) <= now_time) \
                               and (self.end_dt.replace(tzinfo=None)>now_time):
         within_phase = True
+    if (now_time <= self.start_dt.replace(tzinfo=None)):
+        pre_phase = True
+        
+    if (now_time >= self.end_dt.replace(tzinfo=None)):
+        post_phase = True    
+        
+    
 
     # Objects required for a submission: file_upload_form, (prior) submission.
     try:
@@ -547,7 +554,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         # Get/create the R_actual for the self-review, only if there
         # is an actual submission; and only if within the phase.
-        if ctx_objects['submission'] and within_phase:
+        if ctx_objects['submission'] and (within_phase or post_phase):
             r_actual, _ = get_create_actual_rubric(learner,
                                                    r_template,
                                                    ctx_objects['submission'])
@@ -1759,8 +1766,8 @@ def get_stats_comments(request):
     writer = csv.writer(statsfile, delimiter='\t')
     writerow = ['Group name','Email','Self-review [6%]','Peer Review[60%]',
                  'Instructor review[26%]','Peer review credit[8%]',
-                 'Average grade','C1','C2','C3','C4','C5','C1','C2','C3',
-                 'C4','C5']
+                 'Average grade','C1','C2','C3','C4','C1','C2','C3',
+                 'C4',]
 
     writer.writerow(writerow)
     for student in Person.objects.filter(role='Learn'):
