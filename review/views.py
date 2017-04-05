@@ -1767,7 +1767,7 @@ def get_stats_comments(request):
     writerow = ['Group name','Email','Self-review [6%]','Peer Review[60%]',
                  'Instructor review[26%]','Peer review credit[8%]',
                  'Average grade','C1','C2','C3','C4','C1','C2','C3',
-                 'C4',]
+                 'C4','WordCount']
 
     writer.writerow(writerow)
     for student in Person.objects.filter(role='Learn'):
@@ -1796,7 +1796,9 @@ def get_stats_comments(request):
         evals_completed = RubricActual.objects.filter(status='C',
                                                       graded_by=student,
                                                 rubric_template=r_template)
+        word_count = 0
         for r_actual in evals_completed:
+            word_count += r_actual.word_count
             for item in r_actual.ritemactual_set.filter(submitted=True)\
                                                             .order_by('id'):
                 if item.ritem_template.option_type == 'LText':
@@ -1804,9 +1806,10 @@ def get_stats_comments(request):
                     rowwrite.append(item.roptionactual_set.all()[0].comment\
                             .encode('utf-8').replace(b'\t', b'').\
                             replace(b'\r\n', b'|').replace(b'\n', b'|'))
-
+                    
+        rowwrite.append(str(word_count))
         writer.writerow(rowwrite)
-        print('------')
+        print(word_count, '------')
 
     statsfile.close()
     return HttpResponse('The report is on the server to download.')

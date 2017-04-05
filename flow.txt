@@ -5,6 +5,14 @@
 * PDF magick checker
 * Why do the RActuals get assigned for phase 2?
 
+---
+ASsert the lenght of RItemActuals is the same (around line 377)
+items = completed_review.ritemactual_set.filter(submitted=True)\
+                                                            .order_by('id')
+        overall_max_score = 0.0 # just compute this on the last completed_review
+        for idxi, item in enumerate(items):
+        
+---
 
 Check: is it true that if you add a new Item, that existing RActuals are not 
        updated?
@@ -74,6 +82,8 @@ ln -s /usr/local/Cellar/imagemagick\@6/6.9.8-3/lib/libMagickWand-6.Q16.dylib /us
 
 ----
 * Statistics: time from first opening, to first click of a piece of feedback/score
+* Stats/check: number of words per box (normalized) plot again instructor score/peer score
+* Number of words vs time taken
 
 * See their progress in the peer/self review process: xx % completed
 * Push the grades back to Brightspace
@@ -81,7 +91,9 @@ ln -s /usr/local/Cellar/imagemagick\@6/6.9.8-3/lib/libMagickWand-6.Q16.dylib /us
 * Show in the admin interface the avg time take on the rubric
 
 https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_in_brightspace
-
+----
+Research question: did self-review help? Grades increased? Quality of reports up?
+----
 * Return grade to edX?
 
 
