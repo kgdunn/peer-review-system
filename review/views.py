@@ -9,9 +9,9 @@ from django.utils import timezone
 
 # Our imports
 from .models import Person, Course, PR_process
-from .models import PRPhase, SelfEvaluationPhase, SubmissionPhase,\
-                    PeerEvaluationPhase, FeedbackPhase, GradeReportPhase,\
-                    ViewAllSubmissionsPhase
+from .models import PRPhase, SubmissionPhase, SelfEvaluationPhase, \
+                    StaffReviewPhase, PeerEvaluationPhase, FeedbackPhase, \
+                    GradeReportPhase, ViewAllSubmissionsPhase
 from .models import Submission, ReviewReport, GradeComponent
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
@@ -1008,14 +1008,14 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             uploaded_items_exist = False
         else:
             uploaded_items_exist = True # for certainty
-
+        ctx_objects['uploaded_items_exist'] = uploaded_items_exist    
         ctx_objects['uploaded_items'] = uploaded_items
         content = loader.render_to_string('review/view-all-submissions.html',
                                           context=ctx_objects,
                                           request=request,
                                           using=None)
         ctx_objects['self'].show_all_uploads = content
-        ctx_objects['uploaded_items_exist'] = uploaded_items_exist
+        
 
     except ViewAllSubmissionsPhase.DoesNotExist:
         pass
@@ -1068,22 +1068,31 @@ def index(request):
         # A later phase can use (modify even) the state of a variable.
         # The "self" variable is certainly altered every phase
         ctx_objects['self'] = phase
-        ctx_objects = get_related(phase,
-                                  request,
-                                  learner,
-                                  ctx_objects,
-                                  now_time,
-                                  prior)
-
-
-        # Render the HTML for this phase: it depends on the ``pr`` settings,
-        # the date and time, and related objects specifically required for
-        # that phase. The rendering happens per phase. That means if the state
-        # of a variable changes, it might be rendered differently in a later
-        # phase [though this is not expected to be used].
-
-        html.append(render_phase(phase, ctx_objects))
-        html.append('<hr>\n')
+        
+        render_this_section = False
+        if (phase.is_visibile_to_students) and (learner.role == 'Learn'):
+            render_this_section = True
+        if learner.role != 'Learn':   
+            render_this_section = True
+            
+        if render_this_section:
+                
+            ctx_objects = get_related(phase,
+                                      request,
+                                      learner,
+                                      ctx_objects,
+                                      now_time,
+                                      prior)
+    
+    
+            # Render the HTML for this phase: it depends on the ``pr`` settings,
+            # the date and time, and related objects specifically required for
+            # that phase. The rendering happens per phase. That means if the 
+            # state of a variable changes, it might be rendered differently in 
+            # a later phase [though this is not expected to be used].
+    
+            html.append(render_phase(phase, ctx_objects))
+            html.append('<hr>\n')
 
         # Prepare for the next iteration in this loop.
         # Prior element in the Peer Review chain for the next iteration.

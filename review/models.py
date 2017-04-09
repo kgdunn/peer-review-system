@@ -149,6 +149,7 @@ class PRPhase(models.Model):
                     verbose_name='Start of this phase',)
     end_dt = models.DateTimeField(default=timezone.now,
                     verbose_name='End of this phase', )
+    is_visibile_to_students = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True,
             help_text='An override, allowing you to stage/draft phases.')
     show_dates = models.BooleanField(default=True,
