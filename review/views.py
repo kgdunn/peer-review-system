@@ -1418,7 +1418,8 @@ def xhr_store(request, ractual_code):
         try:
             r_opt_template = r_options[selected-1]
         except (IndexError, AssertionError):
-            return HttpResponse('Invalid')
+            return HttpResponse(('<b>Invalid</b>. This should never occur. '
+                                'Please report it'))
 
     # If necessary, prior submissions for the same option are adjusted
     # as being .submitted=False (perhaps the user changed their mind)
