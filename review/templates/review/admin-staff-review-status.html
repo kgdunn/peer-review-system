@@ -1,0 +1,33 @@
+<div class="accordion">
+<h3>Click here to show/hide the information for instructors and TAs</h3>
+<div>
+<table class="pr-admin">
+<thead>
+<tr>
+    <th style="width:250px">{% if self.pr.uses_groups %}Group name and ID{% else %}Submitted by{%endif%}</th>
+    <th style="width:250px">Peer review link</th>
+    <th style="width:250px">Your status</th>
+    <th>Reviews completed</th>
+</tr>
+</thead>
+<tbody>
+{% for item in r_actuals %}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+    <td>{% if self.pr.uses_groups %} 
+           {{item.submission.group_submitted.name}} (ID={{item.submission.group_submitted.id}})
+        {% else %}
+           {{item.submission.submitted_by.display_name}}
+        {% endif %}
+    </td>
+    <td><a href="/review/{{item.unique_code}}/" target="_blank">Access peer review</a> </td>
+    <td>{% if item.status == 'C'%}  <span style="color:darkgreen">Completed - <em>thank you</em></span>
+        {% elif item.status == 'P'%}<span style="color:orange">In progress (not complete) </span>
+        {% else %}                  <span style="color:red">Not started</span>
+                      {%endif%}</td>
+    <td style="text-align:center">{{item.summary_stats.admin_grader_completed}}</td>
+    </tr>
+{% endfor %}{# for item in r_actuals  #}
+</tbody>
+</table>
+</div> <!--extra information-->
+</div> <!--accordion-->

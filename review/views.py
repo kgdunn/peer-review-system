@@ -733,7 +733,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         # Now we have the peer review ojects: ``r_actuals``
         ctx_objects['r_actuals'] = r_actuals
 
-        content = loader.render_to_string('review/admin-peer-review-status.html',
+        content = loader.render_to_string('review/admin-staff-review-status.html',
                                           context=ctx_objects,
                                           request=request,
                                           using=None)
@@ -1419,7 +1419,7 @@ def xhr_store(request, ractual_code):
             r_opt_template = r_options[selected-1]
         except (IndexError, AssertionError):
             return HttpResponse(('<b>Invalid</b>. This should never occur. '
-                                'Please report it'))
+                                'Please report it.'))
 
     # If necessary, prior submissions for the same option are adjusted
     # as being .submitted=False (perhaps the user changed their mind)
