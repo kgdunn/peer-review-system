@@ -16,16 +16,6 @@ class UploadFileForm_multiple_file(forms.Form):
                            'initial_text': "Select 1 or more files"}))
     
 
-    def clean_file_upload(self):
-        data = self.cleaned_data['file_upload']
-        #if "fred@example.com" not in data:
-        #    raise forms.ValidationError("You have forgotten about Fred!")
-
-        # Always return a value to use as the new cleaned data, even if
-        # this method didn't change it.
-        return data    
-
-
 class UploadFF(forms.ModelForm):
 
     learner_ID = forms.TextInput(attrs=None)

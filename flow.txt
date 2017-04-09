@@ -1,7 +1,7 @@
+* Get the tables sortable in the view
+* Get 2 late peer review links out to the students.
 * Statistics: getting review
 * Statistics: getting grades
-
-* Close off peer-reviews tonight
 * PDF magick checker
 * Why do the RActuals get assigned for phase 2?
 
@@ -121,9 +121,10 @@ Check that peer feedback results are the correct ones
 
 Copy rubric over (in the shell)
 ----------------
+./manage.py shell
 from review.models import PR_process, RubricTemplate, RItemTemplate
-src_template = RubricTemplate.objects.get(title='Repair practicum self-review')
-dst_template = RubricTemplate.objects.get(title='Repair practicum peer-review')
+src_template = RubricTemplate.objects.get(title='Recyclability practicum self-review')
+dst_template = RubricTemplate.objects.get(title='Recyclability practicum peer-review')
 src_items = RItemTemplate.objects.filter(r_template=src_template)
 for item in src_items:
     # First get the associated options
@@ -140,7 +141,29 @@ for item in src_items:
         opt.rubric_item = item
         opt.save()
    
-    
+To create a review for a student past the deadline
+---------
+./manage.py shell
+from review.models import PRPhase, Person, RubricTemplate
+from review.views import get_next_submission_to_evaluate
+
+self = PRPhase.objects.get(id=___) <- the phase for  #20
+learner = Person.objects.get(id=___) <- the student
+r_template = RubricTemplate.objects.get(id=5)
+next_subs = get_next_submission_to_evaluate(self, learner, return_all=True)
+
+# Hit database to get the next submission to grade:
+next_sub = next_subs[0]
+r_actual, new = get_create_actual_rubric(learner=learner,
+                                         template=r_template,
+                                         submission=next_sub)
+
+if new:
+    next_sub.number_reviews_assigned += 1
+    next_sub.save()
+    r_actuals.append(r_actual)
+
+
     
 To create a new rubric
 -----------

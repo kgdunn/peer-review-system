@@ -71,8 +71,9 @@ def starting_point(request):
     try:
         pr = PR_process.objects.get(LTI_id=pr_ID)
     except PR_process.DoesNotExist:
-        return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
-            pr_ID)), None, None)
+        return (HttpResponse(('Configuration error. Try viewing this page '
+                        'in Live mode. Or use resource_link_id={}').format(\
+                        pr_ID)), None, None)
 
     try:
         if ' ' in course_ID:
@@ -918,7 +919,7 @@ def index(request):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
-    logger.debug('Learner entering: {0}'.format(learner))
+    logger.debug('Learner entering [pr={0}]: {1}'.format(pr.title, learner))
 
 
     create_hit(request, item=learner, event='login', user=learner,)
