@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import Person, Course, PR_process, PRPhase, Submission
-from .models import SubmissionPhase, SelfEvaluationPhase
+from .models import SubmissionPhase, SelfEvaluationPhase, StaffReviewPhase
 from .models import ViewAllSubmissionsPhase
 from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
 from .models import GradeComponent, ReviewReport
@@ -27,6 +27,9 @@ class SubmissionPhaseAdmin(admin.ModelAdmin):
                     "accepted_file_types_comma_separated")
 
 class SelfEvaluationPhaseAdmin(admin.ModelAdmin):
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
+    
+class StaffReviewPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class PeerEvaluationPhaseAdmin(admin.ModelAdmin):
@@ -94,6 +97,7 @@ admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(PRPhase, PRPhaseAdmin)
 admin.site.register(SubmissionPhase, SubmissionPhaseAdmin)
 admin.site.register(SelfEvaluationPhase, SelfEvaluationPhaseAdmin)
+admin.site.register(StaffReviewPhase, StaffReviewPhaseAdmin)
 admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)

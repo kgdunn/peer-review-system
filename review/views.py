@@ -630,6 +630,123 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
     # Objects required for a peer-review: r_actuals
     try:
+        staffreview_phase = StaffReviewPhase.objects.get(id=self.id)
+        ctx_objects['self'] = staffreview_phase
+        
+        # Students cannot perform a staff review
+        if learner.role == 'Learn':
+            return ctx_objects
+        
+        allow_review = True
+        ctx_objects['allow_review'] = allow_review
+        ctx_objects.pop('r_actuals', None)
+        
+        
+
+        # Is this the first time the person is here: create and return the
+        # N ``RubricActual`` instances.
+
+        # If this is the second or subequent time here, simply return
+        # the N ``RubricActual`` instances.
+
+        # Which was the submission phase, prior to this one. A good starting
+        # guess is ``prior``, and then we work backwards. If none is found,
+        # then return the ``0``.
+        phase = prior
+        while (phase.order >= 0):
+            try:
+                phase = SubmissionPhase.objects.get(is_active=True,
+                                                    pr=self.pr,
+                                                    order=phase.order)
+
+                break
+            except SubmissionPhase.DoesNotExist:
+                phase = PRPhase.objects.get(is_active=True, pr=self.pr,
+                                order=phase.order-1)
+
+
+        max_reviews = Submission.objects.filter(pr_process=phase.pr,
+                                                phase=phase,
+                                                is_valid=True).count()
+
+
+        # Which template are we using in this phase?
+        r_template = RubricTemplate.objects.get(phase=self)
+        query = RubricActual.objects.filter(graded_by=learner,
+                        rubric_template=r_template).order_by('created')
+
+        # We need to create and append the necessary reviews here
+        r_actuals = list(query)
+
+        logger.debug('Found {0} reviews; required: {1}'.format(len(r_actuals),
+                                                               max_reviews))
+        n_iter = 0
+        next_subs = get_next_submission_to_evaluate(self, learner,
+                                                    return_all=True)
+        while (len(r_actuals) != max_reviews) and (n_iter < len(next_subs)):
+
+
+            # Hit database to get the next submission to grade:
+            next_sub = next_subs[n_iter]
+            n_iter += 1
+            if next_sub:
+                r_actual, new = get_create_actual_rubric(learner=learner,
+                                                    template=r_template,
+                                                    submission=next_sub)
+
+                if new:
+                    next_sub.number_reviews_assigned += 1
+                    next_sub.save()
+                    r_actuals.append(r_actual)
+                    logger.debug('Created r_actual: ' + str(r_actual))
+
+        
+        sub_stats = {}  # r_actual_stats
+        all_ra = RubricActual.objects.filter(rubric_template=r_template)
+
+        # admin_grader_completed: bool (0 or 1 int)
+        # admin_grader_inprogress: bool
+        # learner_grader_completed: int
+        # learner_grader_inprogress: int
+
+        for item in all_ra:
+            key = item.submission
+            if sub_stats.get(key, None) is None:
+                sub_stats[key] = defaultdict(int)
+            if item.graded_by.role == 'Admin':
+                if not(sub_stats[key]['admin_grader_inprogress']):
+                    if item.status == 'P':
+                        sub_stats[key]['admin_grader_inprogress'] = 1
+                if not(sub_stats[key]['admin_grader_completed']):
+                    if item.status == 'C':
+                        sub_stats[key]['admin_grader_completed'] = 1
+
+
+
+        # Now that we have statistics for each submission, associate it
+        # back to the r_actuals for the admins:
+
+        for item in r_actuals:
+            key = item.submission
+            item.summary_stats = sub_stats[key]
+
+        # Now we have the peer review ojects: ``r_actuals``
+        ctx_objects['r_actuals'] = r_actuals
+
+        content = loader.render_to_string('review/admin-peer-review-status.html',
+                                          context=ctx_objects,
+                                          request=request,
+                                          using=None)
+
+        ctx_objects['self'].admin_overview = content
+
+
+    except StaffReviewPhase.DoesNotExist:
+        pass
+
+
+    # Objects required for a peer-review: r_actuals
+    try:
         peerreview_phase = PeerEvaluationPhase.objects.get(id=self.id)
         ctx_objects['self'] = peerreview_phase
         allow_review = within_phase

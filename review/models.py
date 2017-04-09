@@ -188,6 +188,12 @@ class SelfEvaluationPhase(PRPhase):
     """
     pass
 
+class StaffReviewPhase(PRPhase):
+    """
+    If a staff-evaluation is required...
+    """
+    pass    
+
 class PeerEvaluationPhase(PRPhase):
     """
     If a peer-evaluation is required...

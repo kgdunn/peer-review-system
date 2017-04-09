@@ -1,3 +1,20 @@
+How well is the goal defined?
+
+10 Extraordinary
+9 - Excellent
+8- Good
+7 - Sufficient
+5 – Insufficient
+4- not delivered
+ 
+
+On edx we describe it as follows:
+
+You will receive feedback based on the richness of your scope, but also in relation to a manageable focus. The staff will also check if you took an experience-centered perspective for your research goal, instead of a focus on a product. 
+
+
+
+----
 * Get the tables sortable in the view
 * Get 2 late peer review links out to the students.
 * Statistics: getting review
@@ -18,35 +35,15 @@ Check: is it true that if you add a new Item, that existing RActuals are not
        updated?
 
 How to resolve POST errors: ""request data read error""
-Debug logs: show which PRProcess is being view/assessed etc
 ----
 Use this for tables: http://olifolkerd.github.io/tabulator/examples/
 ----
-
-* Seems like it sets other's work as is_valid=False
-* Thumbnailing is wrong
-
 
 TO DO
 ======
 * Group email: make an HTML template. Allow the template to be in the PR_Process?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
-
-Groups
---------
-Open time
-Closing time
-Allow more than N enrollments
-Groups of different sizes
-Can be prefilled
-Allow self-removal and re-enrollment
-Longer term: waitlist
-Export to CSV
-IMport names from CSV
-Show description of groups
-Log for administrator
-
 
 
 To do next
