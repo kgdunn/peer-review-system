@@ -92,13 +92,13 @@
     <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
 		Your report is shown below, with the review from {{report.n_reviews}} reviewers
-		{% if self_review %}. If this is a self-review, some of the comments and scores are your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
+		{% if self_review %}. If this is a self-review, some of the comments and scores might be your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
 		{% else %} (including instructor/TA). <span style="color: orange">The scores include the instructor and peer scores (randomized).</span>
 				  Comments, and grades, from your peers are in random order (if you reload the page you will notice that the order changes).
 		{% endif %}{# self_review #}
 
 	{% else %}
-        <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the peer review carefully, in a new tab, to prevent loss of your review feedback.</span> <br>If you do not see any document here then you should please <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>.
+        <p>The work you are required to review is shown below. <span style="color: orange">Please open links in the review carefully, in a new tab, to prevent loss of your review feedback.</span> <br>If you do not see any document here then you should please <a href="/{{submission.file_upload.url}}" target="_blank">first download it</a>.
 	{% endif %}
 
 </div>
@@ -157,12 +157,14 @@
 						<div  class="LText" style="display: block;" id="item-{{item.ritem_template.order}}">
 						    <label for="item-{{item.ritem_template.order}}" id="item-{{item.ritem_template.order}}"></label>
 						    {% if show_feedback %}
-							    The feedback you received from your peers was:
-						        <div class="textwrapper">
-									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.0}}</textarea>
-								</div>
+								{% if item.results.0 %}
+									The feedback you received from your peers was:
+									<div class="textwrapper">
+										<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.0}}</textarea>
+									</div>
+								{% endif %}
 								{% if item.results.4%}
-								The feedback you received from your instructor/TA was:
+								The feedback you received from your instructor/TA/expert was:
 								<div class="textwrapper">
 									<textarea cols="2" rows="10" name="item-{{item.ritem_template.order}}" readonly>{{item.results.4}}</textarea>
 								</div>
@@ -179,8 +181,8 @@
 				{% if show_feedback %} {# show peer/self feedback #}
 				    {% if item.ritem_template.option_type == 'LText' %}{% endif%}
 				    {% if item.ritem_template.option_type == 'DropD' %}
-					    <em>Peer scores</em>:
-					    {{item.results.0}} average = {{item.results.2|floatformat}}
+					    <em>Score received</em>:
+					    {{item.results.0}}; average value = {{item.results.2|floatformat}}
 					{% endif %}
 				{% else %}
 				    {%if item.ritem_template.option_type == 'DropD'%}

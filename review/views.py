@@ -22,10 +22,11 @@ from utils import generate_random_token, send_email, get_IP_address
 # Python imports
 import re
 import os
-import datetime
-import hashlib
-import numpy as np
+import csv
 import json
+import hashlib
+import datetime
+import numpy as np
 from random import shuffle
 from collections import defaultdict
 try:
@@ -42,7 +43,7 @@ import magic  # used to check if file uploads are of the required type
 import logging
 logger = logging.getLogger(__name__)
 
-# This is where the uploads from users will land. This must lie within 
+# This is where the uploads from users will land. This must lie within
 # the webserver's domain to serve.
 base_dir_for_file_uploads = settings.MEDIA_ROOT
 
@@ -135,11 +136,11 @@ def get_create_student(request, course, pr):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
-            
+
         # Branch here for exceptional case of edX
         if LTI_consumer == 'edx' and 'Administrator' in role:
             role = 'Admin'
-            
+
         learner, newbie = Person.objects.get_or_create(email=email,
                                                        user_ID=user_ID,
                                                        role=role)
@@ -274,7 +275,7 @@ def get_next_submission_to_evaluate(phase, learner, return_all=False):
     * Get the submissions sorted from lowest to highest number of ASSIGNED
       reviews. NOTE: for peer-reviews in a MOOC we would normally sort by
       lowest to highest number of completions. But in a campus course we have
-      a reasonable expectation that all peer reviews that are assigned will 
+      a reasonable expectation that all peer reviews that are assigned will
       also be completed. However, something to consider is to sort from
       lowest to highest the difference: (assigned minus completed).
 
@@ -471,11 +472,11 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         within_phase = True
     if (now_time <= self.start_dt.replace(tzinfo=None)):
         pre_phase = True
-        
+
     if (now_time >= self.end_dt.replace(tzinfo=None)):
-        post_phase = True    
-        
-    
+        post_phase = True
+
+
 
     # Objects required for a submission: file_upload_form, (prior) submission.
     try:
@@ -632,16 +633,16 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
     try:
         staffreview_phase = StaffReviewPhase.objects.get(id=self.id)
         ctx_objects['self'] = staffreview_phase
-        
+
         # Students cannot perform a staff review
         if learner.role == 'Learn':
             return ctx_objects
-        
+
         allow_review = True
         ctx_objects['allow_review'] = allow_review
         ctx_objects.pop('r_actuals', None)
-        
-        
+
+
 
         # Is this the first time the person is here: create and return the
         # N ``RubricActual`` instances.
@@ -700,7 +701,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                     r_actuals.append(r_actual)
                     logger.debug('Created r_actual: ' + str(r_actual))
 
-        
+
         sub_stats = {}  # r_actual_stats
         all_ra = RubricActual.objects.filter(rubric_template=r_template)
 
@@ -753,11 +754,11 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         ctx_objects['allow_review'] = allow_review
 
         ctx_objects.pop('r_actuals', None)
-        
+
         if not(allow_review):
             # Administrator roles can go further, even if we are not within the
             # time range for peer-review. This is so admins can view, and even
-            # evaluate all students submissions.            
+            # evaluate all students submissions.
             if learner.role != 'Learn':
                 pass
             else:
@@ -789,7 +790,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
         max_reviews = Submission.objects.filter(pr_process=phase.pr,
                                                 phase=phase,
                                                 is_valid=True).count()
-        peers_grading = 0 
+        peers_grading = 0
         peers_complete = 0
         extra_info = ''
         if learner.role == 'Learn':
@@ -799,7 +800,7 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                                                     group['group_instance'],
                                                     is_valid=True,
                                                     phase=phase)
-            
+
             if my_sub.count():
                 my_sub = my_sub[0]
                 peers_grading = RubricActual.objects.filter(submission=my_sub)\
@@ -814,13 +815,13 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                     extra_info += '1 peer so far;'
                 else:
                     extra_info += '0 peer so far;'
-                
+
                 extra_info += ' it has been completely graded by {0}.'.\
                              format(peers_complete)
         else:
             # Administrators/TAs can have unlimited number of reviews
             n_reviews = max_reviews
-            
+
         ctx_objects['self'].extra_info = extra_info
 
 
@@ -952,19 +953,19 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
                                                                       learner)
                 if item.mandatory:
                     if grade_achieved == 0:
-                        all_zero = True                
+                        all_zero = True
             else:
                 grade_achieved = 0.0
                 grade_detail = '<em>Not available yet</em>'
-                
-            
-                
+
+
+
             total_grade += item.weight * grade_achieved
             item.grade_achieved = grade_achieved
             item.component_weight = item.weight * grade_achieved
             item.grade_detail = grade_detail
             item.max_weight = item.weight * 100.0
-            
+
         if all_zero:
             total_grade = 0.0
 
@@ -1008,14 +1009,14 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
             uploaded_items_exist = False
         else:
             uploaded_items_exist = True # for certainty
-        ctx_objects['uploaded_items_exist'] = uploaded_items_exist    
+        ctx_objects['uploaded_items_exist'] = uploaded_items_exist
         ctx_objects['uploaded_items'] = uploaded_items
         content = loader.render_to_string('review/view-all-submissions.html',
                                           context=ctx_objects,
                                           request=request,
                                           using=None)
         ctx_objects['self'].show_all_uploads = content
-        
+
 
     except ViewAllSubmissionsPhase.DoesNotExist:
         pass
@@ -1068,29 +1069,29 @@ def index(request):
         # A later phase can use (modify even) the state of a variable.
         # The "self" variable is certainly altered every phase
         ctx_objects['self'] = phase
-        
+
         render_this_section = False
         if (phase.is_visibile_to_students) and (learner.role == 'Learn'):
             render_this_section = True
-        if learner.role != 'Learn':   
+        if learner.role != 'Learn':
             render_this_section = True
-            
+
         if render_this_section:
-                
+
             ctx_objects = get_related(phase,
                                       request,
                                       learner,
                                       ctx_objects,
                                       now_time,
                                       prior)
-    
-    
+
+
             # Render the HTML for this phase: it depends on the ``pr`` settings,
             # the date and time, and related objects specifically required for
-            # that phase. The rendering happens per phase. That means if the 
-            # state of a variable changes, it might be rendered differently in 
+            # that phase. The rendering happens per phase. That means if the
+            # state of a variable changes, it might be rendered differently in
             # a later phase [though this is not expected to be used].
-    
+
             html.append(render_phase(phase, ctx_objects))
             html.append('<hr>\n')
 
@@ -1140,7 +1141,7 @@ def upload_submission(request, learner, pr_process, phase):
 
     thumbnail_dir = base_dir_for_file_uploads + 'uploads/{0}/tmp/'.format(
                                                                 pr_process.id)
-    
+
     try:
         os.makedirs(thumbnail_dir)
     except OSError:
@@ -1192,21 +1193,21 @@ def upload_submission(request, learner, pr_process, phase):
         except IOError as exp:
             logger.error('Exception: ' + str(exp))
             # TODO: raise error message
-        
+
         for f_to_process in files:
             filename = f_to_process.name
             # Delete: thumbnail_dir + filename
-                  
-            
+
+
         submitted_file_name_django = full_path.split(base_dir_for_file_uploads)[1]
         extension = 'pdf'
         filename = joint_file_name[0:251] + '.' + extension
-        
+
 
 
     group_members = get_group_information(learner, pr_process.gf_process)
 
-    
+
     if (group_members['group_instance'] is None) and (pr_process.uses_groups\
                                                                        ==False):
         # Uses individual submissions:
@@ -1214,8 +1215,8 @@ def upload_submission(request, learner, pr_process, phase):
                                 submitted_by=learner,
                                 pr_process=pr_process,
                                 phase=phase,
-                                is_valid=True)        
-        
+                                is_valid=True)
+
     else:
         # Has this group submitted this before?
         prior = Submission.objects.filter(status='S',
@@ -1223,35 +1224,35 @@ def upload_submission(request, learner, pr_process, phase):
                                 pr_process=pr_process,
                                 phase=phase,
                                 is_valid=True)
-        
+
     if prior:
         for item in prior:
             logger.debug('Set old submission False: {0} and name "{1}"'.format(\
                         str(item), item.submitted_file_name))
             item.is_valid = False
             item.save()
-            
+
     # Make the thumbnail of the PDF -> PNG
-    from wand.image import Image  
+    from wand.image import Image
     try:
-        imageFromPdf = Image(filename=full_path)  
-        image = Image(width=imageFromPdf.width, height=imageFromPdf.height)  
+        imageFromPdf = Image(filename=full_path)
+        image = Image(width=imageFromPdf.width, height=imageFromPdf.height)
         image.composite(imageFromPdf.sequence[0], top=0, left=0)
-        image.format = "png"  
+        image.format = "png"
         thumbnail_filename = submitted_file_name_django.split('uploads/{0}/'.format(pr_process.id))[1]
         thumbnail_full_name = thumbnail_dir + \
-                                    thumbnail_filename.replace('.'+extension, 
+                                    thumbnail_filename.replace('.'+extension,
                                                                '.png')
         thumbnail_file_name_django = 'uploads/{0}/tmp/{1}'.format(pr_process.id,
                 thumbnail_filename.replace('.'+extension, '.png'))
-        
-        
-        image.save(filename=thumbnail_full_name)     
+
+
+        image.save(filename=thumbnail_full_name)
 
     except Exception as exp:
         logger.error('Exception for thumbnail: ' + str(exp))
-        thumbnail_file_name_django = None       
-    
+        thumbnail_file_name_django = None
+
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
                      status='S',
@@ -1264,7 +1265,7 @@ def upload_submission(request, learner, pr_process, phase):
                      ip_address=get_IP_address(request),
                     )
     sub.save()
-    
+
 
     if group_members['group_name']:
         address = group_members['member_email_list']
@@ -1793,11 +1794,11 @@ def submit_peer_review_feedback(request, ractual_code):
         word_count += words
 
     # All done with storing the results. Did the user fill everything in?
-    
+
     words = [r.word_count for r in RubricActual.objects.filter(status='C')]
     words = np.array(words)
     median_words = np.median(words[words!=0])
-    
+
     if request.POST:
         request.POST.pop('csrfmiddlewaretoken', None) # don't want this in stats
     if len(items) == 0:
@@ -1808,18 +1809,18 @@ def submit_peer_review_feedback(request, ractual_code):
         r_actual.word_count = word_count
         r_actual.score = total_score
         r_actual.save()
-        
+
         # Also mark the Submission as having one extra completed review:
         r_actual.submission.number_reviews_completed += 1
         r_actual.submission.save()
-        
-        
-                
+
+
+
         logger.debug('ALL-DONE: {0}. Median={1} vs Actual={2}; Score={3}'\
                      .format(learner, median_words, word_count, total_score))
         create_hit(request, item=r_actual, event='ending-a-review-session',
                    user=learner, other_info=('COMPLETE; Median={0} vs '
-                     'Actual={1}; Score={2}||').format(median_words, word_count, 
+                     'Actual={1}; Score={2}||').format(median_words, word_count,
                                     total_score) + str(request.POST))
     else:
         r_actual.submitted = False
@@ -1934,7 +1935,7 @@ def get_stats_comments(request):
                     rowwrite.append(item.roptionactual_set.all()[0].comment\
                             .encode('utf-8').replace(b'\t', b'').\
                             replace(b'\r\n', b'|').replace(b'\n', b'|'))
-                    
+
         rowwrite.append(str(word_count))
         writer.writerow(rowwrite)
         print(word_count, '------')
@@ -1998,3 +1999,114 @@ def get_grading_percentage(item, learner):
         pass
 
     return grade, grade_detail
+
+
+def total_stats(request):
+    course = Course.objects.get(name='IO3075 Towards Circular Product Design')
+    all_reviews = RubricActual.objects.filter(rubric_template__pr_process__course=course)
+    all_completed = all_reviews.filter(submitted=True)
+
+    total_words = []
+    percentage_score = []
+    items_graded = []
+    graded_by_role = []
+    statsfile = open('results.csv', 'w')
+    writer = csv.writer(statsfile, delimiter=',')
+    writerow = ['Words', 'Percentage', 'Items graded', 'Role']
+    writer.writerow(writerow)
+
+    for review in all_completed:
+
+        word_count, score, n_items = update_word_count(review)
+        total_words.append(word_count)
+        percentage_score.append(score)
+        items_graded.append(n_items)
+
+
+        rowwrite = [word_count,
+                    score,
+                    n_items,
+                    review.graded_by.role]
+
+        writer.writerow(rowwrite)
+
+    statsfile.close()
+
+    return HttpResponse(content=b'Calculations done')
+
+
+def update_word_count(r_actual):
+    r_item_actuals = r_actual.ritemactual_set.all()
+    items = {}
+    # Create the dictionary: one key per ITEM.
+    # The value associated with the key is a dictionary itself.
+    # items[1] = {'options': [....]  <-- list of the options associated
+    #             'item_obj': the item instance / object}
+
+    word_count = 0
+    total_score = 0.0
+    items_graded = 0
+    text = ''
+    for item in r_item_actuals:
+        score = 0
+        words = 0
+        item_template = item.ritem_template
+        item_dict = {}
+        items[item_template.order] = item_dict
+        item_dict['options'] = item_template.roptiontemplate_set.all()\
+                                                          .order_by('order')
+        item_dict['item_obj'] = item
+        item_dict['template'] = item_template
+
+
+
+        if item_dict['template'].option_type == 'LText':
+            r_opt_template = item_dict['options'][0]
+            options_actual = ROptionActual.objects.filter(ritem_actual=item,
+                                         roption_template = r_opt_template,
+                                         submitted=True)
+            value = ''
+            if options_actual:
+                value = options_actual[0].comment
+                text += value
+            else:
+                print('--No comment--')
+            if value:
+                comment = value
+                words += len(re.split('\s+', comment))
+                did_succeed = True
+            else:
+                # We get for text feedback fields that they can be empty.
+                # In these cases we must continue as if they were not filled
+                # in.
+                #continue
+                pass  # <--- this is a better option, incase user wants to
+                      #      remove their comment entirely.
+
+        elif item_dict['template'].option_type in ('Radio', 'DropD', 'Chcks'):
+            items_graded += 1
+            final_option_chosen =ROptionActual.objects.filter(ritem_actual=item,
+                                                              submitted=True)
+            if final_option_chosen:
+                score = final_option_chosen[0].roption_template.score
+
+        total_score += score
+        word_count += words
+
+    # Then save it
+    if r_actual.word_count != word_count:
+        r_actual.word_count = word_count
+        r_actual.save()
+
+    if r_actual.score != total_score:
+        r_actual.score = total_score
+        r_actual.save()
+
+    print('Score: {0}/{1}; words = {2}'.format(total_score,
+                                        r_actual.rubric_template.maximum_score,
+                                        word_count))
+
+    return (word_count, total_score/r_actual.rubric_template.maximum_score*100,
+           items_graded)
+
+

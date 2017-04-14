@@ -1,56 +1,37 @@
-How well is the goal defined?
+Prevent multiple file upload with PDF: only image files.
+Need a mechanism to reject filetpyes
 
-10 Extraordinary
-9 - Excellent
-8- Good
-7 - Sufficient
-5 – Insufficient
-4- not delivered
- 
-
-On edx we describe it as follows:
-
-You will receive feedback based on the richness of your scope, but also in relation to a manageable focus. The staff will also check if you took an experience-centered perspective for your research goal, instead of a focus on a product. 
-
-
-
+----
+STats: time spent on the peer reviews
+STatis: words: per instructor and per student
 ----
 * Get the tables sortable in the view
 * Get 2 late peer review links out to the students.
-* Statistics: getting review
-* Statistics: getting grades
 * PDF magick checker
 * Why do the RActuals get assigned for phase 2?
-
 ---
 ASsert the lenght of RItemActuals is the same (around line 377)
 items = completed_review.ritemactual_set.filter(submitted=True)\
                                                             .order_by('id')
         overall_max_score = 0.0 # just compute this on the last completed_review
         for idxi, item in enumerate(items):
-        
 ---
 
-Check: is it true that if you add a new Item, that existing RActuals are not 
+Check: is it true that if you add a new Item, that existing RActuals are not
        updated?
-
 How to resolve POST errors: ""request data read error""
 ----
 Use this for tables: http://olifolkerd.github.io/tabulator/examples/
-----
-
+---
 TO DO
 ======
 * Group email: make an HTML template. Allow the template to be in the PR_Process?
 * Don't allow non-PDF for upload
 * Return error messages for non-PDF; too large files
 
-
 To do next
 ------
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-
-
 
 Upload
 =-------
@@ -126,18 +107,18 @@ src_items = RItemTemplate.objects.filter(r_template=src_template)
 for item in src_items:
     # First get the associated options
     options = item.roptiontemplate_set.all()
-    
+
     # Then copy the parent template to the new one
     item.pk = None
     item.r_template = dst_template
     item.save()
-    
+
     # Then re-parent the options to the newly created/saved item
     for opt in options:
         opt.pk = None
         opt.rubric_item = item
         opt.save()
-   
+
 To create a review for a student past the deadline
 ---------
 ./manage.py shell
@@ -161,7 +142,7 @@ if new:
     r_actuals.append(r_actual)
 
 
-    
+
 To create a new rubric
 -----------
 0. Create a course, with the LTI connection
@@ -170,20 +151,20 @@ To create a new rubric
    existing course, select group formation process.
 
 3. Create a a new "RubricTemplate" instance, associated with this PR_Process.
-   Fill in the maximum score; 
+   Fill in the maximum score;
 4. Create one or more phases (submission phase, etc). Remember to create these
    directly from the source model. i.e. create a SubmissionPhase, and not a
    PRPhase of the submission type
-   
+
 5. When you create the self-review (or peer-review phase), you need to link it to
    the appropriate RubricTemplate, created above. Create the phase, but it will
    crash in the browser, until you go the create RubricTemplate, and mention
    the phase to which it is attached. Now it will succeed in the browser.
-   
+
 6. For either the self- or peer-review you need item(s), and each item has 1
-   or more associated options. Enter these, as RItemTemplate's and 
+   or more associated options. Enter these, as RItemTemplate's and
    ROptionTemplate's based on the instructor's rubric.
-  
+
 
 
 Review process
