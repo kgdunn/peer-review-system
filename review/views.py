@@ -2006,27 +2006,19 @@ def total_stats(request):
     all_reviews = RubricActual.objects.filter(rubric_template__pr_process__course=course)
     all_completed = all_reviews.filter(submitted=True)
 
-    total_words = []
-    percentage_score = []
-    items_graded = []
-    graded_by_role = []
     statsfile = open('results.csv', 'w')
     writer = csv.writer(statsfile, delimiter=',')
-    writerow = ['Words', 'Percentage', 'Items graded', 'Role']
+    writerow = ['Words', 'Percentage', 'Items graded', 'Role', 'Phase']
     writer.writerow(writerow)
 
     for review in all_completed:
 
         word_count, score, n_items = update_word_count(review)
-        total_words.append(word_count)
-        percentage_score.append(score)
-        items_graded.append(n_items)
-
-
         rowwrite = [word_count,
                     score,
                     n_items,
-                    review.graded_by.role]
+                    review.graded_by.role,
+                    review.rubric_template.phase.name]
 
         writer.writerow(rowwrite)
 

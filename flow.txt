@@ -1,9 +1,15 @@
 Prevent multiple file upload with PDF: only image files.
 Need a mechanism to reject filetpyes
 
+
+/static-media/admin/js/change_form.js, <--- add/update the media
+
+RuntimeWarning: DateTimeField RubricActual.completed received a naive datetime while time zone support is active.
+
+
+
 ----
 STats: time spent on the peer reviews
-STatis: words: per instructor and per student
 ----
 * Get the tables sortable in the view
 * Get 2 late peer review links out to the students.
@@ -48,7 +54,6 @@ Check for PDF
 * Create a tmbnail from PDF
 * Submission filename is forced into a template
 * Allow multiple uploads, but bundle them on the back-end into 1 PDF file
-* One dropdown: 4, 6, 8, 10
 * Feedback box
 * Student receives email when feedback is available
 * Just a warning: if you upload again; your feedback is overwritten
@@ -70,7 +75,7 @@ ln -s /usr/local/Cellar/imagemagick\@6/6.9.8-3/lib/libMagickWand-6.Q16.dylib /us
 
 https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_in_brightspace
 ----
-Research question: did self-review help? Grades increased? Quality of reports up?
+
 ----
 * Return grade to edX?
 
