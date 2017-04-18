@@ -2006,7 +2006,7 @@ def total_stats(request):
     all_reviews = RubricActual.objects.filter(rubric_template__pr_process__course=course)
     all_completed = all_reviews.filter(submitted=True)
 
-    statsfile = open('results.csv', 'w')
+    statsfile = open('/tmp/results.csv', 'w')
     writer = csv.writer(statsfile, delimiter=',')
     writerow = ['Words', 'Percentage', 'Items graded', 'Role', 'Phase']
     writer.writerow(writerow)
