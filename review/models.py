@@ -149,7 +149,7 @@ class PRPhase(models.Model):
                     verbose_name='Start of this phase',)
     end_dt = models.DateTimeField(default=timezone.now,
                     verbose_name='End of this phase', )
-    is_visibile_to_students = models.BooleanField(default=True, 
+    is_visibile_to_students = models.BooleanField(default=True,
             help_text='Show/Hide this stage from the student view.')
     is_active = models.BooleanField(default=True,
             help_text='An override, allowing you to stage/draft phases.')
@@ -174,10 +174,10 @@ class SubmissionPhase(PRPhase):
     #filename_template = models.CharField(max_length=200,
     #                                     default='{{random}}.{{extension}}')
     #n_file_uploads = models.PositiveSmallIntegerField(default=1)
-    
-    allow_multiple_files = models.BooleanField(default=False, 
+
+    allow_multiple_files = models.BooleanField(default=False,
         help_text='If True, and ONLY for image files: will combine them.')
-    
+
     send_email_on_success = models.BooleanField(default=True)
     max_file_upload_size_MB = models.PositiveSmallIntegerField(default=10)
     accepted_file_types_comma_separated = models.CharField(default='PDF',
@@ -194,7 +194,7 @@ class StaffReviewPhase(PRPhase):
     """
     If a staff-evaluation is required...
     """
-    pass    
+    pass
 
 class PeerEvaluationPhase(PRPhase):
     """
@@ -249,7 +249,7 @@ class Submission(models.Model):
         help_text=('Valid if: it was submitted on time, or if this is the most '
                    'recent submission (there might be older ones).'))
     file_upload = models.FileField(upload_to=peerreview_directory_path)
-    thumbnail = models.FileField(upload_to=peerreview_directory_path, 
+    thumbnail = models.FileField(upload_to=peerreview_directory_path,
                                  blank=True, null=True)
     submitted_file_name = models.CharField(max_length=255, default='')
 
@@ -262,7 +262,7 @@ class Submission(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime_submitted = models.DateTimeField(auto_now_add=True,
         verbose_name="Date and time the learner/group submitted.")
-    
+
     def __str__(self):
         return '[{0}][assign={1}][cmptd={2}]: {3}'.format(self.pr_process,
                                         self.number_reviews_assigned,
@@ -330,6 +330,8 @@ class RubricActual(models.Model):
     status = models.CharField(max_length=2, default='A', choices=STATUS)
     submitted = models.BooleanField(default=False,
         help_text='Has been completed reviewed AND submitted by peer grader.')
+    special_access = models.BooleanField(default=False,
+        help_text='Set to true to allow the "graded_by" person to access it.')
     graded_by = models.ForeignKey(Person)
     rubric_template = models.ForeignKey(RubricTemplate)
     submission = models.ForeignKey(Submission, null=True)

@@ -1551,7 +1551,12 @@ def review(request, ractual_code):
                                     group['group_instance']):
                     if learner.role == 'Learn':
                         # This only counts for learners though.
-                        return HttpResponse('This review has expired.')
+                        # But one more final check:
+                        if r_actual.special_access:
+                            show_feedback = False
+                            break
+                        else:
+                            return HttpResponse('This review has expired.')
 
 
                 if learner.role != 'Learn':
