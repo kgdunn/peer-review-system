@@ -1888,7 +1888,7 @@ def get_stats_comments(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
-    phase = PRPhase.objects.filter(pr=pr_process)[4]
+    phase = PRPhase.objects.filter(pr=pr_process)[5]
 
     import csv
     statsfile = open('results.tsv', 'w')
@@ -1931,14 +1931,16 @@ def get_stats_comments(request):
             for item in r_actual.ritemactual_set.filter(submitted=True)\
                                                             .order_by('id'):
                 if item.ritem_template.option_type == 'LText':
-                    print(item)
-                    rowwrite.append(item.roptionactual_set.all()[0].comment\
+                    all_items = item.roptionactual_set.all()
+                    print(item, all_items.count())
+
+                    rowwrite.append(all_items[all_items.count()-1].comment\
                             .encode('utf-8').replace(b'\t', b'').\
                             replace(b'\r\n', b'|').replace(b'\n', b'|'))
 
         rowwrite.append(str(word_count))
         writer.writerow(rowwrite)
-        print(word_count, '------')
+        print(word_count, total_grade, '------')
 
     statsfile.close()
     return HttpResponse('The report is on the server to download.')

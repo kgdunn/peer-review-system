@@ -85,8 +85,6 @@ https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_i
 
 * Model to store grade reports in the database; with a flag to capture updates
 
-* Students don't get a grade if they have not submitted peer review'
-
 * Show admin's grades as soon as they graded
 
 * How the correlation of the instructors matches up with the students.
@@ -128,24 +126,21 @@ To create a review for a student past the deadline
 ---------
 ./manage.py shell
 from review.models import PRPhase, Person, RubricTemplate
-from review.views import get_next_submission_to_evaluate
+from review.views import get_next_submission_to_evaluate, get_create_actual_rubric
 
-self = PRPhase.objects.get(id=___) <- the phase for  #20
+self = PRPhase.objects.get(id=___) <- the PeerEvaluation phase (e.g  #20)
 learner = Person.objects.get(id=___) <- the student
-r_template = RubricTemplate.objects.get(id=5)
+r_template = RubricTemplate.objects.get(id=5)  <- the RTemplate for that phase
 next_subs = get_next_submission_to_evaluate(self, learner, return_all=True)
 
 # Hit database to get the next submission to grade:
 next_sub = next_subs[0]
-r_actual, new = get_create_actual_rubric(learner=learner,
-                                         template=r_template,
+r_actual, new = get_create_actual_rubric(learner=learner, template=r_template,
                                          submission=next_sub)
 
 if new:
     next_sub.number_reviews_assigned += 1
     next_sub.save()
-    r_actuals.append(r_actual)
-
 
 
 To create a new rubric
@@ -170,7 +165,9 @@ To create a new rubric
    or more associated options. Enter these, as RItemTemplate's and
    ROptionTemplate's based on the instructor's rubric.
 
-
+To extract the grades for instructor
+=====================================
+use the "get_stats_comments" function
 
 Review process
 ==============
