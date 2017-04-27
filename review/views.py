@@ -9,9 +9,10 @@ from django.utils import timezone
 
 # Our imports
 from .models import Person, Course, PR_process
-from .models import PRPhase, SubmissionPhase, SelfEvaluationPhase, \
-                    StaffReviewPhase, PeerEvaluationPhase, FeedbackPhase, \
-                    GradeReportPhase, ViewAllSubmissionsPhase
+from .models import (PRPhase, SubmissionPhase, SelfEvaluationPhase,
+                    StaffReviewPhase, PeerEvaluationPhase, FeedbackPhase,
+                    GradeReportPhase, ViewAllSubmissionsPhase,
+                    GetAllOwnSubmissionsPhase)
 from .models import Submission, ReviewReport, GradeComponent
 from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
@@ -22,6 +23,7 @@ from utils import generate_random_token, send_email, get_IP_address
 # Python imports
 import re
 import os
+import six
 import csv
 import json
 import hashlib
@@ -982,6 +984,41 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
 
     try:
+        getall_phase = GetAllOwnSubmissionsPhase.objects.get(id=self.id)
+        ctx_objects['self'] = getall_phase
+        if not(within_phase):
+            return ctx_objects
+
+        ctx_objects['abc'] = 123
+
+        all_peer_reviews = self.pr.course.pr_process_set.all()
+        for pr in all_peer_reviews:
+            grp_info = get_group_information(learner, self.pr.gf_process)
+            subs = Submission.objects.filter(pr_process=self.pr)\
+                            .filter(group_submitted=grp_info['group_instance'])\
+                            .filter(is_valid=True)\
+                            .order_by('-datetime_submitted')
+            evals_completed = RubricActual.objects.filter(submission=subs[0],
+                                                          submitted=True)
+
+            feedback_file = generate_merged_report(evals_completed,
+                                                   submission=subs[0])
+
+
+
+
+        content = loader.render_to_string('review/download-all-submissions.html',
+                                          context=ctx_objects,
+                                          request=request,
+                                          using=None)
+        ctx_objects['self'].download_all_uploads = content
+
+
+    except GetAllOwnSubmissionsPhase.DoesNotExist:
+        pass
+
+
+    try:
         viewall_phase = ViewAllSubmissionsPhase.objects.get(id=self.id)
         ctx_objects['self'] = viewall_phase
         uploaded_items_exist = within_phase
@@ -1560,6 +1597,13 @@ def review(request, ractual_code):
 
 
                 if learner.role != 'Learn':
+
+                    if r_actual.special_access:
+                        # Allows instructors to still grade if marked as
+                        # "special access"
+                        show_feedback = False
+                        break
+
                     # Note: this is not the best, but it allows the admin to
                     # see the reports.
                     learner = r_actual.submission.submitted_by
@@ -2006,6 +2050,106 @@ def get_grading_percentage(item, learner):
         pass
 
     return grade, grade_detail
+
+
+def generate_merged_report(evals_completed, submission):
+    """
+    Generates a merged PDF of the original report, and the comments added to it.
+
+    It finds all the ``evals_completed`` for the ``submisssion``. It gets the
+    original PDF for that submissions, adds the peer and TA/instructor reviews,
+    merges the new PDF, and return a link to that PDF.
+    """
+    now_time = datetime.datetime.now()
+    filename_feedback = '/tmp/tmp-pdf-{0}-{1}-{2}-{3}.pdf'.format(now_time.hour,
+                                                        now_time.minute,
+                                                        now_time.second,
+                                                        now_time.microsecond)
+
+    from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame
+    from reportlab.platypus import Paragraph, Spacer
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER
+    from reportlab.lib.colors import black, purple
+
+    styles= {'default': ParagraphStyle('default', fontName='Helvetica',
+                fontSize=10, leading=12, leftIndent=0, rightIndent=0,
+                firstLineIndent=0, alignment=TA_LEFT, spaceBefore=0,
+                spaceAfter=0, bulletFontName='Helvetica', bulletFontSize=10,
+                bulletIndent=0, textColor= black, backColor=None,
+                wordWrap=None, borderWidth= 0, borderPadding= 0,
+                borderColor=None, borderRadius= None, allowWidows= 1,
+                allowOrphans= 0, textTransform=None,
+                # 'uppercase' | 'lowercase' | None
+                endDots=None, splitLongWords=1, ), }
+    styles['title'] = ParagraphStyle('title', parent=styles['default'],
+                fontName='Helvetica-Bold', fontSize=24, leading=42,
+                alignment=TA_CENTER, textColor=purple,)
+
+    # Peer reviews
+    out_peers = []
+    out_admin = []
+    for r_actual in evals_completed.filter(graded_by__role='Learn'):
+        for item in r_actual.ritemactual_set.filter(submitted=True)\
+                                                        .order_by('id'):
+            if item.ritem_template.option_type == 'LText':
+                all_items = item.roptionactual_set.all()
+
+                out_peers.append(Paragraph(all_items[all_items.count()-1].comment,
+                                           styles['default']) )
+                out_peers.append(Spacer(1, 12))
+
+    for r_actual in evals_completed.filter(graded_by__role='Admin'):
+        for item in r_actual.ritemactual_set.filter(submitted=True)\
+                                                        .order_by('id'):
+            if item.ritem_template.option_type == 'LText':
+                all_items = item.roptionactual_set.all()
+
+                out_admin.append(Paragraph(all_items[all_items.count()-1].comment,
+                                           styles['default']) )
+                out_admin.append(Spacer(1, 12))
+
+    doc = BaseDocTemplate(filename_feedback)
+    doc.addPageTemplates([PageTemplate(
+                            frames=[
+                                Frame(doc.leftMargin, doc.bottomMargin,
+                                      doc.width, doc.height,id=None ),] ),
+                          ])
+
+
+    out_admin.insert(0, Paragraph('Feedback from instructors/TA',
+                                  styles['title']))
+    out_peers.insert(0, Paragraph('Feedback from peers', styles['title']))
+    all_feedback = out_admin
+    all_feedback.extend(out_peers)
+    doc.build(all_feedback)
+
+    try:
+        from PyPDF2 import PdfFileWriter, PdfFileReader
+    except ImportError:
+        from pyPdf import PdfFileWriter, PdfFileReader
+
+
+    peer_review_doc = submission.file_upload
+    full_path = base_dir_for_file_uploads + peer_review_doc.name
+
+    existing_pdf = PdfFileReader(open(full_path, "rb"))
+    output = PdfFileWriter()
+
+    for k in range(existing_pdf.numPages):
+        output.addPage(existing_pdf.getPage(k))
+
+    feedback_pdf = PdfFileReader(filename_feedback)
+    for k in range(feedback_pdf.numPages):
+        output.addPage(feedback_pdf.getPage(k))
+
+    feedback_file = base_dir_for_file_uploads + generate_random_token(8)\
+                                                                      + '.pdf'
+    outputStream = open(feedback_file, "wb")
+    output.write(outputStream)
+    outputStream.close()
+
+    return feedback_file
 
 
 def total_stats(request):

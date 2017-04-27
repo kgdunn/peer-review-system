@@ -215,6 +215,12 @@ class ViewAllSubmissionsPhase(PRPhase):
     """
     pass
 
+class GetAllOwnSubmissionsPhase(PRPhase):
+    """
+    Allows students to download their submitted reports"""
+    pass
+
+
 class GradeReportPhase(PRPhase):
     """
     Grade report shown to the user

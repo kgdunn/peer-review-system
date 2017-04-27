@@ -28,6 +28,6 @@ urlpatterns = [
 
     url(r'^get_stats_comments$', views.get_stats_comments),
 
-    url(r'^total_stats$', views.total_stats)
+    url(r'^total_stats$', views.total_stats),
 
 ]

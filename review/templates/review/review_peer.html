@@ -91,7 +91,7 @@
 	<div id="review-realtime-feedback" style="float:right; padding-top: 1em; padding-right: 1em;"></div>
     <h2>Hello {{person.display_name}}</h2>
 	{% if show_feedback %}
-		Your report is shown below, with the review from {{report.n_reviews}} reviewers
+		Your report is shown below, with the review from {{report.n_reviews}} reviewer{{report.n_reviews|pluralize}}
 		{% if self_review %}. If this is a self-review, some of the comments and scores might be your own. <span style="color: orange">Your average score is {{report.learner_average}}.</span>
 		{% else %} (including instructor/TA). <span style="color: orange">The scores include the instructor and peer scores (randomized).</span>
 				  Comments, and grades, from your peers are in random order (if you reload the page you will notice that the order changes).

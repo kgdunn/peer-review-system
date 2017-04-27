@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import Person, Course, PR_process, PRPhase, Submission
 from .models import SubmissionPhase, SelfEvaluationPhase, StaffReviewPhase
-from .models import ViewAllSubmissionsPhase
+from .models import ViewAllSubmissionsPhase, GetAllOwnSubmissionsPhase
 from .models import PeerEvaluationPhase, GradeReportPhase, FeedbackPhase
 from .models import GradeComponent, ReviewReport
 from .models import RItemActual, RItemTemplate
@@ -28,7 +28,7 @@ class SubmissionPhaseAdmin(admin.ModelAdmin):
 
 class SelfEvaluationPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
-    
+
 class StaffReviewPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
@@ -39,6 +39,9 @@ class FeedbackPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 class ViewAllSubmissionsPhaseAdmin(admin.ModelAdmin):
+    list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
+
+class GetAllOwnSubmissionsPhaseAdmin(admin.ModelAdmin):
     list_display = ("name", "pr", "order", "start_dt", "end_dt", "is_active")
 
 
@@ -86,7 +89,7 @@ class ROptionTemplateAdmin(admin.ModelAdmin):
 class ReviewReportAdmin(admin.ModelAdmin):
     list_display = ('learner', 'group', 'phase', 'submission', 'unique_code',
                     'last_viewed', 'created')
-    ordering = ['created',]
+    ordering = ['-created',]
 
 
 admin.site.register(Person, PersonAdmin)
@@ -102,6 +105,7 @@ admin.site.register(PeerEvaluationPhase, PeerEvaluationPhaseAdmin)
 admin.site.register(FeedbackPhase, FeedbackPhaseAdmin)
 admin.site.register(GradeReportPhase, GradeReportPhaseAdmin)
 admin.site.register(ViewAllSubmissionsPhase, ViewAllSubmissionsPhaseAdmin)
+admin.site.register(GetAllOwnSubmissionsPhase, GetAllOwnSubmissionsPhaseAdmin)
 
 admin.site.register(ReviewReport, ReviewReportAdmin)
 admin.site.register(GradeComponent, GradeComponentAdmin)
