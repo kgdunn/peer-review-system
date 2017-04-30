@@ -18,7 +18,7 @@ from .models import RubricActual, ROptionActual, RItemActual
 from .models import RubricTemplate, ROptionTemplate, RItemTemplate
 from stats.views import create_hit
 from utils import generate_random_token, send_email, get_IP_address
-
+from grades.views import display_grades
 
 # Python imports
 import re
@@ -1078,6 +1078,10 @@ def index(request):
 
 
     create_hit(request, item=learner, event='login', user=learner,)
+
+    LTI_consumer = recognise_LTI_LMS(request)
+    if request.POST.get('custom_grades', False) == 'True': #and LTI_consumer  == 'edx':
+        return display_grades(request)
 
     # Get all the possible phases
     phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
