@@ -1,0 +1,9 @@
+{% extends "review/base.html" %}
+
+{% block content %}
+
+{% for key, value in grades %}
+  {{key}}, {{value}}
+{% endfor %} {#iterate over the grades dict#}
+
+{% endblock %}

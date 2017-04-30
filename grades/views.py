@@ -12,7 +12,7 @@ from review.models import Person
 import io
 import csv
 import six
-
+from collections import defaultdict
 
 # Logging
 import logging
@@ -23,9 +23,7 @@ def display_grades(learner, course, pr, request):
     Displays the grades to the student here.
     """
     gradebook = GradeBook.objects.get(course=course)
-    categories = GradeCategory.objects.get(gradebook=gradebook)
-    gitems = LearnerGrade.objects.filter(learner=learner)
-
+    grades = {}
     if learner.role == 'Admin':
         ctx = {'learner': learner,
                'course': course,
@@ -34,7 +32,28 @@ def display_grades(learner, course, pr, request):
         return render(request,
                       'grades/import_grades.html', ctx)
 
-    return HttpResponse('Grades will be displayed here.')
+    categories = GradeCategory.objects.filter(gradebook=gradebook)\
+                                                            .order_by('order')
+
+    for gcat in categories:
+        if gcat.gradeitem_set.all().count() == 0:
+            continue
+
+        items = gcat.gradeitem_set.all().order_by('order')
+        for item in items:
+            grade = LearnerGrade.objects.filter(learner=learner, gitem=item)
+            if grade.count() == 0:
+                pass
+            else:
+                key = gcat.order + item.order/1000.0
+                grades[key] = grade[0]
+
+    if six.PY2:
+        ctx = {'grades': sorted(grades.iteritems())}
+    elif six.PY3:
+        ctx = {'grades': sorted(grades.items())}
+
+    return render(request, 'grades/learner_grades.html', ctx)
 
 @csrf_exempt
 @xframe_options_exempt
@@ -53,7 +72,9 @@ def import_edx_gradebook(request):
         "Verification Status",
         "Certificate Eligible",
         "Certificate Delivered",
-        "Certificate Type"]
+        "Certificate Type",
+        "(Avg)",   # <--- special case: skip calculated columns
+    ]
 
     if request.method != 'POST':
         return HttpResponse(('Grades cannot be uploaded directly. Please upload'
@@ -81,9 +102,76 @@ def import_edx_gradebook(request):
     logger.debug(io_string)
 
     out = ''
-    for row in csv.reader(io_string, delimiter=','):
-        out += str(row)
+    reader = csv.reader(io_string, delimiter=',')
+    columns = defaultdict(int)
+    for row in reader:
+        if reader.line_num == 1:
+            order = 0
+            for idx, col in enumerate(row):
+                invalid = False
+                for skip in SKIP_FIELDS:
+                    if col.endswith(skip):
+                        invalid = True
+                if invalid:
+                    order += 1
+                    continue
+                else:
+                    columns[order] = col
+                    order += 1
 
+                gradebook = GradeBook.objects.get(course=course)
+                cat, created_cat = GradeCategory.objects.get_or_create(
+                                                    gradebook=gradebook,
+                                                    display_name=col,
+                                                    defaults={'order': order,
+                                                              'max_score': 1,
+                                                              'weight':0.0,}
+                                                    )
+
+                item, created_item = GradeItem.objects.get_or_create(
+                                                display_name=col,
+                                                category__gradebook=gradebook,
+                                                defaults={'order': order,
+                                                          'max_score': 1,
+                                                          'weight':0.0,}
+                                                )
+                if created_cat and created_item:
+                    item.category = cat
+                    item.save()
+
+            # After processing the first row
+            continue
+
+        for idx, col in enumerate(row):
+            edX_id = row[0]
+            email = row[1]
+            display_name = row[2]
+            if Person.objects.filter(email=email, role='Learn').count():
+                learner = Person.objects.filter(email=email, role='Learn')[0]
+            else:
+                continue
+
+            if idx not in columns.keys():
+                continue
+
+            item_name = columns[idx]
+            gitem = GradeItem.objects.get(display_name=item_name,
+                                          category__gradebook=gradebook)
+            prior = LearnerGrade.objects.filter(gitem=gitem, learner=learner)
+            if prior.count():
+                item = prior[0]
+            else:
+                item = LearnerGrade(gitem=gitem, learner=learner)
+
+
+            if col in ('Not Attempted', 'Not Available'):
+                item.not_graded_yet = True
+                item.value = None
+            else:
+                item.not_graded_yet = False
+                item.value = float(col)*100
+
+            item.save()
 
 
     return HttpResponse('out:' + out)

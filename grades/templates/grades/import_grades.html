@@ -2,8 +2,11 @@
 
 {% block content %}
 
-<p>Please upload the grades CSV format, based on the export from edX:
+<div class="accordion">
+<h3>Click here to show/hide the extra information for instructors and TAs</h3>
+<div>
 
+<p>Please upload the grades CSV format, based on the export from edX:
 
 <form action="{% url 'import_edx_gradebook' %}" method="post"  enctype="multipart/form-data">
     {% csrf_token %}

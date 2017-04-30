@@ -55,7 +55,7 @@ class GradeItem(models.Model):
     An item in the gradebook. Each gradebook consists of one or more items
     (columns) in the gradebook.
     """
-    category = models.ForeignKey(GradeCategory)
+    category = models.ForeignKey(GradeCategory, blank=True, null=True)
     order = models.PositiveSmallIntegerField(
         help_text="Which column order is this item")
     display_name = models.CharField(max_length=250, default='Assignment ...')
@@ -84,8 +84,12 @@ class LearnerGrade(models.Model):
     """
     gitem = models.ForeignKey(GradeItem)
     learner = models.ForeignKey(Person)
-    value = models.DecimalField(max_digits=7, decimal_places=3,
+    value = models.DecimalField(max_digits=7, decimal_places=3, blank=True,
+                                null=True,
                                 help_text="The grade earned by the learner.")
+    not_graded_yet = models.BooleanField(default=True,
+            help_text="If this item is not yet graded/submitted/etc")
+    modfied_dt = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return '[{0}/{1}] for {2}'.format(self.value,
