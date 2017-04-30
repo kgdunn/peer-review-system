@@ -40,7 +40,8 @@ class Course(models.Model):
     #                                  [u'brightspace.tudelft.nl:training-IDE'],
     #
     # edX:   u'context_id': [u'course-v1:DelftX+IDEMC.1x+1T2017']
-
+    base_url = models.CharField(max_length=200, help_text="The base URL",
+                                blank=True)
     offering = models.PositiveIntegerField(default='0000', blank=True,
         help_text="Which year/quarter is it being offered?")
 
