@@ -72,7 +72,7 @@ def import_edx_gradebook(request):
         print (row)
         out += str(row)
 
-    return HttpResponse(out)
+    return HttpResponse('out:' + out)
 
 
 
