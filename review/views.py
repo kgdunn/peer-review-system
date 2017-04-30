@@ -1937,7 +1937,7 @@ def get_stats_comments(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
-    phase = PRPhase.objects.filter(pr=pr_process)[5]
+    phase = PRPhase.objects.filter(pr=pr_process).order_by('order')[4]
 
     import csv
     statsfile = open('results.tsv', 'w')
@@ -1946,17 +1946,21 @@ def get_stats_comments(request):
                  'Instructor review[26%]','Peer review credit[8%]',
                  'Average grade','C1','C2','C3','C4','C1','C2','C3',
                  'C4','WordCount']
-
     writer.writerow(writerow)
+    writer.writerow([pr_process, phase])
     for student in Person.objects.filter(role='Learn'):
-        print(student)
+
         rowwrite = []
 
         grade_components = GradeComponent.objects.filter(pr=pr_process).\
               order_by('order')
         total_grade = 0.0
-        rowwrite.append(student.enrolled_set.all()[0].group.name)
-        rowwrite.append(student.email)
+        if student.enrolled_set.all():
+            rowwrite.append(student.enrolled_set.all()[0].group.name)
+            rowwrite.append(student.email)
+        else:
+            continue
+
         student_grade = {}
         for item in grade_components:
 
@@ -1981,7 +1985,6 @@ def get_stats_comments(request):
                                                             .order_by('id'):
                 if item.ritem_template.option_type == 'LText':
                     all_items = item.roptionactual_set.all()
-                    print(item, all_items.count())
 
                     rowwrite.append(all_items[all_items.count()-1].comment\
                             .encode('utf-8').replace(b'\t', b'').\
@@ -1989,7 +1992,9 @@ def get_stats_comments(request):
 
         rowwrite.append(str(word_count))
         writer.writerow(rowwrite)
-        print(word_count, total_grade, '------')
+        logger.debug('Reported {0} [{1}]: {2}'.format(student,
+                                                      word_count,
+                                                      total_grade))
 
     statsfile.close()
     return HttpResponse('The report is on the server to download.')
