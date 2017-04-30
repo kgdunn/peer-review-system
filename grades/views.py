@@ -6,6 +6,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
 from .models import GradeBook, GradeCategory, GradeItem, LearnerGrade
+from review.models import Person
 
 # Python imports
 import io
@@ -17,7 +18,7 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
-def display_grades(learner, course, request):
+def display_grades(learner, course, pr, request):
     """
     Displays the grades to the student here.
     """
@@ -27,12 +28,13 @@ def display_grades(learner, course, request):
 
     if learner.role == 'Admin':
         ctx = {'learner': learner,
-               'course': course}
+               'course': course,
+               'pr': pr}
 
         return render(request,
                       'grades/import_grades.html', ctx)
 
-    return HttpResponse('<a href="/grades/import_grades">UPload</a>')
+    return HttpResponse('Grades will be displayed here.')
 
 @csrf_exempt
 @xframe_options_exempt
@@ -40,7 +42,8 @@ def import_edx_gradebook(request):
     """
     Allows the instructor to import a grades list from edX.
     """
-    logger.debug("Importing grades: {0}".format(str(request.POST)))
+
+    logger.debug("Importing grades:")
     SKIP_FIELDS = [
         "Student ID",
         "Email",
@@ -61,6 +64,14 @@ def import_edx_gradebook(request):
     else:
         return HttpResponse('A file was not uploaded, or a problem occurred.')
 
+    from review.views import starting_point
+    person_or_error, course, pr = starting_point(request)
+
+    if not(isinstance(person_or_error, Person)):
+        return person_or_error      # Error path if student does not exist
+
+    learner = person_or_error
+
     if six.PY2:
         uploaded_file = request.FILES.get('file_upload').readlines()
         io_string = uploaded_file
@@ -71,8 +82,9 @@ def import_edx_gradebook(request):
 
     out = ''
     for row in csv.reader(io_string, delimiter=','):
-        print (row)
         out += str(row)
+
+
 
     return HttpResponse('out:' + out)
 

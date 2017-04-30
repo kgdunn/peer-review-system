@@ -9,6 +9,7 @@
     {% csrf_token %}
     <input type="hidden" name="learner_ID" value="{{learner.user_ID}}">
     <input type="hidden" name="context_id" value="{{course.label}}">
+    <input type="hidden" name="resource_link_id" value="{{pr.LTI_id}}">
 
     <label for="id_file_upload">File upload:</label>
     <input id="id_file_upload"

@@ -102,7 +102,10 @@ def recognise_LTI_LMS(request):
     is if nothing can be determined.
     """
     if settings.DEBUG:
-        request.POST = request.GET # only on the development server
+        try:
+            request.POST.update(request.GET) # only on the development server
+        except AttributeError:
+            request.POST = request.GET
 
     if request.POST.get('learner_ID', ''):
         return None   # Used for form submissions internally.
@@ -1080,7 +1083,7 @@ def index(request):
 
     LTI_consumer = recognise_LTI_LMS(request)
     if request.POST.get('custom_grades', False) == 'True': #and LTI_consumer  == 'edx':
-        return display_grades(learner, course, request)
+        return display_grades(learner, course, pr, request)
 
     # Get all the possible phases
     phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')

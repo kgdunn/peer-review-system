@@ -22,41 +22,6 @@ from random import shuffle
 import logging
 logger = logging.getLogger(__name__)
 
-#---------
-
-# Commented this out: this is purely replicated code, and that shouldn't happen
-
-#def starting_point(request):
-    #"""
-    #Bootstrap code to run on every request.
-
-    #Returns a Person instance, the course, and Peer Review (pr) instances.
-
-    #"""
-    #person = get_create_student(request)
-
-    #course_ID = request.POST.get('context_id',
-                                    #request.GET.get('context_id', None))
-    #group_ID = request.POST.get('resource_link_id',
-                                    #request.GET.get('resource_link_id', None))
-
-    #try:
-        #gID = Group_Formation_Process.objects.get(LTI_id=group_ID)
-    #except Group_Formation_Process.DoesNotExist:
-        #return (HttpResponse('Config error. Try resource_link_id={}\n'.format(\
-            #group_ID)), None, None)
-
-    #try:
-        #course = Course.objects.get(label=course_ID)
-    #except Course.DoesNotExist:
-        #return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
-            #course_ID)), None, None)
-
-    #if person:
-        #return person, course, gID
-    #else:
-        #return HttpResponse(("You are not registered in this course."))
-
 
 def randomly_enroll_function(gID):
     """
