@@ -8,6 +8,7 @@ from .models import GradeBook, GradeCategory, GradeItem, LearnerGrade
 # Python imports
 import io
 import csv
+import six
 
 
 # Logging
@@ -58,8 +59,14 @@ def import_edx_gradebook(request):
     else:
         return HttpResponse('A file was not uploaded, or a problem occurred.')
 
-    uploaded_file = request.FILES.get('file_upload').read().decode('utf-8')
-    io_string = io.StringIO(uploaded_file)
+    if six.PY2:
+        uploaded_file = request.FILES.get('file_upload').read()
+        io_string = uploaded_file
+    if six.PY3:
+        uploaded_file = request.FILES.get('file_upload').read().decode('utf-8')
+        io_string = io.StringIO(uploaded_file)
+    logger.debug(io_string)
+
     out = ''
     for row in csv.reader(io_string, delimiter=','):
         print (row)
