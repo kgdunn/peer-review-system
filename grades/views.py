@@ -62,7 +62,7 @@ def import_edx_gradebook(request):
         return HttpResponse('A file was not uploaded, or a problem occurred.')
 
     if six.PY2:
-        uploaded_file = request.FILES.get('file_upload').read()
+        uploaded_file = request.FILES.get('file_upload').readlines()
         io_string = uploaded_file
     if six.PY3:
         uploaded_file = request.FILES.get('file_upload').read().decode('utf-8')
