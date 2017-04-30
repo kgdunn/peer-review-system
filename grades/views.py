@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
+
 
 # Our imports
 from .models import GradeBook, GradeCategory, GradeItem, LearnerGrade
@@ -33,7 +35,7 @@ def display_grades(learner, course, request):
     return HttpResponse('<a href="/grades/import_grades">UPload</a>')
 
 @csrf_exempt
-#@xframe_options_exempt
+@xframe_options_exempt
 def import_edx_gradebook(request):
     """
     Allows the instructor to import a grades list from edX.
