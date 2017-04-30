@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('review.urls')),
     url(r'groups/', include('groups.urls')),
+    url(r'grades/', include('grades.urls')),
 ]
 
 if settings.DEBUG:

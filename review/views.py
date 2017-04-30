@@ -1081,7 +1081,7 @@ def index(request):
 
     LTI_consumer = recognise_LTI_LMS(request)
     if request.POST.get('custom_grades', False) == 'True': #and LTI_consumer  == 'edx':
-        return display_grades(request)
+        return display_grades(learner, course, request)
 
     # Get all the possible phases
     phases = PRPhase.objects.filter(pr=pr, is_active=True).order_by('order')
