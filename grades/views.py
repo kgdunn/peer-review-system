@@ -9,11 +9,15 @@ from .models import GradeBook, GradeCategory, GradeItem, LearnerGrade
 import io
 import csv
 
+
+# Logging
+import logging
+logger = logging.getLogger(__name__)
+
 def display_grades(learner, course, request):
     """
     Displays the grades to the student here.
     """
-
     gradebook = GradeBook.objects.get(course=course)
     categories = GradeCategory.objects.get(gradebook=gradebook)
     gitems = LearnerGrade.objects.filter(learner=learner)
@@ -35,6 +39,7 @@ def import_edx_gradebook(request):
     """
     Allows the instructor to import a grades list from edX.
     """
+    logger.debug("Importing grades: {0}".format(str(request.POST)))
     SKIP_FIELDS = [
         "Student ID",
         "Email",

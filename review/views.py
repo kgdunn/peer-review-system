@@ -23,7 +23,6 @@ from grades.views import display_grades
 # Python imports
 import re
 import os
-import six
 import csv
 import json
 import hashlib
