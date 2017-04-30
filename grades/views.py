@@ -28,7 +28,7 @@ def display_grades(learner, course, request):
 
     return HttpResponse('<a href="/grades/import_grades">UPload</a>')
 
-#@csrf_exempt
+@csrf_exempt
 #@xframe_options_exempt
 def import_edx_gradebook(request):
     """
