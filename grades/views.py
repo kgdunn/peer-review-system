@@ -24,12 +24,10 @@ def display_grades(learner, course, request):
 
     if learner.role == 'Admin':
         ctx = {'learner': learner,
-               'course': course},
+               'course': course}
 
-        return render(request, 'grades/import_grades.html', ctx)
-        #learner_ID" value="f79a5944761377f26dbdebb735dcc8a8">
-        #context_id" value="course-v1:DelftX+IDEMC.1x+1T2017">
-        #resource_link_id"
+        return render(request,
+                      'grades/import_grades.html', ctx)
 
     return HttpResponse('<a href="/grades/import_grades">UPload</a>')
 
@@ -52,7 +50,6 @@ def import_edx_gradebook(request):
         "Certificate Type"]
 
     if request.method != 'POST':
-        ctx = {}
         return HttpResponse(('Grades cannot be uploaded directly. Please upload'
                              ' the grades via edX.'))
 
