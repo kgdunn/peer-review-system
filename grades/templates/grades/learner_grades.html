@@ -1,9 +1,23 @@
 {% extends "review/base.html" %}
-
 {% block content %}
 
-{% for key, value in grades %}
-  {{key}}, {{value}}
+The grades shown below are updated every 24 hours. Last update: {{gradebook.last_updated|date:"D, d F"}} at {{gradebook.last_updated|time:"H:i"}}
+<br><br>
+<table class="pr-admin">
+<thead>
+<tr>
+    <th>Grade item</th>
+    <th>Your grade [%]</th>
+    <th>Maximum grade possible</th>
+</tr>
+</thead>
+{% for key, gval in grades %}
+    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
+        <td><a href="{{course.base_url}}/{{gval.gitem.link}}" target="_blank">{{gval.gitem.display_name}}</a></td>
+        <td><span style="float:right">{%if gval.not_graded_yet%}--{% else%}{{gval.value|floatformat:1}}{%endif%}</span></td>
+        <td>{{gval.gitem.max_score}}</td>
+    </tr>
 {% endfor %} {#iterate over the grades dict#}
+</table>
 
 {% endblock %}

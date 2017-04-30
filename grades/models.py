@@ -13,6 +13,7 @@ class GradeBook(models.Model):
                                         help_text="A value between 0 and 100.")
     max_score = models.DecimalField(max_digits=5, decimal_places=2, default=100,
         help_text="A value between 0 and 100. Normally this is 100.0")
+    last_updated = models.DateTimeField()
     def __str__(self):
         return 'Gradebook: {0} [{1}/{2}]'.format(self.course,
                                                  self.passing_value,

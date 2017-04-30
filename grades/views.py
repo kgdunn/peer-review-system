@@ -12,6 +12,7 @@ from review.models import Person
 import io
 import csv
 import six
+import datetime
 from collections import defaultdict
 
 # Logging
@@ -53,6 +54,9 @@ def display_grades(learner, course, pr, request):
     elif six.PY3:
         ctx = {'grades': sorted(grades.items())}
 
+    ctx['course'] = course
+    ctx['gradebook'] = gradebook
+
     return render(request, 'grades/learner_grades.html', ctx)
 
 @csrf_exempt
@@ -60,6 +64,10 @@ def display_grades(learner, course, pr, request):
 def import_edx_gradebook(request):
     """
     Allows the instructor to import a grades list from edX.
+
+    Improvements:
+    * create a "Person" profile for students that in the CSV file, but not yet
+      in the DB.
     """
 
     logger.debug("Importing grades:")
@@ -172,6 +180,9 @@ def import_edx_gradebook(request):
                 item.value = float(col)*100
 
             item.save()
+
+    gradebook.last_update = datetime.datetime.utcnow()
+    gradebook.save()
 
 
     return HttpResponse('out:' + out)
