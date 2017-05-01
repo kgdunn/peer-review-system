@@ -6,7 +6,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Our imports
 from .models import GradeBook, GradeCategory, GradeItem, LearnerGrade
-from review.models import Person
+from review.models import Person, Course
 
 # Python imports
 import io
@@ -19,6 +19,25 @@ from collections import defaultdict, namedtuple
 # Logging
 import logging
 logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@xframe_options_exempt
+def display_grade(request, user_ID, course):
+    """
+    Shows the grades for a student
+    """
+    course = Course.objects.get(label=course)
+    gradebook = course.gradebook_set.all()[0]
+    learner = Person.objects.filter(user_ID=user_ID)[0]
+    grades, total_grade = get_grade_summary(learner, gradebook)
+    ctx = {'course': course,
+           'gradebook': gradebook,
+           'grades': grades,
+           'total_grade': total_grade,
+           'learner': learner,
+           }
+    return render(request, 'grades/learner_grades.html', ctx)
+
 
 def get_grade_summary(learner, gradebook):
     """
@@ -115,24 +134,30 @@ def get_grade_summary(learner, gradebook):
 
     return grades, total_grade
 
-def display_grades(learner, course, pr, request):
+def grade_landing_page(learner, course, pr, request):
     """
     Displays the grades to the student here.
     """
+    gradebook = GradeBook.objects.get(course=course)
     if learner.role == 'Admin':
+        all_lgrades = LearnerGrade.objects.filter(\
+                                          gitem__category__gradebook=gradebook)
+        students = list(set([lgrade.learner for lgrade in all_lgrades]))
+
         ctx = {'learner': learner,
                'course': course,
-               'pr': pr}
+               'pr': pr,
+               'all_learners': students
+               }
 
-        return render(request,
-                      'grades/import_grades.html', ctx)
+        return render(request, 'grades/admin_grades.html', ctx)
 
-    gradebook = GradeBook.objects.get(course=course)
     grades, total_grade = get_grade_summary(learner, gradebook)
     ctx = {'course': course,
            'gradebook': gradebook,
            'grades': grades,
-           'total_grade': total_grade
+           'total_grade': total_grade,
+           'learner': learner,
            }
 
     return render(request, 'grades/learner_grades.html', ctx)
@@ -236,6 +261,9 @@ def import_edx_gradebook(request):
                 learner = Person.objects.filter(email=email, role='Learn')[0]
             else:
                 continue
+                #new_student, _ = Person.objects.get_or_create(email=email,
+                                                           #role='Learn',
+                                                           #display_name=row[2])
 
             if idx not in columns.keys():
                 continue

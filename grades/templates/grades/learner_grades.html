@@ -14,6 +14,10 @@
 
 {% block content %}
 
+<span class="final-grade">Grade report for: {{learner.display_name}}</span>
+<br>
+<br>
+
 The grades shown below are updated every 24 hours. Last update: {{gradebook.last_updated|date:"D, d F"}} at {{gradebook.last_updated|time:"H:i"}}
 <br><br>
 <table class="pr-admin">
@@ -64,5 +68,7 @@ The grades shown below are updated every 24 hours. Last update: {{gradebook.last
 </table>
 
 <span class="final-grade">Total grade, overall: {{total_grade|floatformat:1}}%</span>
+<br>
+<span class="category">To pass this course you must reach or exceed {{gradebook.passing_value|floatformat:1}}%</span>
 
 {% endblock %}

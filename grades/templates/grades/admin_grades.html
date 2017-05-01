@@ -2,9 +2,6 @@
 
 {% block content %}
 
-<div class="accordion">
-<h3>Click here to show/hide the extra information for instructors and TAs</h3>
-<div>
 
 <p>Please upload the grades CSV format, based on the export from edX:
 
@@ -19,5 +16,13 @@
     initial_text="Upload the exported gradebook" name="file_upload" type="file" multiple="" required="">
     <input type="submit" value="Upload grades" name="submit"/>
 </form>
+
+<hr>
+See the grade report for these students:
+<ul>
+{% for student in all_learners%}
+    <li><a href="{% url 'display_grade' student.user_ID course.label%}" target="_blank">{{student.display_name}}</a>
+{% endfor %}
+
 
 {% endblock %}
