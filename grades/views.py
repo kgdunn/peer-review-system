@@ -178,7 +178,7 @@ def import_edx_gradebook(request):
         return person_or_error      # Error path if student does not exist
 
     learner = person_or_error
-
+    gradebook = GradeBook.objects.get(course=course)
     if six.PY2:
         uploaded_file = request.FILES.get('file_upload').readlines()
         io_string = uploaded_file
@@ -205,7 +205,7 @@ def import_edx_gradebook(request):
                     columns[order] = col
                     order += 1
 
-                gradebook = GradeBook.objects.get(course=course)
+
                 cat, created_cat = GradeCategory.objects.get_or_create(
                                                     gradebook=gradebook,
                                                     display_name=col,
@@ -259,7 +259,7 @@ def import_edx_gradebook(request):
 
             item.save()
 
-    gradebook.last_update = datetime.datetime.utcnow()
+    gradebook.last_updated = datetime.datetime.utcnow()
     gradebook.save()
 
 
