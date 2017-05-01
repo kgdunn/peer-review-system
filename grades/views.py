@@ -29,6 +29,7 @@ def display_grade(request, user_ID, course):
     course = Course.objects.get(label=course)
     gradebook = course.gradebook_set.all()[0]
     learner = Person.objects.filter(user_ID=user_ID)[0]
+    logger.debug('Displaying grade for {0}'.format(learner))
     grades, total_grade = get_grade_summary(learner, gradebook)
     ctx = {'course': course,
            'gradebook': gradebook,
@@ -152,15 +153,10 @@ def grade_landing_page(learner, course, pr, request):
 
         return render(request, 'grades/admin_grades.html', ctx)
 
-    grades, total_grade = get_grade_summary(learner, gradebook)
-    ctx = {'course': course,
-           'gradebook': gradebook,
-           'grades': grades,
-           'total_grade': total_grade,
-           'learner': learner,
-           }
+    else:
+        return display_grade(request, learner.user_ID, course.label)
 
-    return render(request, 'grades/learner_grades.html', ctx)
+
 
 @csrf_exempt
 @xframe_options_exempt
