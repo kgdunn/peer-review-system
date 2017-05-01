@@ -1,4 +1,17 @@
 {% extends "review/base.html" %}
+
+{% block header %}
+<style>
+.category{
+    font-size: 1.5em;
+}
+.final-grade{
+    font-size: 1.75em;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 The grades shown below are updated every 24 hours. Last update: {{gradebook.last_updated|date:"D, d F"}} at {{gradebook.last_updated|time:"H:i"}}
@@ -7,17 +20,49 @@ The grades shown below are updated every 24 hours. Last update: {{gradebook.last
 <thead>
 <tr>
     <th>Link to the graded item</th>
-    <th>Your grade [%]</th>
+    <th>Weight</th>
+    <th>Your score achieved</th>
     <th>Maximum grade possible</th>
 </tr>
 </thead>
-{% for key, gval in grades %}
-    <tr class="pr-admin-{% cycle 'odd' 'even' %}">
-        <td><a href="{{course.base_url}}/{{gval.gitem.link}}" target="_blank">{{gval.gitem.display_name}}</a></td>
-        <td><span style="float:right">{%if gval.not_graded_yet%}--{% else%}{{gval.value|floatformat:1}}{%endif%}</span></td>
-        <td>{{gval.gitem.max_score}}</td>
-    </tr>
-{% endfor %} {#iterate over the grades dict#}
+{% for category, weight, items in grades %}
+    {% cycle 'odd' 'even' as rowcolours silent %}
+    {% if items|length > 1 %}
+        {% for item in items %}
+            <tr class="pr-admin-{{rowcolours}}">
+            {% if forloop.first %}
+                <td><span class="category">{{category}}</span></td>
+                <td style="text-align:center">{{weight|floatformat}}</span></td>
+                <td><span class="category" style="float:left">{%if item.1.not_graded_yet%}--{% else%}{{item.1.value|floatformat:1}}{%endif%}</span></td>
+                <td><span class="category">{{item.1.max_score|floatformat}}</span></td>
+              </tr>
+
+            {% else %}
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{course.base_url}}/{{item.1.gitem.link}}" target="_blank">{{item.1.gitem.display_name}}</a></td>
+                <td></td>
+                <td><span style="float:right">{%if item.1.not_graded_yet%}--{% else%}{{item.1.value|floatformat:1}}{%endif%}</span></td>
+                <td></td>
+            {% endif %}
+            </tr>
+
+        {% endfor %}{#iterate over the items within a category#}
+
+
+    {% else %}
+
+        <tr class="pr-admin-{{rowcolours}}">
+            <td><span class="category">{{category}}</span>
+                <span style="float:right">(<a href="{{course.base_url}}/{{items.0.1.gitem.link}}" target="_blank">link</a>)<span></td>
+            <td style="text-align:center">{{weight|floatformat}}</span></td>
+            <td><span class="category" style="float:left">{%if items.0.1.not_graded_yet%}--{% else%}{{items.0.1.value|floatformat:1}}{%endif%}</span></td>
+            <td><span class="category">{{items.0.1.gitem.max_score|floatformat}}</span></td>
+        </tr>
+
+    {% endif %}
+
+{% endfor %} {#iterate over the grades list#}
 </table>
+
+<span class="final-grade">Total grade, overall: {{total_grade|floatformat:1}}%</span>
 
 {% endblock %}
