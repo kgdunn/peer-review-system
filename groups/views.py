@@ -99,12 +99,11 @@ def handle_uploaded_file(classlist, gID, auto_create_and_enroll_groups=True):
             if newbie:
                 output.append('Added new learner: %s' % learner)
 
-            enrolled = Enrolled(person=learner,
-                                group=group,
-                                is_enrolled=is_enrolled)
-            enrolled.save()
-
-            output.append('Enrolled learner: %s' % learner)
+            enrolled, newenr = Enrolled.objects.get_or_create(person=learner,
+                                                        group=group,
+                                                        is_enrolled=is_enrolled)
+            if newenr:
+                output.append('Enrolled learner: %s' % learner)
 
     return '\n'.join(output)
 
@@ -124,8 +123,8 @@ def import_classlist(request):
     if request.method == 'POST':
 
         #person_or_error, course, gID = starting_point(request)
-        course = Course.objects.get(pk=1)
-        gID = Group_Formation_Process.objects.get(pk=1)
+        course = Course.objects.get(pk=5)
+        gID = Group_Formation_Process.objects.get(pk=3)
 
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
