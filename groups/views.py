@@ -72,7 +72,7 @@ def handle_uploaded_file(classlist, gID, auto_create_and_enroll_groups=True):
         if idx == 0:
             continue
 
-        row = row.decode().split(',')
+        row = row.decode('utf-8').split(',')
         student_number = row[0].strip('#')
         last_name = row[2].strip()
         email = row[4].strip()
