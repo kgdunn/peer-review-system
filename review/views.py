@@ -1666,7 +1666,7 @@ def review(request, ractual_code):
                                                         submitted=True)
             if prior_answer.count():
                 has_prior_answers = True
-                if item_template.option_type in ('DropD', 'Chcks'):
+                if item_template.option_type in ('DropD', 'Chcks', 'Radio'):
                     option.selected = True
                 elif item_template.option_type == 'LText':
                     option.prior_text = prior_answer[0].comment
