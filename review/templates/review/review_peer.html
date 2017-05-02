@@ -119,10 +119,10 @@
 		{% spaceless %}
 	    {% if not show_feedback %}
 			{{rubric.general_instructions|safe}}<br>
-		    Assess the work based on these criteria. Submit your review when complete.
 		    <form action="{% url 'submit_peer_review_feedback' ractual_code=ractual_code %}"
 		          method="POST" enctype="multipart/form-data">{% csrf_token %}
 		    <div class="submit_button" ><input  type="submit" name="{{ractual_code}}" value="Submit your review"></div>
+			Don't forget to submit your review when complete.
 			<hr>
 		{% endif %}
 		<div class="clear"></div>
@@ -205,6 +205,7 @@
 		{% if not show_feedback %}
 			<span class="submit_button" ><input type="submit" name="below-{{ractual_code}}" value="Submit your review"></span>
 			</form>
+			Don't forget to submit your review when complete.
 		{% endif %}
 		{% endspaceless %}
             <!-- Column 2 end -->
