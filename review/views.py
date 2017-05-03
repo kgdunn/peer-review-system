@@ -1301,6 +1301,8 @@ def upload_submission(request, learner, pr_process, phase):
             strike1 = True
 
         if strike1:
+            logger.debug('Invalid upload: {0} [{1}]'.format(mime,
+                                                            full_path))
             return None, 'Invalid file upload. Uploaded file must be a PDF.'
 
     # Make the thumbnail of the PDF -> PNG
