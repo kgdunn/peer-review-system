@@ -25,6 +25,7 @@ import re
 import os
 import csv
 import json
+import magic
 import hashlib
 import datetime
 import numpy as np
@@ -533,11 +534,16 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 
         if request.FILES:
             submission = upload_submission(request, learner, self.pr, sub_phase)
-            ctx_objects['submission'] = submission
+            if isinstance(submission, tuple):
+                ctx_objects['submission'] = submission[0]
+                ctx_objects['submission_error_message'] = submission[1]
+            else:
+                ctx_objects['submission'] = submission
 
         sub_phase.submission = ctx_objects['submission']
         sub_phase.allow_submit = ctx_objects['allow_submit'] = allow_submit
-        sub_phase.file_upload_form = ctx_objects['file_upload_form'] = file_upload_form
+        sub_phase.file_upload_form = ctx_objects['file_upload_form'] = \
+                                                              file_upload_form
 
 
 
@@ -1282,9 +1288,25 @@ def upload_submission(request, learner, pr_process, phase):
             item.is_valid = False
             item.save()
 
+    # Check that the file format is correct right away.
+    strike1 = False
+    if 'pdf' in phase.accepted_file_types_comma_separated.lower():
+        try:
+            mime = magic.from_file(full_path, mime=True).decode('utf-8')
+        except Exception as exp:
+            logger.error('Could not determine MIME type: ' + str(exp))
+            strike1 = True
+
+        if 'application/pdf' not in mime.lower():
+            strike1 = True
+
+        if strike1:
+            return None, 'Invalid file upload. Uploaded file must be a PDF.'
+
     # Make the thumbnail of the PDF -> PNG
-    from wand.image import Image
+    strike2 = False
     try:
+        from wand.image import Image
         imageFromPdf = Image(filename=full_path)
         image = Image(width=imageFromPdf.width, height=imageFromPdf.height)
         image.composite(imageFromPdf.sequence[0], top=0, left=0)
@@ -1300,8 +1322,13 @@ def upload_submission(request, learner, pr_process, phase):
         image.save(filename=thumbnail_full_name)
 
     except Exception as exp:
+        strike2 = True
         logger.error('Exception for thumbnail: ' + str(exp))
         thumbnail_file_name_django = None
+
+    if strike2:
+        return None, 'Invalid file upload. Uploaded file must be a PDF.'
+
 
     sub = Submission(submitted_by=learner,
                      group_submitted=group_members['group_instance'],
