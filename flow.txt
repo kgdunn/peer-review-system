@@ -1,6 +1,4 @@
 Prevent multiple file upload with PDF: only image files.
-Need a mechanism to reject filetpyes
-
 
 /static-media/admin/js/change_form.js, <--- add/update the media
 
@@ -13,7 +11,6 @@ STats: time spent on the peer reviews
 ----
 * Get the tables sortable in the view
 * Get 2 late peer review links out to the students.
-* PDF magick checker
 * Why do the RActuals get assigned for phase 2?
 ---
 ASsert the lenght of RItemActuals is the same (around line 377)
@@ -32,8 +29,7 @@ Use this for tables: http://olifolkerd.github.io/tabulator/examples/
 TO DO
 ======
 * Group email: make an HTML template. Allow the template to be in the PR_Process?
-* Don't allow non-PDF for upload
-* Return error messages for non-PDF; too large files
+* Return error messages for too large files
 
 To do next
 ------
@@ -43,21 +39,13 @@ Upload
 =-------
 Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
 http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously
+
 Size limit
-Strip out the PDF information
-Check for PDF
->>> import magic
->>> magic.from_file("testdata/test.pdf")
 
 
-* Raise error messages: incorrect filetypes, cannot create PDF, etc
-* Create a tmbnail from PDF
 * Submission filename is forced into a template
-* Allow multiple uploads, but bundle them on the back-end into 1 PDF file
 * Feedback box
 * Student receives email when feedback is available
-* Just a warning: if you upload again; your feedback is overwritten
-* During the upload/submission phase: admin sees which groups have/haven't uploaded
 
 ---
 brew install imagemagick@6

@@ -190,6 +190,7 @@ def get_create_student(request, course, pr):
         if learner.user_ID == '':
             logger.info('Augumented user_ID on %s' % learner.email)
             learner.user_ID = user_ID
+            learner.display_name = display_name
             learner.save()
 
 
