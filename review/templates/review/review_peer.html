@@ -138,7 +138,7 @@
 					{% if item.ritem_template.option_type == 'Radio' %}
                     <div class="radio">
                         <label><span class="radio_button peeroption"><input type="radio" name="item-{{item.ritem_template.order}}" id="item-{{item.ritem_template.order}}" value="option-{{option.order}}"
-						{%if option.selected%}checked="checked"{% endif %} {%if show_feedback%}disabled="disabled" {% endif %}></span><span class="radio_text"><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}} </span></label>
+						{%if option.selected and not show_feedback %}checked="checked"{% endif %} {%if show_feedback%}disabled="disabled" {% endif %}></span><span class="radio_text"><b>{{option.score|floatformat}} point{{option.score|pluralize}}</b>: {{option.criterion|safe}} </span></label>
                     </div>
 					{% endif %}
 					{% if item.ritem_template.option_type == 'Chcks' %}
