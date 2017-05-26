@@ -2322,13 +2322,14 @@ def push_grades(request):
     2. Get the ``lis_result_sourcedid``
     3.
     """
+    #person_or_error, course, pr = starting_point(request)
 
-    person_or_error, course, pr = starting_point(request)
+    if request.POST.get(u'resource_link_id') != '1114979422':
+        return HttpResponse('Nothing to do')
 
-
-    #url = request.POST.get('lis_outcome_service_url', '')
     sourced_id = request.POST.get('lis_result_sourcedid', '')
     grade = 0.429
+    logger.debug('sourced_id = {0}'.format(sourced_id))
 
     proc = subprocess.Popen("php /var/django/peer-review-lti/testing.php {0}".format(sourced_id),
                             shell=True,
@@ -2339,4 +2340,4 @@ def push_grades(request):
     logger.debug(script_response)
 
 
-    return('Grades pushed')
+    return HttpResponse('Grades pushed')
