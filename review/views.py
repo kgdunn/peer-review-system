@@ -1086,6 +1086,9 @@ def index(request):
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
+    if request.POST.get(u'resource_link_id') == '1114979422':
+        push_grades(request)
+
     person_or_error, course, pr = starting_point(request)
 
     if not(isinstance(person_or_error, Person)):
