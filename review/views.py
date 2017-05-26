@@ -2330,7 +2330,7 @@ def push_grades(request):
     sourced_id = request.POST.get('lis_result_sourcedid', '')
     grade = 0.429
 
-    proc = subprocess.Popen("php testing.php {0}".format(sourced_id),
+    proc = subprocess.Popen("php /var/django/peer-review-lti/testing.php {0}".format(sourced_id),
                             shell=True,
                             stdout=subprocess.PIPE)
     script_response = proc.stdout.read()
