@@ -5,12 +5,10 @@ Prevent multiple file upload with PDF: only image files.
 RuntimeWarning: DateTimeField RubricActual.completed received a naive datetime while time zone support is active.
 
 
-
 ----
 STats: time spent on the peer reviews
 ----
 * Get the tables sortable in the view
-* Get 2 late peer review links out to the students.
 * Why do the RActuals get assigned for phase 2?
 ---
 ASsert the lenght of RItemActuals is the same (around line 377)
@@ -19,7 +17,6 @@ items = completed_review.ritemactual_set.filter(submitted=True)\
         overall_max_score = 0.0 # just compute this on the last completed_review
         for idxi, item in enumerate(items):
 ---
-
 Check: is it true that if you add a new Item, that existing RActuals are not
        updated?
 How to resolve POST errors: ""request data read error""
@@ -41,7 +38,6 @@ Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
 http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously
 
 Size limit
-
 
 * Submission filename is forced into a template
 * Feedback box
@@ -66,7 +62,6 @@ https://community.brightspace.com/devcop/blog/setting_up_an_lti_11_integration_i
 
 ----
 * Return grade to edX?
-
 
 * What was the effect of self-review? Did reports improve?
 * Send ZIP file of all practicum reports: self-review and peer-review

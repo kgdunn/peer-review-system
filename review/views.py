@@ -28,6 +28,7 @@ import json
 import magic
 import hashlib
 import datetime
+import subprocess
 import numpy as np
 from random import shuffle
 from collections import defaultdict
@@ -1981,15 +1982,16 @@ def get_stats_comments(request):
         return HttpResponse(("You have reached the Group LTI component "
                              "without authorization."))
 
-    phase = PRPhase.objects.filter(pr=pr_process).order_by('order')[4]
+    phase = PRPhase.objects.filter(pr=pr_process).order_by('order')[1]
 
     import csv
     statsfile = open('results.tsv', 'w')
     writer = csv.writer(statsfile, delimiter='\t')
-    writerow = ['Group name','Email','Self-review [6%]','Peer Review[60%]',
-                 'Instructor review[26%]','Peer review credit[8%]',
-                 'Average grade','C1','C2','C3','C4','C1','C2','C3',
-                 'C4','WordCount']
+    writerow = ['Group name','Email', 'TotalGrade', 'Review of ...',
+                '1. Argument', '1. Good', '1. Tip', '2. Complete', '2. Good',
+                '2. Tip', '3. Quality', '3. Good', '3. Tip', '4. Clarity',
+                '4. Elaborated?', '4. Shortened?', '4. Good', '4. Tip',
+                'WordCount',]
     writer.writerow(writerow)
     writer.writerow([pr_process, phase])
     for student in Person.objects.filter(role='Learn'):
@@ -2025,14 +2027,21 @@ def get_stats_comments(request):
         word_count = 0
         for r_actual in evals_completed:
             word_count += r_actual.word_count
+            rowwrite.append(r_actual.submission.group_submitted.name)
             for item in r_actual.ritemactual_set.filter(submitted=True)\
                                                             .order_by('id'):
                 if item.ritem_template.option_type == 'LText':
                     all_items = item.roptionactual_set.all()
 
                     rowwrite.append(all_items[all_items.count()-1].comment\
-                            .encode('utf-8').replace(b'\t', b'').\
+                            .encode('utf-8').replace(b'\t', b' ').\
                             replace(b'\r\n', b'|').replace(b'\n', b'|'))
+
+                if item.ritem_template.option_type == 'Radio':
+                    all_items = item.roptionactual_set.all().order_by('-modified')
+                    rowwrite.append(all_items[0].roption_template.score)
+
+
 
         rowwrite.append(str(word_count))
         writer.writerow(rowwrite)
@@ -2302,3 +2311,32 @@ def update_word_count(r_actual):
            items_graded)
 
 
+@csrf_exempt
+@xframe_options_exempt
+def push_grades(request):
+    """
+    Based on: https://community.brightspace.com/devcop/blog/ ...
+                             so_you_want_to_extend_your_lms__part_1_lti_primer
+
+    1. Get the ``lis_outcome_service_url``
+    2. Get the ``lis_result_sourcedid``
+    3.
+    """
+
+    person_or_error, course, pr = starting_point(request)
+
+
+    #url = request.POST.get('lis_outcome_service_url', '')
+    sourced_id = request.POST.get('lis_result_sourcedid', '')
+    grade = 0.429
+
+    proc = subprocess.Popen("php testing.php {0}".format(sourced_id),
+                            shell=True,
+                            stdout=subprocess.PIPE)
+    script_response = proc.stdout.read()
+
+    #output = subprocess.check_output(["php", 'testing.php', sourced_id])
+    logger.debug(script_response)
+
+
+    return('Grades pushed')

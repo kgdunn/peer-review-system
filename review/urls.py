@@ -30,4 +30,6 @@ urlpatterns = [
 
     url(r'^total_stats$', views.total_stats),
 
+    url(r'^push_grades$', views.push_grades),
+
 ]
