@@ -215,7 +215,7 @@ $postBody = str_replace(
 	array('SOURCEDID', 'GRADE', 'OPERATION', 'MESSAGE'),
 	array($sourcedid, $grade, 'replaceResultRequest', uniqid()),
 	getPOXGradeRequest());
-	echo($postBody);
+
 $response = sendOAuthBodyPOST('POST', $endpoint, $oauth_consumer_key, $oauth_consumer_secret, 'application/xml', $postBody);
 $response = parseResponse($response);
 if($response['imsx_codeMajor'] == 'success') {

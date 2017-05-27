@@ -1086,10 +1086,11 @@ def index(request):
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
-    if request.POST.get(u'resource_link_id') == '1114979422':
+    if request.POST.get(u'resource_link_id', '') == '1114979422':
         grade = 0.29
         sourcedid = request.POST.get('lis_result_sourcedid', '')
-        push_grades(sourcedid, grade)
+        success = push_grades(sourcedid, grade)
+        logger.debug('Push grades returned: {0}'.format(success))
 
     person_or_error, course, pr = starting_point(request)
 
@@ -2330,8 +2331,6 @@ def push_grades(sourcedid, grade):
 
     Will return "True" if the grade was successfully set; else it returns None.
     """
-    if request.POST.get(u'resource_link_id') != '1114979422':
-        return HttpResponse('Nothing to do')
 
     try:
         grade = float(grade)
@@ -2349,6 +2348,5 @@ def push_grades(sourcedid, grade):
                             stdout=subprocess.PIPE)
     script_response = proc.stdout.read()
     logger.debug(script_response)
-
 
     return HttpResponse('Grades pushed')
