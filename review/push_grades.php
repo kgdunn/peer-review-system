@@ -221,7 +221,8 @@ $response = sendOAuthBodyPOST('POST', $endpoint, $oauth_consumer_key, $oauth_con
 $response = parseResponse($response);
 $result = 'Grade set FAILED';
 if($response['imsx_codeMajor'] == 'success') {
-    $result = 'Grade was set';
+    echo ('Grade was set');
+	return (0);
 }
 return $result;
 
