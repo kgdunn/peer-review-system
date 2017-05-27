@@ -1087,7 +1087,9 @@ def index(request):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
     if request.POST.get(u'resource_link_id') == '1114979422':
-        push_grades(request)
+        grade = 0.29
+        sourcedid = request.POST.get('lis_result_sourcedid', '')
+        push_grades(sourcedid, grade)
 
     person_or_error, course, pr = starting_point(request)
 
@@ -2316,30 +2318,36 @@ def update_word_count(r_actual):
 
 @csrf_exempt
 @xframe_options_exempt
-def push_grades(request):
+def push_grades(sourcedid, grade):
     """
     Based on: https://community.brightspace.com/devcop/blog/ ...
                              so_you_want_to_extend_your_lms__part_1_lti_primer
 
-    1. Get the ``lis_outcome_service_url``
-    2. Get the ``lis_result_sourcedid``
-    3.
-    """
-    #person_or_error, course, pr = starting_point(request)
+    1. Requires the ``lis_result_sourcedid`` from request.POST, as input
+       variable ``sourcedid``.
+       sourcedid = request.POST.get('lis_result_sourcedid', '')
+    2. The ``grade``: a value between 0.0 and 1.0
 
+    Will return "True" if the grade was successfully set; else it returns None.
+    """
     if request.POST.get(u'resource_link_id') != '1114979422':
         return HttpResponse('Nothing to do')
 
-    sourced_id = request.POST.get('lis_result_sourcedid', '')
-    grade = 0.429
-    logger.debug('sourced_id = {0}'.format(sourced_id))
+    try:
+        grade = float(grade)
+    except ValueError:
+        return None
 
-    proc = subprocess.Popen("php /var/django/peer-review-lti/testing.php {0}".format(sourced_id),
+    # Call the PHP to do the work. Supply the required command line arguments
+    calling_args = ("--sourcedid {0} --grade {1} --oauth_consumer_key={2} ",
+                    "--oauth_consumer_secret={3}").format(sourcedid, grade,
+                                                          settings.LTI_KEY,
+                                                          settings.LTI_SECRET)
+    php_script = settings.BASE_DIR_LOCAL + os.sep + 'review/push_grades.php'
+    proc = subprocess.Popen("php {0} {1}".format(php_script, calling_args),
                             shell=True,
                             stdout=subprocess.PIPE)
     script_response = proc.stdout.read()
-
-    #output = subprocess.check_output(["php", 'testing.php', sourced_id])
     logger.debug(script_response)
 
 
