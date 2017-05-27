@@ -2317,8 +2317,6 @@ def update_word_count(r_actual):
            items_graded)
 
 
-@csrf_exempt
-@xframe_options_exempt
 def push_grades(sourcedid, grade):
     """
     Based on: https://community.brightspace.com/devcop/blog/ ...
