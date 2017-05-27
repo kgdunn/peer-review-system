@@ -2333,6 +2333,7 @@ def push_grades(sourcedid, grade):
     try:
         grade = float(grade)
     except ValueError:
+        logger.debug('Could not create a floating point grade: ' + grade)
         return None
 
     # Call the PHP to do the work. Supply the required command line arguments
@@ -2347,7 +2348,7 @@ def push_grades(sourcedid, grade):
     script_response = proc.stdout.read()
     logger.debug(script_response)
 
-    if script_response.find('Grade was set') >= 0:
+    if script_response.find() >= 0:
         return True
     else:
         return False
