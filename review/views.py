@@ -2349,4 +2349,7 @@ def push_grades(sourcedid, grade):
     script_response = proc.stdout.read()
     logger.debug(script_response)
 
-    return HttpResponse('Grades pushed')
+    if script_response.find('Grade was set') >= 0:
+        return True
+    else:
+        return False
