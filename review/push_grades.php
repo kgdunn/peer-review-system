@@ -1,7 +1,8 @@
+<?php
+
 # Uses code from https://github.com/Brightspace/sample-LTI-WHMIS-quiz
 # which appears to be based on the MIT licensed code of Andy Smith, (c) 2007.
 
-<?php
 require_once 'OAuth.php';
 $endpoint     = 'https://brightspace.tudelft.nl/d2l/le/lti/Outcome';
 
@@ -219,9 +220,9 @@ $postBody = str_replace(
 $response = sendOAuthBodyPOST('POST', $endpoint, $oauth_consumer_key, $oauth_consumer_secret, 'application/xml', $postBody);
 $response = parseResponse($response);
 if($response['imsx_codeMajor'] == 'success') {
-    echo('Grade was set');
+    return 'Grade was set';
 } else {
-    echo('Grade set FAILED with ');
-	echo($response['imsx_codeMajor']);
+    return 'Grade set FAILED';
+
 }
 ?>
