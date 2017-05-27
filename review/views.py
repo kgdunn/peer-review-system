@@ -2338,7 +2338,7 @@ def push_grades(sourcedid, grade):
         return None
 
     # Call the PHP to do the work. Supply the required command line arguments
-    calling_args = ("--sourcedid {0} --grade {1} --oauth_consumer_key={2} ",
+    calling_args = ("--sourcedid {0} --grade {1} --oauth_consumer_key={2} "
                     "--oauth_consumer_secret={3}").format(sourcedid, grade,
                                                           settings.LTI_KEY,
                                                           settings.LTI_SECRET)
