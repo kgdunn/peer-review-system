@@ -2346,9 +2346,9 @@ def push_grades(sourcedid, grade):
                             shell=True,
                             stdout=subprocess.PIPE)
     script_response = proc.stdout.read()
-    logger.debug(script_response)
+    logger.debug('PHP script response: ' + str(script_response))
 
-    if script_response.find() >= 0:
+    if script_response.find('Grade was set') >= 0:
         return True
     else:
         return False
