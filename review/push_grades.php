@@ -219,10 +219,10 @@ $postBody = str_replace(
 
 $response = sendOAuthBodyPOST('POST', $endpoint, $oauth_consumer_key, $oauth_consumer_secret, 'application/xml', $postBody);
 $response = parseResponse($response);
+$result = 'Grade set FAILED';
 if($response['imsx_codeMajor'] == 'success') {
     $result = 'Grade was set';
-} else {
-    $result = 'Grade set FAILED';
-return $result;
 }
+return $result;
+
 ?>

@@ -1087,7 +1087,7 @@ def index(request):
         return HttpResponse("You have reached the Peer Review LTI component.")
 
     if request.POST.get(u'resource_link_id', '') == '1114979422':
-        grade = 0.29
+        grade = 0.31
         sourcedid = request.POST.get('lis_result_sourcedid', '')
         success = push_grades(sourcedid, grade)
         logger.debug('Push grades returned: {0}'.format(success))
