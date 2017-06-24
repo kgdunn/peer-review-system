@@ -67,7 +67,7 @@ def starting_point(request):
     pr_ID = request.POST.get('resource_link_id', None) or (settings.DEBUG and \
                              request.GET.get('resource_link_id', None))
 
-    logger.debug('Entering: {0} || {1}'.format(course_ID, pr_ID)
+    logger.debug('Entering: {0} || {1}'.format(course_ID, pr_ID))
 
     if (pr_ID is None) or (course_ID is None):
         return (HttpResponse(("You are not registered in this course. NCNPR")),
