@@ -77,8 +77,8 @@ def starting_point(request):
         pr = PR_process.objects.get(LTI_id=pr_ID)
     except PR_process.DoesNotExist:
         return (HttpResponse(('Configuration error. Try viewing this page '
-                        'in Live mode. Or use resource_link_id={}').format(\
-                        pr_ID)), None, None)
+          'in Live mode. Or use resource_link_id={} or context_id={}').format(\
+          pr_ID, course_ID)), None, None)
 
     try:
         if ' ' in course_ID:
