@@ -67,6 +67,7 @@ def starting_point(request):
     pr_ID = request.POST.get('resource_link_id', None) or (settings.DEBUG and \
                              request.GET.get('resource_link_id', None))
 
+    logger.debug('Entering: {0} || {1}'.format(course_ID, pr_ID)
 
     if (pr_ID is None) or (course_ID is None):
         return (HttpResponse(("You are not registered in this course. NCNPR")),
@@ -1085,12 +1086,6 @@ def get_related(self, request, learner, ctx_objects, now_time, prior):
 def index(request):
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the Peer Review LTI component.")
-
-    if request.POST.get(u'resource_link_id', '') == '1114979422':
-        grade = 0.31
-        sourcedid = request.POST.get('lis_result_sourcedid', '')
-        success = push_grades(sourcedid, grade)
-        logger.debug('Push grades returned: {0}'.format(success))
 
     person_or_error, course, pr = starting_point(request)
 
