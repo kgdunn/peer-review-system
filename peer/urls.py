@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'', include('review.urls')),
     url(r'groups/', include('groups.urls')),
     url(r'grades/', include('grades.urls')),
+    url(r'keyterms/', include('keyterms.urls')),
 ]
 
 if settings.DEBUG:

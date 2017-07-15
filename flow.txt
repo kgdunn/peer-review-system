@@ -1,8 +1,13 @@
+PDF error: /Users/kevindunn/_ver016200701_01.pdf
+
+
 Prevent multiple file upload with PDF: only image files.
 
 /static-media/admin/js/change_form.js, <--- add/update the media
 
 RuntimeWarning: DateTimeField RubricActual.completed received a naive datetime while time zone support is active.
+
+
 
 
 ----
@@ -31,10 +36,7 @@ TO DO
 To do next
 ------
 Prominently colour "Submit" button. Orange when not submitted; Green when submitted.
-
-Upload
-=-------
-Add upload bar: https://github.com/ouhouhsami/django-progressbarupload
+Upload bar: https://github.com/ouhouhsami/django-progressbarupload
 http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously
 
 Size limit
