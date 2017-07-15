@@ -25,7 +25,7 @@ class Image(models.Model):
     """
     The template image
     """
-    person = models.ForeignKey('review.models.Person')
+    person = models.ForeignKey('review.Person')
     link_to_raw = models.ImageField
     link_to_modified = models.ImageField()
 
