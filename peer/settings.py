@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'groups',
     'stats',
     'grades',
-    'keyterms'
+    'keyterms',
+
+    # 3rd-part apps
+    'sorl.thumbnail',
 ]
 
 MIDDLEWARE = [

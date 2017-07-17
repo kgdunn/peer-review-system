@@ -13,6 +13,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# Use the "{% load thumbnail %}" from http://sorl-thumbnail.readthedocs.io/en/latest/index.html
+
+# assemble a single PDF from image, text
+
+# Render to PNG
+# http://pillow.readthedocs.io/en/3.1.x/reference/ImageDraw.html
+
+# Have a queue to process the image?
+
+
 @csrf_exempt
 @xframe_options_exempt
 def keyterm_startpage(request):
