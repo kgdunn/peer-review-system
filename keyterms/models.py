@@ -18,6 +18,9 @@ class KeyTerm_Task(models.Model):
         verbose_name="Resource Link Page ID",
         help_text=('LTI post field: "resource_link_id"'))
 
+    def __str__(self):
+        return u'{0}'.format(self.keyterm_text)
+
 
 @python_2_unicode_compatible
 class KeyTerm_Definition(models.Model):
@@ -43,7 +46,7 @@ class KeyTerm_Definition(models.Model):
     #                                           'is after the deadline now.'))
 
     def __str__(self):
-        return u'%s' % self.person
+        return u'{0}'.format(self.person)
 
 
     def save(self, *args, **kwargs):
@@ -62,6 +65,11 @@ class Thumbs(models.Model):
     voter = models.ForeignKey('review.Person')
     awarded = models.BooleanField(default=False)
     last_edited = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return u'Thumb up for [{0}] by person {1}'.format(keyterm_definition,
+                                                          self.person)
+
 
 
 
