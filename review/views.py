@@ -114,6 +114,8 @@ def recognise_LTI_LMS(request):
         return None   # Used for form submissions internally.
     if request.POST.get('resource_link_id', '').find('edx.org')>0:
         return 'edx'
+    elif request.POST.get('resource_link_id', '').find('.tudelft.nl') > 0:
+        return 'profed'
     elif request.POST.get('ext_d2l_token_digest', None):
         return 'brightspace'
     elif request.POST.get('tool_consumer_instance_guid', '').find('coursera')>1:
@@ -131,12 +133,13 @@ def get_create_student(request, course, pr):
     newbie = False
     display_name = user_ID = ''
     LTI_consumer = recognise_LTI_LMS(request)
-    if LTI_consumer in ('brightspace', 'edx', 'coursera'):
+    if LTI_consumer in ('brightspace', 'edx', 'coursera', 'profed'):
         email = request.POST.get('lis_person_contact_email_primary', '')
         display_name = request.POST.get('lis_person_name_full', '')
-        if LTI_consumer == 'edx':
+        if LTI_consumer in ('edx', 'profed'):
             display_name = display_name or \
                                  request.POST.get('lis_person_sourcedid', '')
+
         user_ID = request.POST.get('user_id', '')
         role = request.POST.get('roles', '')
         # You can also use: request.POST['ext_d2l_role'] in Brightspace
