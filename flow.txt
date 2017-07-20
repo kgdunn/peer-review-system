@@ -8,6 +8,15 @@ Prevent multiple file upload with PDF: only image files.
 RuntimeWarning: DateTimeField RubricActual.completed received a naive datetime while time zone support is active.
 
 
+Create a thumbnail:
+    from PIL import Image, ImageDraw
+    size = (256, 256)
+    imagefile = 'Screen Shot 2017-07-16 at 10.31.37.png'
+    im = Image.open(imagefile)
+    im.thumbnail(size)
+    im.save(imagefile + ".jpg", "JPEG")
+
+
 
 
 ----

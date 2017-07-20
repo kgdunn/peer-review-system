@@ -8,6 +8,13 @@ class KeyTerm_Task(models.Model):
     """
     The details for learners to fill in 1 new key term.
     """
+
+    class Meta:
+        verbose_name = "Key Term Task"
+        verbose_name_plural = "Key Term Tasks"
+
+
+
     max_thumbs = models.PositiveSmallIntegerField(default=3,
                 help_text='Maximum number of thumbs up that can be awarded')
     min_submissions_before_voting = models.PositiveSmallIntegerField(default=10,
@@ -27,6 +34,10 @@ class KeyTerm_Definition(models.Model):
     """
     The KeyTerm defined by a learner in the course.
     """
+    class Meta:
+        verbose_name = "Key Term Definition"
+        verbose_name_plural = "Key Term Definitions"
+
     keyterm_required = models.ForeignKey(KeyTerm_Task)
     person = models.ForeignKey('review.Person')
     image_raw = models.ImageField(blank=True, null=True)
@@ -46,14 +57,15 @@ class KeyTerm_Definition(models.Model):
     #                                           'is after the deadline now.'))
 
     def __str__(self):
-        return u'{0}'.format(self.person)
+        return u'[{0}] defined by {1} on {2:%Y-%m-%d %H:%M}'.format(\
+            self.keyterm_required, self.person, self.last_edited)
 
 
     def save(self, *args, **kwargs):
-        if len(self.definition_text)>=500:
+        if self.definition_text and (len(self.definition_text)>=500):
             self.definition_text = self.definition_text[0:501] + ' ...'
 
-        super(KeyTerm_Definition, self).save(*args, **kwargs) # Call the "real" save()
+        super(KeyTerm_Definition, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
@@ -61,17 +73,18 @@ class Thumbs(models.Model):
     """
     Rating for each submission.
     """
+    class Meta:
+        verbose_name = "Thumbs up"
+        verbose_name_plural = "Thumbs up"
+
     keyterm_definition = models.ForeignKey(KeyTerm_Definition)
     voter = models.ForeignKey('review.Person')
     awarded = models.BooleanField(default=False)
     last_edited = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return u'Thumb up for [{0}] by person {1}'.format(keyterm_definition,
-                                                          self.person)
-
-
-
+        return u'Thumb up for [{1}] by person {2}'.format(self.person,
+                                                    self.keyterm_definition,)
 
 
 
