@@ -152,15 +152,60 @@ def resume_or_fill_in_keyterm(request, terms_per_page, learner):
     """
     Form where the user fills in the required keyterm. They are either resuming
     a prior attempt, or starting from fresh.
+
+    User must first Preview before being allowed to Submit.
     """
+    # User could be coming here the first time, previewing, or about to finalize
+    # their keyterm.
 
-    if terms_per_page.filter(person=learner, is_finalized=False).count():
-        # Resume a prior attempt
-        return HttpResponse('Resume in the form')
+    _, course, pr = starting_point(request)
+    action = request.POST.get('action', '')
+    ctx = {'learner': learner, 'course': course, 'pr': pr,
+           'action': action}
 
-    else:
-        # Start from fresh
-        return HttpResponse('Fresh')
+    if action == '':     # First time here
+        ctx['action'] = 'editing'
+
+
+    # Load what we have from the UI
+    definition = request.POST.get('definition', '<No definition supplied>')
+
+    if action == 'preview':
+
+        # Save what we have to the DB;
+        keyterm_req = KeyTerm_Task.objects.filter(\
+                                           resource_link_page_id=pr.LTI_id)[0]
+
+        term, created = KeyTerm_Definition.objects.get_or_create(person=learner,
+                                                keyterm_required=keyterm_req)
+        term.definition_text = definition
+        term.explainer_text = 'def'
+        term.reference_text = 'fge'
+        term.allow_to_share = False
+        term.is_finalized = False
+        term.image_raw = None
+        term.save()
+        ctx['action'] = 'preview'
+
+        # If a field not provided, then don't allow to be finalized
+        #ctx['action'] = 'editing'
+        ctx['error_message'] = 'blah'
+
+    # Load what we have in the DB, if anything. Only during 'editing'
+    if (terms_per_page.filter(person=learner, is_finalized=False).count()>0):
+        term = terms_per_page.filter(person=learner, is_finalized=False)[0]
+
+        ctx['definition'] = term.definition_text
+
+
+    if action == 'finalize':
+        term = terms_per_page.filter(person=learner, is_finalized=False)[0]
+        term.is_finalized = True
+        term.save()
+
+
+    # All done, now return the HTML
+    return render(request, 'keyterms/form-entry.html', ctx)
 
 
 

@@ -46,12 +46,14 @@ class KeyTerm_Definition(models.Model):
     last_edited = models.DateTimeField(auto_now=True, auto_now_add=False)
     definition_text = models.CharField(max_length=505, blank=True, null=True,
                                        help_text='Capped at 500 characters.')
-    explainer_text = models.TextField(blank=False, null=False)
-    reference_text = models.CharField(max_length=250)
+    explainer_text = models.TextField(blank=True, null=True)
+    reference_text = models.CharField(max_length=250, blank=True, null=True)
     allow_to_share = models.BooleanField(help_text=('Student is OK to share '
-                                                    'their work with class.'))
+                                                    'their work with class.'),
+                                         default=True)
     is_finalized = models.BooleanField(help_text=('User has submitted, and it '
-                                                  'is after the deadline'))
+                                                  'is after the deadline'),
+                                       default=False)
     #is_submitted = models.BooleanField(help_text=('User has added stuff'))
     #is_locked = models.BooleanField(help_text=('User has not confirmed, but it'
     #                                           'is after the deadline now.'))
