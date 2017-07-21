@@ -18,7 +18,6 @@ from .models import KeyTerm_Definition, KeyTerm_Task, Thumbs
 # Python imports
 import datetime
 
-
 # Logging
 import logging
 logger = logging.getLogger(__name__)
@@ -227,7 +226,7 @@ def admin_create_keyterm(request, keyterm=None):
                                     resource_link_page_id=resource_link_page_id)
         if new:
             logger.debug('Created new keyterm [{0}] in id={1}'.format(keyterm,
-                                                                      resource_link_page_id))
+                                                      resource_link_page_id))
             return True
 
     return HttpResponse('Admin Creates Key Term here')
@@ -255,8 +254,11 @@ def show_vote_keyterms(request, terms_per_page, learner):
 @csrf_exempt
 @xframe_options_exempt
 def keyterm_startpage(request):
+    import wingdbstub
+    logger.debug(str(request))
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the KeyTerms LTI component.")
+
 
     person_or_error, course, pr = starting_point(request)
 
