@@ -74,13 +74,6 @@ def starting_point(request):
                 None, None)
 
     try:
-        pr = PR_process.objects.get(LTI_id=pr_ID)
-    except PR_process.DoesNotExist:
-        return (HttpResponse(('Configuration error. Try viewing this page '
-          'in Live mode. Or use resource_link_id={} or context_id={}').format(\
-          pr_ID, course_ID)), None, None)
-
-    try:
         if ' ' in course_ID:
             course_ID = course_ID.replace(' ', '+') # For edX course ID's
 
@@ -89,7 +82,16 @@ def starting_point(request):
         return (HttpResponse('Configuration error. Try context_id={}\n'.format(\
                 course_ID)), None, None)
 
-    person = get_create_student(request, course, pr)
+    # Create the person only if they are visiting from a valid course
+    person = get_create_student(request, course=None, pr=None)
+
+    try:
+        pr = PR_process.objects.get(LTI_id=pr_ID)
+    except PR_process.DoesNotExist:
+        return (person, course, ('Configuration error. Try viewing this page '
+          'in Live mode. Or use resource_link_id={} or context_id={}').format(\
+          pr_ID, course_ID))
+
     if person:
         return person, course, pr
     else:
@@ -1098,11 +1100,11 @@ def index(request):
     learner = person_or_error
     logger.debug('Learner entering [pr={0}]: {1}'.format(pr.title, learner))
 
-
     create_hit(request, item=learner, event='login', user=learner,)
 
     LTI_consumer = recognise_LTI_LMS(request)
-    if request.POST.get('custom_grades', False) == 'True': #and LTI_consumer  == 'edx':
+    if request.POST.get('custom_grades', False) == 'True':
+        #and LTI_consumer  == 'edx':
         return grade_landing_page(learner, course, pr, request)
 
     # Get all the possible phases

@@ -7,7 +7,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 # Imports from other applications
 # -------------------------------
 from review.views import starting_point, recognise_LTI_LMS
-from review.models import Person
+from review.models import Person, Course
 from stats.views import create_hit
 
 
@@ -235,6 +235,11 @@ def keyterm_startpage(request):
 
     person_or_error, course, pr = starting_point(request)
 
+    if course:
+        if isinstance(pr, str) and isinstance(course, Course):
+            #TODO: return admin_create_keyterm(request)
+            return HttpResponse('<b>Create a KeyTerm first.</b> ' + pr)
+
     if not(isinstance(person_or_error, Person)):
         return person_or_error      # Error path if student does not exist
 
@@ -244,9 +249,10 @@ def keyterm_startpage(request):
 
     create_hit(request, item=learner, event='login', user=learner,)
 
+    task = KeyTerm_Task.objects.filter(resource_link_page_id=pr.LTI_id)
+    terms_per_page = KeyTerm_Definition.objects.filter(keyterm_required=task)
 
-    terms_per_page = KeyTerm_Definition.objects.filter(\
-                            keyterm_required__resource_link_page_id=pr.LTI_id)
+
 
 
     if terms_per_page.filter(person=learner, is_finalized=True).count() == 0:
