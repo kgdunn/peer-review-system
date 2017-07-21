@@ -226,6 +226,8 @@ def admin_create_keyterm(request, keyterm=None):
         task, new = KeyTerm_Task.objects.get_or_create(keyterm_text = keyterm,
                                     resource_link_page_id=resource_link_page_id)
         if new:
+            logger.debug('Created new keyterm [{0}] in id={1}'.format(keyterm,
+                                                      resource_link_page_id))
             return True
 
     return HttpResponse('Admin Creates Key Term here')
