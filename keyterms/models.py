@@ -1,7 +1,11 @@
 #from django.utils import timezone
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.timezone import now
+from datetime import timedelta
 
+def get_deadline():
+    return now() + timedelta(days=20)
 
 @python_2_unicode_compatible
 class KeyTerm_Task(models.Model):
@@ -20,7 +24,7 @@ class KeyTerm_Task(models.Model):
     min_submissions_before_voting = models.PositiveSmallIntegerField(default=10,
         help_text='Minimum number of submissions before voting can start.')
     keyterm_text = models.CharField(max_length=254)
-    deadline_for_voting = models.DateTimeField()
+    deadline_for_voting = models.DateTimeField(default=get_deadline)
     resource_link_page_id = models.CharField(max_length=50,
         verbose_name="Resource Link Page ID",
         help_text=('LTI post field: "resource_link_id"'))

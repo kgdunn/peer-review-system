@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q
 from django.http import HttpResponse
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -13,6 +14,9 @@ from stats.views import create_hit
 
 # Imports for this application
 from .models import KeyTerm_Definition, KeyTerm_Task, Thumbs
+
+# Python imports
+import datetime
 
 
 # Logging
@@ -207,10 +211,23 @@ def resume_or_fill_in_keyterm(request, terms_per_page, learner):
     # All done, now return the HTML
     return render(request, 'keyterms/form-entry.html', ctx)
 
-def admin_create_keyterm(request):
+def admin_create_keyterm(request, keyterm=None):
     """
-    Simple form for the admin to create a KeyTerm
+    Simple form for the admin to create a KeyTerm.
+
+    If the ``keyterm`` is provided, it will be created with the default settings
+    of thumbs and a due date. The function will then return ``True``.
+
     """
+    if keyterm:
+
+        resource_link_page_id = request.POST.get('resource_link_id', None) or\
+                (settings.DEBUG and request.GET.get('resource_link_id', None))
+        task, new = KeyTerm_Task.objects.get_or_create(keyterm_text = keyterm,
+                                    resource_link_page_id=resource_link_page_id)
+        if new:
+            return True
+
     return HttpResponse('Admin Creates Key Term here')
 
 
@@ -257,8 +274,12 @@ def keyterm_startpage(request):
 
     task = KeyTerm_Task.objects.filter(resource_link_page_id=pr.LTI_id)
 
+    # A KeyTerm_task has not been created for this page yet.
     if task.count() == 0:
-        return admin_create_keyterm(request)
+        #return admin_create_keyterm(request)
+        keyterm = request.POST.get('keyterm', '')
+        if keyterm:
+            admin_create_keyterm(request, keyterm=keyterm)
 
     terms_per_page = KeyTerm_Definition.objects.filter(keyterm_required=task)
 
