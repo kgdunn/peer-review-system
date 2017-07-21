@@ -207,6 +207,12 @@ def resume_or_fill_in_keyterm(request, terms_per_page, learner):
     # All done, now return the HTML
     return render(request, 'keyterms/form-entry.html', ctx)
 
+def admin_create_keyterm(request):
+    """
+    Simple form for the admin to create a KeyTerm
+    """
+    return HttpResponse('Admin Creates Key Term here')
+
 
 
 def show_vote_keyterms(request, terms_per_page, learner):
@@ -250,6 +256,10 @@ def keyterm_startpage(request):
     create_hit(request, item=learner, event='login', user=learner,)
 
     task = KeyTerm_Task.objects.filter(resource_link_page_id=pr.LTI_id)
+
+    if task.count() == 0:
+        return admin_create_keyterm(request)
+
     terms_per_page = KeyTerm_Definition.objects.filter(keyterm_required=task)
 
 
