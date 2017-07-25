@@ -24,8 +24,9 @@ SECRET_KEY = '*j(tvwn6bljf235g-bkgj&w0cx$9v)xp@pbhm06*4+zcvm@#bd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+import wingdbstub
 ALLOWED_HOSTS = []
+
 
 
 # Application definition
