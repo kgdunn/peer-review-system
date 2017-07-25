@@ -1,5 +1,10 @@
 PDF error: /Users/kevindunn/_ver016200701_01.pdf
 
+Improvements:
+1. Push Person & Course & Groups models into a separate (generic) module.
+2. Push "PR_Process" into a generic 'starting_point' function that can be called
+   per page.
+
 
 Prevent multiple file upload with PDF: only image files.
 

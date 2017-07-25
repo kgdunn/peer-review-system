@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # 3rd-part apps
     'sorl.thumbnail',
+    'django_q',
 ]
 
 MIDDLEWARE = [
