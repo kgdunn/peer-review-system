@@ -261,12 +261,13 @@ def keyterm_startpage(request):
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the KeyTerms LTI component.")
 
-
     person_or_error, course, pr = starting_point(request)
 
     if course:
         if isinstance(pr, str) and isinstance(course, Course):
             #TODO: return admin_create_keyterm(request)
+
+            # request.POST.get('custom_keyterm', '')  -> Third Culture Kid
             return HttpResponse('<b>Create a KeyTerm first.</b> ' + pr)
 
     if not(isinstance(person_or_error, Person)):
@@ -275,6 +276,29 @@ def keyterm_startpage(request):
     learner = person_or_error
     logger.debug('Learner entering [pr={0}]: {1}'.format(pr.title, learner))
 
+    from datetime import timedelta
+    from django.utils import timezone
+    from django_q.tasks import async, schedule
+    from django_q.models import Schedule
+
+    msg = 'Welcome to our website at {0}'.format(now())
+    # send this message right away
+    async('django.core.mail.send_mail',
+          'Welcome',
+          msg,
+          'from@example.com',
+          [learner.email],
+          task_name='Welcome email')
+    # and this follow up email in one hour
+    msg = 'Here are some tips to get you started...{0}'.format(now())
+    schedule('django.core.mail.send_mail',
+             'Follow up',
+             msg,
+             'from@example.com',
+             [learner.email],
+             schedule_type=Schedule.ONCE,
+             next_run=timezone.now() + timedelta(seconds=120),
+             task_name='Follow-up email')
 
     create_hit(request, item=learner, event='login', user=learner,)
 

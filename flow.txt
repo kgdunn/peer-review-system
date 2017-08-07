@@ -21,6 +21,11 @@ Create a thumbnail:
     im.thumbnail(size)
     im.save(imagefile + ".jpg", "JPEG")
 
+---
+To create a queue:
+*  pip install django-q
+*  add 'django_q' to INSTALLED_APPS and then: ./manage.py migrate
+*  pip install redis
 
 
 

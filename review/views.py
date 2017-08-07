@@ -145,7 +145,7 @@ def get_create_student(request, course, pr):
         user_ID = request.POST.get('user_id', '')
         role = request.POST.get('roles', '')
         # You can also use: request.POST['ext_d2l_role'] in Brightspace
-        if 'Instructor' in role:
+        if ('Instructor' in role) or ('Administrator' in role):
             role = 'Admin'
         elif 'Student' in role:
             role = 'Learn'
