@@ -18,7 +18,6 @@ from .models import KeyTerm_Definition, KeyTerm_Task, Thumbs
 # Python imports
 import datetime
 
-import wingdbstub
 
 # Logging
 import logging
@@ -256,7 +255,6 @@ def show_vote_keyterms(request, terms_per_page, learner):
 @csrf_exempt
 @xframe_options_exempt
 def keyterm_startpage(request):
-    import wingdbstub
     logger.debug(str(request))
     if request.method != 'POST' and (len(request.GET.keys())==0):
         return HttpResponse("You have reached the KeyTerms LTI component.")
